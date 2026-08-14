@@ -1,12 +1,11 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AuthenticationError } from "@formbricks/types/errors";
-import { withAuthorizationSurface } from "@/lib/authorization/context";
 import { SMTP_HOST, SMTP_PASSWORD, SMTP_PORT, SMTP_USER } from "@/lib/constants";
-import { verifyUserRoleAccess } from "@/lib/organization/auth";
 import { getTranslate } from "@/lingodotdev/server";
 import { getSession } from "@/modules/auth/lib/session";
 import { InviteMembers } from "@/modules/setup/organization/[organizationId]/invite/components/invite-members";
+import { hasSetupInviteAccess } from "@/modules/setup/organization/[organizationId]/invite/lib/authorization";
 
 export const metadata: Metadata = {
   title: "Invite",
@@ -28,15 +27,21 @@ export const InvitePage = async (props: InvitePageProps) => {
   const session = await getSession();
   if (!session) throw new AuthenticationError(t("common.session_not_found"));
 
-  // ENG-2388: `verifyUserRoleAccess` already resolves through `can()` (it asks `organization.write`
-  // and `organization.manage`), so the decision needed no re-routing — only a surface. Without one
-  // the coordinator has no rollout target, falls through to the legacy evaluator, and schedules no
-  // shadow comparison, leaving this gate correct but absent from parity evidence.
-  const { hasCreateOrUpdateMembersAccess } = await withAuthorizationSurface("page", () =>
-    verifyUserRoleAccess(params.organizationId, session.user.id)
-  );
-
-  if (!hasCreateOrUpdateMembersAccess) return notFound();
+  // Not the security boundary — `inviteOrganizationMemberAction` is — but this shares the action's
+  // role list so a manager gets a 404 instead of a form that fails on submit.
+  //
+  // Merge note (ENG-2388 vs ENG-2169): this branch previously wrapped `verifyUserRoleAccess` in
+  // `withAuthorizationSurface("page", …)`, because that helper resolves through `can()` and so had
+  // only ever needed a surface to become comparable. Main has since replaced it with
+  // `hasSetupInviteAccess`, which is owner-only — `inviteUser` always persists an OWNER invite, so
+  // admitting managers here would let a manager mint an owner without an existing owner's approval.
+  // That restriction wins; it is a real privilege narrowing and must not be reverted.
+  //
+  // The wrapper is dropped rather than kept: `hasSetupInviteAccess` reads the membership row and
+  // tests a role list, so there is no `can()` call beneath it for a surface to make comparable —
+  // wrapping it would only emit a zero-check observation. Restoring that coverage means routing the
+  // helper itself, which is tracked as instance 2 of ENG-2409.
+  if (!(await hasSetupInviteAccess(session.user.id, params.organizationId))) return notFound();
 
   return <InviteMembers IS_SMTP_CONFIGURED={IS_SMTP_CONFIGURED} organizationId={params.organizationId} />;
 };
