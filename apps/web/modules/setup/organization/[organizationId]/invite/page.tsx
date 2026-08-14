@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AuthenticationError } from "@formbricks/types/errors";
+import { withAuthorizationSurface } from "@/lib/authorization/context";
 import { SMTP_HOST, SMTP_PASSWORD, SMTP_PORT, SMTP_USER } from "@/lib/constants";
 import { verifyUserRoleAccess } from "@/lib/organization/auth";
 import { getTranslate } from "@/lingodotdev/server";
@@ -27,9 +28,12 @@ export const InvitePage = async (props: InvitePageProps) => {
   const session = await getSession();
   if (!session) throw new AuthenticationError(t("common.session_not_found"));
 
-  const { hasCreateOrUpdateMembersAccess } = await verifyUserRoleAccess(
-    params.organizationId,
-    session.user.id
+  // ENG-2388: `verifyUserRoleAccess` already resolves through `can()` (it asks `organization.write`
+  // and `organization.manage`), so the decision needed no re-routing — only a surface. Without one
+  // the coordinator has no rollout target, falls through to the legacy evaluator, and schedules no
+  // shadow comparison, leaving this gate correct but absent from parity evidence.
+  const { hasCreateOrUpdateMembersAccess } = await withAuthorizationSurface("page", () =>
+    verifyUserRoleAccess(params.organizationId, session.user.id)
   );
 
   if (!hasCreateOrUpdateMembersAccess) return notFound();
