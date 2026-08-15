@@ -51,6 +51,7 @@ interface LoginFormProps {
   samlSsoEnabled: boolean;
   fsinfSsoEnabled: boolean;
   fsinfSsoDisplayName: string;
+  fsinfSsoCanonicalOrigin: string;
   oauthError?: string;
   prefilledEmail?: string;
   inviteToken?: string | null;
@@ -72,6 +73,7 @@ export const LoginForm = ({
   samlSsoEnabled,
   fsinfSsoEnabled,
   fsinfSsoDisplayName,
+  fsinfSsoCanonicalOrigin,
   oauthError,
   prefilledEmail,
   inviteToken,
@@ -305,7 +307,11 @@ export const LoginForm = ({
             />
           )}
           {fsinfSsoEnabled && (
-            <FsinfAuthentikButton displayName={fsinfSsoDisplayName} returnToUrl={resolvedCallbackUrl} />
+            <FsinfAuthentikButton
+              displayName={fsinfSsoDisplayName}
+              returnToUrl={resolvedCallbackUrl}
+              canonicalOrigin={fsinfSsoCanonicalOrigin}
+            />
           )}
         </div>
 

@@ -1,6 +1,6 @@
 import "server-only";
 import type { GenericOAuthConfig } from "better-auth/plugins";
-import { OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, OIDC_DISPLAY_NAME, OIDC_ISSUER } from "@/lib/constants";
+import { OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, OIDC_ISSUER, WEBAPP_URL } from "@/lib/constants";
 
 /**
  * FSINF: our own, always-on OIDC login against Authentik (portal.nak-studis.de).
@@ -11,14 +11,17 @@ import { OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, OIDC_DISPLAY_NAME, OIDC_ISSUER } fr
  * MIT-licensed (third-party, not Formbricks' own EE code), so registering our own provider entry here
  * — outside apps/web/modules/ee/ — uses only AGPL-licensed code we're free to run and modify.
  *
- * Reuses the same OIDC_CLIENT_ID/SECRET/ISSUER/DISPLAY_NAME env vars the (unused, license-gated) EE
- * OIDC provider would have used, since those constants are plain config, not EE code. Provider ID is
+ * Reuses the same OIDC_CLIENT_ID/SECRET/ISSUER env vars the (unused, license-gated) EE OIDC provider
+ * would have used, since those constants are plain config, not EE code. Provider ID is
  * "fsinf-authentik" (distinct from the EE module's "openid") so the callback path is
  * /api/auth/oauth2/callback/fsinf-authentik — the Authentik provider's redirect_uri must match.
  */
 export const FSINF_SSO_ENABLED = !!(OIDC_CLIENT_ID && OIDC_CLIENT_SECRET && OIDC_ISSUER);
 
-export const FSINF_SSO_DISPLAY_NAME = OIDC_DISPLAY_NAME || "Authentik";
+export const FSINF_SSO_DISPLAY_NAME = "Authentik";
+
+/** Authentik's redirect_uri is fixed to this origin — see fsinf-authentik-button.tsx for why. */
+export const FSINF_SSO_CANONICAL_ORIGIN = WEBAPP_URL ?? "";
 
 export const fsinfSsoConfig: GenericOAuthConfig[] = FSINF_SSO_ENABLED
   ? [
