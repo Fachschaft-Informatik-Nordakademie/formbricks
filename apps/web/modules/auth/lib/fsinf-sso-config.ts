@@ -32,7 +32,10 @@ export const fsinfSsoConfig: GenericOAuthConfig[] = FSINF_SSO_ENABLED
         discoveryUrl: `${OIDC_ISSUER}/.well-known/openid-configuration`,
         scopes: ["openid", "email", "profile"],
         pkce: true,
-        requireIssuerValidation: true, // Authentik returns `iss` (RFC 9207-compliant)
+        // Authentik doesn't return the RFC 9207 `iss` param on the callback (same situation as the
+        // Azure provider above — verified live: enabling this makes every login fail with
+        // error=issuer_missing). PKCE + state validation above already bind the exchange.
+        requireIssuerValidation: false,
         mapProfileToUser: (profile) => ({
           email: profile.email,
           name:
