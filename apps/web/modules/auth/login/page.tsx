@@ -18,6 +18,7 @@ import {
   getSearchParamString,
   resolveAuthCallbackUrl,
 } from "@/modules/auth/lib/callback-url";
+import { FSINF_SSO_DISPLAY_NAME, FSINF_SSO_ENABLED } from "@/modules/auth/lib/fsinf-sso-config";
 import {
   getIsMultiOrgEnabled,
   getIsSamlSsoEnabled,
@@ -67,6 +68,8 @@ export const LoginPage = async ({
           isMultiOrgEnabled={isMultiOrgEnabled}
           isSsoEnabled={isSsoEnabled}
           samlSsoEnabled={samlSsoEnabled}
+          fsinfSsoEnabled={FSINF_SSO_ENABLED}
+          fsinfSsoDisplayName={FSINF_SSO_DISPLAY_NAME}
           oauthError={oauthError}
           prefilledEmail={getSearchParamString(searchParams.email)}
           inviteToken={inviteToken}

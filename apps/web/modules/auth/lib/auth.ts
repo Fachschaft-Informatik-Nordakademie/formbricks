@@ -20,6 +20,7 @@ import {
 import { hashSecret, verifySecret } from "@/lib/crypto";
 import { env } from "@/lib/env";
 import { BETTER_AUTH_IP_ADDRESS_CONFIG } from "@/lib/utils/client-ip";
+import { fsinfSsoConfig } from "@/modules/auth/lib/fsinf-sso-config";
 import {
   accountDeletionConfig,
   requireDeletionConfirmationBeforeHandler,
@@ -375,7 +376,10 @@ export const auth = betterAuth({
     }),
     // SSO via generic OAuth (Azure/OIDC + the BoxyHQ SAML bridge); empty config when no license or
     // providers are configured. The account-linking/provisioning hooks are a separate reviewed pass.
-    genericOAuth({ config: ssoGenericOAuthConfig }),
+    // FSINF: our own always-on Authentik provider (fsinf-sso-config.ts) is appended here too — it's
+    // independent of the ee/sso license gate, so ssoGenericOAuthConfig stays [] without a license
+    // while fsinfSsoConfig still provides our entry.
+    genericOAuth({ config: [...ssoGenericOAuthConfig, ...fsinfSsoConfig] }),
     // SSO-recovery magic-link sign-in — the BA replacement for the "token" provider's sso_recovery
     // path (recovery-scoped, not a general magic-link). See better-auth-recovery-signin.ts.
     ssoRecoverySignInPlugin,

@@ -13,6 +13,7 @@ export const FormWrapper = ({ children }: FormWrapperProps) => {
           <Link target="_blank" href="https://nak-inf.de" rel="noopener noreferrer">
             <Logo className="mx-auto w-3/4" />
           </Link>
+          <p className="mt-3 text-sm font-medium text-slate-500">FS INF Formulare</p>
         </div>
         {children}
       </div>

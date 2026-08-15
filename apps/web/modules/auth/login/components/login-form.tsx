@@ -12,6 +12,7 @@ import { cn } from "@/lib/cn";
 import { FORMBRICKS_LOGGED_IN_WITH_LS } from "@/lib/localStorage";
 import { buildAttributionQuerySuffix } from "@/modules/auth/lib/attribution";
 import { authClient } from "@/modules/auth/lib/auth-client";
+import { FsinfAuthentikButton } from "@/modules/auth/components/fsinf-authentik-button";
 import { SSOOptions } from "@/modules/ee/sso/components/sso-options";
 import { TwoFactor } from "@/modules/ee/two-factor-auth/components/two-factor";
 import { TwoFactorBackup } from "@/modules/ee/two-factor-auth/components/two-factor-backup";
@@ -48,6 +49,8 @@ interface LoginFormProps {
   isMultiOrgEnabled: boolean;
   isSsoEnabled: boolean;
   samlSsoEnabled: boolean;
+  fsinfSsoEnabled: boolean;
+  fsinfSsoDisplayName: string;
   oauthError?: string;
   prefilledEmail?: string;
   inviteToken?: string | null;
@@ -67,6 +70,8 @@ export const LoginForm = ({
   isMultiOrgEnabled,
   isSsoEnabled,
   samlSsoEnabled,
+  fsinfSsoEnabled,
+  fsinfSsoDisplayName,
   oauthError,
   prefilledEmail,
   inviteToken,
@@ -298,6 +303,9 @@ export const LoginForm = ({
               returnToUrl={resolvedCallbackUrl}
               source="signin"
             />
+          )}
+          {fsinfSsoEnabled && (
+            <FsinfAuthentikButton displayName={fsinfSsoDisplayName} returnToUrl={resolvedCallbackUrl} />
           )}
         </div>
 
