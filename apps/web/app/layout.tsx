@@ -24,11 +24,11 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
       <body className="flex h-dvh flex-col transition-all ease-in-out">
         {/* First in the document so instrumentation-client.ts can start Sentry as early as possible. */}
         <SentryClientConfigScript />
-        {/* FSINF Analytics (self-hosted Umami fork) - website ID is filled in server-side after deployment */}
+        {/* FS INF Analytics (self-hosted Umami fork) */}
         <Script
           defer
           src="https://analytics.nak-inf.de/script.js"
-          data-website-id="FSINF_ANALYTICS_WEBSITE_ID_PLACEHOLDER"
+          data-website-id="829beb0b-6a80-4942-ac24-18230894aa61"
         />
         <NoScriptWarning locale={locale} />
         <I18nProvider language={locale} defaultLanguage={DEFAULT_LOCALE}>
