@@ -22,7 +22,14 @@ import { recordAuthorizationChecksPerRequest } from "./metrics";
  * than one. That splits the count for that request — it weakens the N+1 signal slightly, it does
  * not make it wrong — which is why the wrapper is applied at as few and as high a point as possible.
  */
-export type TAuthorizationSurface = "server_action" | "page" | "api_v1" | "api_v2" | "api_v3" | "mcp";
+export type TAuthorizationSurface =
+  | "server_action"
+  | "page"
+  | "api_v1"
+  | "api_v2"
+  | "api_v3"
+  | "mcp"
+  | "feedback_gateway";
 
 type TComparisonJob = () => Promise<void>;
 
