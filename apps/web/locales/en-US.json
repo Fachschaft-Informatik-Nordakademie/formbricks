@@ -62,7 +62,7 @@
       "login_to_your_account": "Log in to your account",
       "login_with_email": "Log in with Email",
       "lost_access": "Lost Access?",
-      "new_to_formbricks": "New to Formbricks?",
+      "new_to_formbricks": "New to FS INF Formulare?",
       "oauth_account_not_linked_description": "This SSO provider is not linked to an existing Formbricks account. Please sign in with the method you used originally. If that was email and password, complete email verification first if you are prompted.",
       "oauth_account_not_linked_title": "This SSO sign-in could not be linked",
       "please_verify_your_email_to_continue": "Please verify your email address. We've sent you a verification link.",
@@ -121,7 +121,7 @@
       "security_updates_description": "Security relevant information only, Privacy Policy applies.",
       "security_updates_title": "Security updates",
       "terms_of_service": "Terms of Service",
-      "title": "Create your Formbricks account"
+      "title": "Create your FS INF Formulare account"
     },
     "signup_without_verification_success": {
       "user_successfully_created": "User created successfully",
@@ -353,7 +353,7 @@
     "membership_not_found": "Membership not found",
     "meta": "Meta",
     "metadata": "Metadata",
-    "mobile_overlay_app_works_best_on_desktop": "Formbricks works best on a bigger screen. To manage or build surveys, switch to another device.",
+    "mobile_overlay_app_works_best_on_desktop": "FS INF Formulare works best on a bigger screen. To manage or build surveys, switch to another device.",
     "mobile_overlay_surveys_look_good": "Do not worry – your surveys look great on every device and screen size!",
     "mobile_overlay_title": "Oops, tiny screen detected!",
     "months": "months",
@@ -601,7 +601,7 @@
     "email_customization_preview_email_text": "This is an email preview to show you which logo will be rendered in the emails.",
     "email_footer_text_1": "Have a great day!",
     "email_footer_text_2": "The Formbricks Team",
-    "email_template_text_1": "This email was sent via Formbricks.",
+    "email_template_text_1": "This email was sent via FS INF Formulare.",
     "embed_survey_preview_email_didnt_request": "Did not request this?",
     "embed_survey_preview_email_fight_spam": "Help us fight spam and forward this mail to hola@formbricks.com",
     "embed_survey_preview_email_heading": "Preview Email Embed",
@@ -2029,7 +2029,7 @@
       "upload_contacts_modal_upload_btn": "Upload contacts",
       "upload_contacts_success": "Contacts uploaded successfully"
     },
-    "formbricks_logo": "Formbricks Logo",
+    "formbricks_logo": "FS INF Formulare Logo",
     "general": {
       "cannot_delete_only_workspace": "This is your only workspace, it cannot be deleted. Create a new workspace first.",
       "cooldown_period_updated_successfully": "Cooldown period updated successfully",

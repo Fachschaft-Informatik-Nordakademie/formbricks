@@ -2,8 +2,8 @@ import { Body, Container, Head, Html, Img, Link, Section, Tailwind, Text } from 
 import { TEmailTemplateLegalProps } from "../types/email";
 import { TFunction } from "../types/translations";
 
-const fbLogoUrl = "https://app.formbricks.com/logo-transparent.png";
-const logoLink = "https://formbricks.com?utm_source=email_header&utm_medium=email";
+const fbLogoUrl = "https://forms.nak-inf.de/logo-transparent.png";
+const logoLink = "https://nak-inf.de";
 const FORCE_LIGHT_COLOR_SCHEME = "only light";
 
 interface EmailTemplateProps extends TEmailTemplateLegalProps {
@@ -68,7 +68,7 @@ export function EmailTemplate({
           <Section className="mt-4 text-center text-sm">
             <Link
               className="m-0 text-sm font-normal text-slate-500"
-              href="https://formbricks.com/?utm_source=email_header&utm_medium=email"
+              href="https://nak-inf.de"
               target="_blank"
               rel="noopener noreferrer">
               {t("emails.email_template_text_1")}

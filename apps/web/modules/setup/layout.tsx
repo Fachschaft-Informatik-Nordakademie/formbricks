@@ -9,7 +9,7 @@ export const SetupLayout = ({ children }: { children: React.ReactNode }) => {
         <div
           style={{ scrollbarGutter: "stable both-edges" }}
           className="flex max-h-[90vh] w-160 flex-col items-center gap-y-4 overflow-auto rounded-lg border bg-white p-12 text-center shadow-md">
-          <div className="size-20 rounded-lg bg-slate-900 p-2">
+          <div className="size-20 rounded-lg border border-slate-200 bg-white p-2">
             <FormbricksLogo className="h-full w-full" />
           </div>
           {children}
