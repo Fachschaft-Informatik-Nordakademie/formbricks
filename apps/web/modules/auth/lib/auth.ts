@@ -86,7 +86,11 @@ export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET ?? env.NEXTAUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL ?? env.NEXTAUTH_URL,
   disabledPaths: ["/token"],
-  trustedOrigins: [env.BETTER_AUTH_URL, env.NEXTAUTH_URL].filter((url): url is string => Boolean(url)),
+  trustedOrigins: [
+    env.BETTER_AUTH_URL,
+    env.NEXTAUTH_URL,
+    ...(env.ADDITIONAL_TRUSTED_ORIGINS?.split(",").map((origin) => origin.trim()) ?? []),
+  ].filter((url): url is string => Boolean(url)),
   telemetry: { enabled: false },
 
   database: prismaAdapter(prisma, { provider: "postgresql" }),

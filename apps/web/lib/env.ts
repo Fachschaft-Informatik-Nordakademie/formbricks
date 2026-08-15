@@ -288,6 +288,10 @@ const parsedEnv = createEnv({
     // weak secret can't silently ship (it stays optional for the pre-cutover rollout).
     BETTER_AUTH_SECRET: z.string().min(32).optional(),
     BETTER_AUTH_URL: z.url().optional(),
+    // FSINF: forms.nak-inf.de is the canonical WEBAPP_URL/baseURL, but forms.nak-studis.de serves
+    // the same app on a second domain — Better Auth's origin check rejects requests whose Origin
+    // header isn't in trustedOrigins, so that domain needs to be listed explicitly here.
+    ADDITIONAL_TRUSTED_ORIGINS: z.string().optional(),
     MAIL_FROM_NAME: z.string().optional(),
     NOTION_OAUTH_CLIENT_ID: z.string().optional(),
     NOTION_OAUTH_CLIENT_SECRET: z.string().optional(),
@@ -400,6 +404,7 @@ const parsedEnv = createEnv({
     AZUREAD_TENANT_ID: process.env.AZUREAD_TENANT_ID,
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
     BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+    ADDITIONAL_TRUSTED_ORIGINS: process.env.ADDITIONAL_TRUSTED_ORIGINS,
     BREVO_API_KEY: process.env.BREVO_API_KEY,
     BREVO_LIST_ID: process.env.BREVO_LIST_ID,
     CRON_SECRET: process.env.CRON_SECRET,
