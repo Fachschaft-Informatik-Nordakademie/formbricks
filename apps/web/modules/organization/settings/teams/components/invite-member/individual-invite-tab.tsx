@@ -10,6 +10,7 @@ import { ZId } from "@formbricks/types/common";
 import { TOrganizationRole, ZOrganizationRole } from "@formbricks/types/memberships";
 import { ZUserName } from "@formbricks/types/user";
 import { AddMemberRole } from "@/modules/ee/role-management/components/add-member-role";
+import { FsinfAuthentikMemberPicker } from "@/modules/organization/settings/teams/components/invite-member/fsinf-authentik-member-picker";
 import { TOrganizationTeam } from "@/modules/ee/teams/team-list/types/team";
 import { organizationSettingsPath } from "@/modules/settings/lib/routes";
 import { Alert, AlertDescription } from "@/modules/ui/components/alert";
@@ -83,6 +84,7 @@ export const IndividualInviteTab = ({
     handleSubmit,
     reset,
     control,
+    setValue,
     watch,
     formState: { isSubmitting, errors },
   } = form;
@@ -105,6 +107,15 @@ export const IndividualInviteTab = ({
   return (
     <FormProvider {...form}>
       <form onSubmit={handleSubmit(submitEventClass)} className="flex flex-col gap-6">
+        {/* FSINF: pre-fill name + email from the Authentik directory. Hides itself when the instance
+            has no Authentik API credentials; both fields stay editable either way. */}
+        <FsinfAuthentikMemberPicker
+          organizationId={organizationId}
+          onSelect={(member) => {
+            setValue("name", member.name, { shouldValidate: true });
+            setValue("email", member.email, { shouldValidate: true });
+          }}
+        />
         <div className="flex flex-col gap-y-2">
           <Label htmlFor="memberNameInput">{t("common.full_name")}</Label>
           <Input

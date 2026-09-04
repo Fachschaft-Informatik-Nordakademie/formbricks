@@ -295,6 +295,12 @@ const parsedEnv = createEnv({
     MAIL_FROM_NAME: z.string().optional(),
     NOTION_OAUTH_CLIENT_ID: z.string().optional(),
     NOTION_OAUTH_CLIENT_SECRET: z.string().optional(),
+    // FSINF: read-only Authentik admin API, used by the invite dialog's member picker
+    // (fsinf-authentik-directory.ts). Optional — without them the picker hides itself.
+    AUTHENTIK_URL: z.string().optional(),
+    AUTHENTIK_API_TOKEN: z.string().optional(),
+    /** Optional Authentik group the picker is restricted to, e.g. "Fachschaft Informatik". */
+    AUTHENTIK_DIRECTORY_GROUP: z.string().optional(),
     OIDC_CLIENT_ID: z.string().optional(),
     OIDC_CLIENT_SECRET: z.string().optional(),
     OIDC_DISPLAY_NAME: z.string().optional(),
@@ -480,6 +486,9 @@ const parsedEnv = createEnv({
     SENTRY_DSN: process.env.SENTRY_DSN,
     NOTION_OAUTH_CLIENT_ID: process.env.NOTION_OAUTH_CLIENT_ID,
     NOTION_OAUTH_CLIENT_SECRET: process.env.NOTION_OAUTH_CLIENT_SECRET,
+    AUTHENTIK_URL: process.env.AUTHENTIK_URL,
+    AUTHENTIK_API_TOKEN: process.env.AUTHENTIK_API_TOKEN,
+    AUTHENTIK_DIRECTORY_GROUP: process.env.AUTHENTIK_DIRECTORY_GROUP,
     OIDC_CLIENT_ID: process.env.OIDC_CLIENT_ID,
     OIDC_CLIENT_SECRET: process.env.OIDC_CLIENT_SECRET,
     OIDC_DISPLAY_NAME: process.env.OIDC_DISPLAY_NAME,

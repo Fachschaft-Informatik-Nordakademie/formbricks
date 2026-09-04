@@ -57,6 +57,11 @@ export const OIDC_ISSUER = env.OIDC_ISSUER;
 export const OIDC_DISPLAY_NAME = env.OIDC_DISPLAY_NAME;
 export const OIDC_SIGNING_ALGORITHM = env.OIDC_SIGNING_ALGORITHM;
 
+// FSINF: Authentik admin API for the invite dialog's member picker (fsinf-authentik-directory.ts).
+export const AUTHENTIK_URL = env.AUTHENTIK_URL;
+export const AUTHENTIK_API_TOKEN = env.AUTHENTIK_API_TOKEN;
+export const AUTHENTIK_DIRECTORY_GROUP = env.AUTHENTIK_DIRECTORY_GROUP;
+
 export const SAML_DATABASE_URL = env.SAML_DATABASE_URL;
 export const SAML_TENANT = "formbricks.com";
 export const SAML_PRODUCT = "formbricks";
