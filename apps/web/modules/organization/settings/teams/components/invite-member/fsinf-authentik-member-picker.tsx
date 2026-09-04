@@ -14,7 +14,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/modules/ui/components/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/modules/ui/components/popover";
 
 interface FsinfAuthentikMemberPickerProps {
   organizationId: string;
@@ -36,6 +35,12 @@ const SEARCH_DEBOUNCE_MS = 250;
  *
  * Filtering happens server-side (`searchAuthentikMembersAction` → Authentik's `search` parameter), so
  * cmdk's own filtering is switched off — it must not filter the list it is handed a second time.
+ *
+ * The list is deliberately INLINE rather than in a Popover: this control lives inside the invite
+ * Dialog, and a Popover renders into a portal outside the dialog's DOM. Radix's scroll lock then
+ * treats the list as "outside" and swallows its wheel events, so the list could only be scrolled by
+ * keyboard — it looked stuck. Inline content is inside the dialog's own scroll shard and scrolls
+ * normally.
  *
  * The picker is an accelerator, never a gate: the fields it fills stay editable, the CSV upload stays
  * exactly as it was, and the whole control removes itself when the instance has no Authentik API
@@ -94,24 +99,24 @@ export const FsinfAuthentikMemberPicker = ({
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="secondary"
-          className="w-full justify-between font-normal"
-          aria-expanded={open}>
-          <span className="flex items-center gap-2 text-slate-600">
-            <SearchIcon className="h-4 w-4" />
-            {label}
-          </span>
-          <ChevronDownIcon className="h-4 w-4 text-slate-500" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-(--radix-popover-trigger-width) p-0">
-        <Command shouldFilter={false}>
+    <div className="flex flex-col gap-2">
+      <Button
+        type="button"
+        variant="secondary"
+        className="w-full justify-between font-normal"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}>
+        <span className="flex items-center gap-2 text-slate-600">
+          <SearchIcon className="h-4 w-4" />
+          {label}
+        </span>
+        <ChevronDownIcon className={cn("h-4 w-4 text-slate-500 transition-transform", open && "rotate-180")} />
+      </Button>
+
+      {open && (
+        <Command shouldFilter={false} className="rounded-md border border-slate-300">
           <CommandInput placeholder="Name oder E-Mail …" value={query} onValueChange={setQuery} />
-          <CommandList>
+          <CommandList className="max-h-60 overscroll-contain border-0">
             <CommandEmpty>{isLoading ? "Suche in Authentik …" : "Keine Treffer in Authentik"}</CommandEmpty>
             <CommandGroup>
               {members.map((member) => {
@@ -127,7 +132,10 @@ export const FsinfAuthentikMemberPicker = ({
                       <span className="text-xs text-slate-500">{member.email}</span>
                     </span>
                     <CheckIcon
-                      className={cn("h-4 w-4 shrink-0 text-slate-900", isSelected ? "opacity-100" : "opacity-0")}
+                      className={cn(
+                        "h-4 w-4 shrink-0 text-slate-900",
+                        isSelected ? "opacity-100" : "opacity-0"
+                      )}
                     />
                   </CommandItem>
                 );
@@ -135,7 +143,7 @@ export const FsinfAuthentikMemberPicker = ({
             </CommandGroup>
           </CommandList>
         </Command>
-      </PopoverContent>
-    </Popover>
+      )}
+    </div>
   );
 };
