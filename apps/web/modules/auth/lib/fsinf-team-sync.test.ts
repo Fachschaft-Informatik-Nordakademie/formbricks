@@ -6,8 +6,8 @@ const listAuthentikGroupNames = vi.fn();
 const prismaMock = {
   user: { findUnique: vi.fn() },
   membership: { findMany: vi.fn() },
-  team: { findMany: vi.fn() },
   teamUser: { upsert: vi.fn(), deleteMany: vi.fn() },
+  team: { findMany: vi.fn(), upsert: vi.fn() },
 };
 
 vi.mock("server-only", () => ({}));
@@ -38,6 +38,7 @@ describe("FSINF team sync", () => {
     prismaMock.membership.findMany.mockResolvedValue([{ organizationId: "org-1" }]);
     prismaMock.teamUser.deleteMany.mockResolvedValue({ count: 0 });
     prismaMock.teamUser.upsert.mockResolvedValue({});
+    prismaMock.team.upsert.mockResolvedValue({});
     listAuthentikGroupNames.mockResolvedValue(["Studierende", "Fachschaft Informatik"]);
   });
 
@@ -100,7 +101,36 @@ describe("FSINF team sync", () => {
     expect(prismaMock.teamUser.deleteMany).not.toHaveBeenCalled();
   });
 
-  test("never lets a failure escape into the sign-in", async () => {
+test("creates a Formbricks team for every Authentik group", async () => {
+    getAuthentikGroupsForEmail.mockResolvedValue(["Studierende"]);
+    prismaMock.team.findMany.mockResolvedValue([{ id: "team-stud", name: "Studierende" }]);
+
+    await (await loadSync())(user);
+
+    expect(prismaMock.team.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { organizationId_name: { organizationId: "org-1", name: "Studierende" } },
+        create: { organizationId: "org-1", name: "Studierende" },
+        update: {},
+      })
+    );
+    expect(prismaMock.team.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { organizationId_name: { organizationId: "org-1", name: "Fachschaft Informatik" } },
+      })
+    );
+  });
+
+  test("creates no teams when the directory could not be read", async () => {
+    getAuthentikGroupsForEmail.mockResolvedValue(null);
+    listAuthentikGroupNames.mockResolvedValue(null);
+
+    await (await loadSync())(user);
+
+    expect(prismaMock.team.upsert).not.toHaveBeenCalled();
+  });
+
+    test("never lets a failure escape into the sign-in", async () => {
     getAuthentikGroupsForEmail.mockRejectedValue(new Error("boom"));
 
     await expect((await loadSync())(user)).resolves.toBeUndefined();
@@ -114,6 +144,7 @@ describe("FSINF team sync on sign-in", () => {
     prismaMock.team.findMany.mockResolvedValue([{ id: "team-stud", name: "Studierende" }]);
     prismaMock.teamUser.deleteMany.mockResolvedValue({ count: 0 });
     prismaMock.teamUser.upsert.mockResolvedValue({});
+    prismaMock.team.upsert.mockResolvedValue({});
     listAuthentikGroupNames.mockResolvedValue(["Studierende"]);
     getAuthentikGroupsForEmail.mockResolvedValue(["Studierende"]);
   });

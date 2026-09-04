@@ -30,6 +30,37 @@ import {
  * membership is never downgraded, so a human promotion to admin survives the sync.
  */
 
+/**
+ * Create a Formbricks team for every Authentik group that has none yet, in each organization the
+ * signing-in user belongs to.
+ *
+ * A team on its own grants nothing — access only exists once someone gives the team a workspace under
+ * Team Access — so creating them ahead of time is safe and saves the manual step of recreating the
+ * directory by hand. Names are taken verbatim from Authentik so the mirror rule in
+ * syncFsinfTeamsForUser matches them.
+ */
+const createMissingTeamsForGroups = async (
+  organizationIds: string[],
+  groupNames: string[]
+): Promise<void> => {
+  for (const organizationId of organizationIds) {
+    for (const name of groupNames) {
+      const trimmed = name.trim();
+      if (!trimmed) continue;
+      try {
+        await prisma.team.upsert({
+          where: { organizationId_name: { organizationId, name: trimmed } },
+          create: { organizationId, name: trimmed },
+          update: {}, // an existing team keeps its name, members and workspace access
+        });
+      } catch (error) {
+        // One group failing to materialise must not stop the rest, nor the sign-in.
+        logger.error({ error, organizationId, name: trimmed }, "FSINF team sync: could not create team");
+      }
+    }
+  }
+};
+
 /** Runs on sign-in, so it must never throw and never block the login. */
 export const syncFsinfTeamsForUser = async ({
   userId,
@@ -59,8 +90,15 @@ export const syncFsinfTeamsForUser = async ({
     });
     if (memberships.length === 0) return;
 
+    const organizationIds = memberships.map((membership) => membership.organizationId);
+
+    // Every Authentik group gets a Formbricks team, so the team list mirrors the directory instead of
+    // having to be recreated by hand before a group can be used. Idempotent via the
+    // (organizationId, name) unique index; a team that already exists is left exactly as it is.
+    await createMissingTeamsForGroups(organizationIds, allGroupNames);
+
     const teams = await prisma.team.findMany({
-      where: { organizationId: { in: memberships.map((membership) => membership.organizationId) } },
+      where: { organizationId: { in: organizationIds } },
       select: { id: true, name: true },
     });
 
