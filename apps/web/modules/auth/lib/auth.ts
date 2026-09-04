@@ -21,11 +21,12 @@ import { hashSecret, verifySecret } from "@/lib/crypto";
 import { env } from "@/lib/env";
 import { BETTER_AUTH_IP_ADDRESS_CONFIG } from "@/lib/utils/client-ip";
 import { fsinfSsoConfig } from "@/modules/auth/lib/fsinf-sso-config";
+import { fsinfSsoDatabaseHooks } from "@/modules/auth/lib/fsinf-sso-hooks";
 import {
   accountDeletionConfig,
   requireDeletionConfirmationBeforeHandler,
 } from "@/modules/account/lib/better-auth-account-deletion";
-import { ssoDatabaseHooks, ssoLicenseGateBeforeHandler } from "@/modules/ee/sso/lib/better-auth-hooks";
+import { ssoLicenseGateBeforeHandler } from "@/modules/ee/sso/lib/better-auth-hooks";
 import { ssoGenericOAuthConfig, ssoSocialProviders } from "@/modules/ee/sso/lib/better-auth-providers";
 import { ssoRecoverySignInPlugin } from "@/modules/ee/sso/lib/better-auth-recovery-signin";
 import { runAfterAuthHooks } from "./after-auth-hooks";
@@ -269,7 +270,9 @@ export const auth = betterAuth({
   // deactivated users before a session is created — parity with authOptions, covers every sign-in
   // path) with the Phase 7 `signedIn` success audit.
   databaseHooks: {
-    ...ssoDatabaseHooks,
+    // FSINF: wraps the stock ssoDatabaseHooks so our own Authentik provider is treated as an SSO
+    // sign-up rather than a (blocked) credential one. See fsinf-sso-hooks.ts.
+    ...fsinfSsoDatabaseHooks,
     session: {
       create: {
         before: rejectInactiveUserOnSessionCreate,

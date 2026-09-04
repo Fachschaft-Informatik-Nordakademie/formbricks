@@ -20,16 +20,33 @@ export const FSINF_SSO_ENABLED = !!(OIDC_CLIENT_ID && OIDC_CLIENT_SECRET && OIDC
 
 export const FSINF_SSO_DISPLAY_NAME = "Authentik";
 
+/**
+ * Distinct from the EE module's "openid" on purpose — see above. Exported because the callback path
+ * (/api/auth/oauth2/callback/fsinf-authentik) and the database hooks in fsinf-sso-hooks.ts both have to
+ * agree with it.
+ */
+export const FSINF_SSO_PROVIDER_ID = "fsinf-authentik";
+
+/**
+ * Authentik reports its issuer WITH a trailing slash (…/application/o/<slug>/), and OIDC_ISSUER is
+ * normally copied from the provider config in exactly that form. Appending the well-known path to it
+ * verbatim yields a double slash, which Authentik answers with 404 — Better Auth then never learns
+ * the authorization_endpoint and rejects sign-in with INVALID_OAUTH_CONFIGURATION. Strip trailing
+ * slashes so both spellings of the env var work.
+ */
+const discoveryUrlFor = (issuer: string): string =>
+  `${issuer.replace(/\/+$/, "")}/.well-known/openid-configuration`;
+
 /** Authentik's redirect_uri is fixed to this origin — see fsinf-authentik-button.tsx for why. */
 export const FSINF_SSO_CANONICAL_ORIGIN = WEBAPP_URL ?? "";
 
 export const fsinfSsoConfig: GenericOAuthConfig[] = FSINF_SSO_ENABLED
   ? [
       {
-        providerId: "fsinf-authentik",
+        providerId: FSINF_SSO_PROVIDER_ID,
         clientId: OIDC_CLIENT_ID ?? "",
         clientSecret: OIDC_CLIENT_SECRET ?? "",
-        discoveryUrl: `${OIDC_ISSUER}/.well-known/openid-configuration`,
+        discoveryUrl: discoveryUrlFor(OIDC_ISSUER ?? ""),
         scopes: ["openid", "email", "profile"],
         pkce: true,
         // Authentik doesn't return the RFC 9207 `iss` param on the callback (same situation as the
