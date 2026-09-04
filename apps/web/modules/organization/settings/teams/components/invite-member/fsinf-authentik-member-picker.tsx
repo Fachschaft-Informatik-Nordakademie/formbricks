@@ -1,7 +1,8 @@
 "use client";
 
-import { ChevronDownIcon, SearchIcon } from "lucide-react";
+import { CheckIcon, ChevronDownIcon, SearchIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/cn";
 import type { TAuthentikDirectoryMember } from "@/modules/auth/lib/fsinf-authentik-directory";
 import { searchAuthentikMembersAction } from "@/modules/organization/settings/teams/fsinf-directory-actions";
 import { Button } from "@/modules/ui/components/button";
@@ -17,26 +18,35 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/modules/ui/components
 
 interface FsinfAuthentikMemberPickerProps {
   organizationId: string;
-  /** Fills the name and email fields of the invite form. */
+  /** Individual tab: fills name + email. Bulk tab: toggles the member in its selection. */
   onSelect: (member: TAuthentikDirectoryMember) => void;
+  /** Bulk tab only: emails already picked, marked with a check and left selectable to un-pick. */
+  selectedEmails?: string[];
+  /** Bulk tab only: keep the list open so several people can be picked in one go. */
+  keepOpenOnSelect?: boolean;
+  label?: string;
 }
 
 const SEARCH_DEBOUNCE_MS = 250;
 
 /**
- * FSINF: pick the person to invite from Authentik (portal.nak-studis.de) instead of typing their
- * address from memory.
+ * FSINF: pick people to invite from Authentik (portal.nak-studis.de) instead of typing addresses from
+ * memory. Used by both invite tabs — the individual one takes a single person, the bulk one collects
+ * several as an alternative to uploading a CSV.
  *
  * Filtering happens server-side (`searchAuthentikMembersAction` → Authentik's `search` parameter), so
  * cmdk's own filtering is switched off — it must not filter the list it is handed a second time.
  *
- * The picker is an accelerator, never a gate: the name and email fields stay editable, and the whole
- * control removes itself when the instance has no Authentik API credentials, so the dialog is exactly
- * what it was before on any deployment that doesn't configure the directory.
+ * The picker is an accelerator, never a gate: the fields it fills stay editable, the CSV upload stays
+ * exactly as it was, and the whole control removes itself when the instance has no Authentik API
+ * credentials.
  */
 export const FsinfAuthentikMemberPicker = ({
   organizationId,
   onSelect,
+  selectedEmails = [],
+  keepOpenOnSelect = false,
+  label = "Mitglied aus Authentik wählen",
 }: Readonly<FsinfAuthentikMemberPickerProps>) => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -45,6 +55,8 @@ export const FsinfAuthentikMemberPicker = ({
   const [isLoading, setIsLoading] = useState(true);
   // Guards against a slow response for an older keystroke overwriting a newer one's results.
   const requestIdRef = useRef(0);
+
+  const selected = new Set(selectedEmails.map((email) => email.toLowerCase()));
 
   const runSearch = useCallback(
     async (searchTerm: string) => {
@@ -76,47 +88,54 @@ export const FsinfAuthentikMemberPicker = ({
 
   const handleSelect = (member: TAuthentikDirectoryMember) => {
     onSelect(member);
+    if (keepOpenOnSelect) return;
     setOpen(false);
     setQuery("");
   };
 
   return (
-    <div className="flex flex-col gap-y-2">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="secondary"
-            className="w-full justify-between font-normal"
-            aria-expanded={open}>
-            <span className="flex items-center gap-2 text-slate-600">
-              <SearchIcon className="h-4 w-4" />
-              Mitglied aus Authentik wählen
-            </span>
-            <ChevronDownIcon className="h-4 w-4 text-slate-500" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent align="start" className="w-(--radix-popover-trigger-width) p-0">
-          <Command shouldFilter={false}>
-            <CommandInput placeholder="Name oder E-Mail …" value={query} onValueChange={setQuery} />
-            <CommandList>
-              <CommandEmpty>{isLoading ? "Suche in Authentik …" : "Keine Treffer in Authentik"}</CommandEmpty>
-              <CommandGroup>
-                {members.map((member) => (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="secondary"
+          className="w-full justify-between font-normal"
+          aria-expanded={open}>
+          <span className="flex items-center gap-2 text-slate-600">
+            <SearchIcon className="h-4 w-4" />
+            {label}
+          </span>
+          <ChevronDownIcon className="h-4 w-4 text-slate-500" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-(--radix-popover-trigger-width) p-0">
+        <Command shouldFilter={false}>
+          <CommandInput placeholder="Name oder E-Mail …" value={query} onValueChange={setQuery} />
+          <CommandList>
+            <CommandEmpty>{isLoading ? "Suche in Authentik …" : "Keine Treffer in Authentik"}</CommandEmpty>
+            <CommandGroup>
+              {members.map((member) => {
+                const isSelected = selected.has(member.email.toLowerCase());
+                return (
                   <CommandItem
                     key={member.id}
                     value={member.id}
                     onSelect={() => handleSelect(member)}
-                    className="flex flex-col items-start gap-0.5">
-                    <span className="text-sm font-medium text-slate-900">{member.name}</span>
-                    <span className="text-xs text-slate-500">{member.email}</span>
+                    className="flex flex-row items-center justify-between gap-2">
+                    <span className="flex flex-col items-start gap-0.5">
+                      <span className="text-sm font-medium text-slate-900">{member.name}</span>
+                      <span className="text-xs text-slate-500">{member.email}</span>
+                    </span>
+                    <CheckIcon
+                      className={cn("h-4 w-4 shrink-0 text-slate-900", isSelected ? "opacity-100" : "opacity-0")}
+                    />
                   </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-    </div>
+                );
+              })}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 };

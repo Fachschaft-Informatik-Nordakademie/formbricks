@@ -1,13 +1,16 @@
 "use client";
 
-import { ArrowUpFromLineIcon } from "lucide-react";
+import { ArrowUpFromLineIcon, XIcon } from "lucide-react";
 import Link from "next/link";
 import Papa, { type ParseResult } from "papaparse";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TOrganizationRole } from "@formbricks/types/memberships";
 import { cn } from "@/lib/cn";
+import type { TAuthentikDirectoryMember } from "@/modules/auth/lib/fsinf-authentik-directory";
 import type { TOrganizationTeam } from "@/modules/ee/teams/team-list/types/team";
+import { FsinfAuthentikMemberPicker } from "@/modules/organization/settings/teams/components/invite-member/fsinf-authentik-member-picker";
+import { buildInviteesFromDirectory } from "@/modules/organization/settings/teams/components/invite-member/fsinf-directory-invitees";
 import { ZInvitees } from "@/modules/organization/settings/teams/types/invites";
 import { organizationSettingsPath } from "@/modules/settings/lib/routes";
 import { Alert, AlertDescription } from "@/modules/ui/components/alert";
@@ -68,6 +71,17 @@ export const BulkInviteTab = ({
   const [previewRows, setPreviewRows] = useState<BulkCsvRow[]>([]);
   const [error, setError] = useState<string>("");
   const [isImporting, setIsImporting] = useState(false);
+  // FSINF: people picked from Authentik, the alternative to uploading a CSV.
+  const [directorySelection, setDirectorySelection] = useState<TAuthentikDirectoryMember[]>([]);
+
+  const toggleDirectoryMember = (member: TAuthentikDirectoryMember) => {
+    setError("");
+    setDirectorySelection((current) =>
+      current.some((entry) => entry.email.toLowerCase() === member.email.toLowerCase())
+        ? current.filter((entry) => entry.email.toLowerCase() !== member.email.toLowerCase())
+        : [...current, member]
+    );
+  };
 
   const handleFileSelected = (file: File | undefined) => {
     if (!file) return;
@@ -119,6 +133,27 @@ export const BulkInviteTab = ({
     setCSVFile(undefined);
     setPreviewRows([]);
     setError("");
+  };
+
+  /** FSINF: invite everyone picked from Authentik — same submit path as the CSV import below. */
+  const onInviteSelection = async () => {
+    if (!directorySelection.length || !isBulkInviteAllowed || isImporting) return;
+
+    const parsed = ZInvitees.safeParse(buildInviteesFromDirectory(directorySelection, isAccessControlAllowed));
+    if (!parsed.success) {
+      setError(t("workspace.settings.general.please_check_csv_file"));
+      return;
+    }
+
+    setIsImporting(true);
+    try {
+      const success = await onSubmit(parsed.data);
+      if (success) {
+        setOpen(false);
+      }
+    } finally {
+      setIsImporting(false);
+    }
   };
 
   const onImport = async () => {
@@ -232,6 +267,39 @@ export const BulkInviteTab = ({
           </Alert>
         ) : null}
 
+        {/* FSINF: pick the people straight from Authentik instead of preparing a CSV. Hidden once a
+            file is loaded, so there is always exactly one source of truth for what gets imported. */}
+        {!csvFile && (
+          <div className="flex flex-col gap-2">
+            <FsinfAuthentikMemberPicker
+              organizationId={organizationId}
+              onSelect={toggleDirectoryMember}
+              selectedEmails={directorySelection.map((member) => member.email)}
+              keepOpenOnSelect
+              label={
+                directorySelection.length
+                  ? `${directorySelection.length} Mitglied(er) aus Authentik gewählt`
+                  : "Mitglieder aus Authentik wählen"
+              }
+            />
+            {directorySelection.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {directorySelection.map((member) => (
+                  <button
+                    key={member.id}
+                    type="button"
+                    onClick={() => toggleDirectoryMember(member)}
+                    title={`${member.email} entfernen`}
+                    className="flex items-center gap-1.5 rounded-full bg-slate-100 py-1 pr-2 pl-3 text-xs text-slate-700 hover:bg-slate-200">
+                    {member.name}
+                    <XIcon className="h-3 w-3" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="flex flex-col gap-2">
           <div className="no-scrollbar rounded-md border-2 border-dashed border-slate-300 bg-slate-50 p-4">
             {csvFile ? (
@@ -314,12 +382,20 @@ export const BulkInviteTab = ({
             {t("workspace.contacts.upload_contacts_modal_pick_different_file")}
           </Button>
         ) : null}
-        <Button
-          onClick={() => void onImport()}
-          disabled={!csvFile || !previewCount || isImporting}
-          loading={isImporting}>
-          {t("common.import")}
-        </Button>
+        {/* FSINF: with people picked from Authentik and no file loaded, the primary button invites the
+            selection; otherwise it stays the CSV import it always was. */}
+        {directorySelection.length > 0 && !csvFile ? (
+          <Button onClick={() => void onInviteSelection()} disabled={isImporting} loading={isImporting}>
+            {`${directorySelection.length} Mitglied(er) einladen`}
+          </Button>
+        ) : (
+          <Button
+            onClick={() => void onImport()}
+            disabled={!csvFile || !previewCount || isImporting}
+            loading={isImporting}>
+            {t("common.import")}
+          </Button>
+        )}
       </DialogFooter>
     </>
   );
