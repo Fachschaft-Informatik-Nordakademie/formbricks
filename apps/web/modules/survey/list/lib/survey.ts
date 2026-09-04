@@ -15,6 +15,7 @@ import { getTranslate } from "@/lingodotdev/server";
 import { getIsQuotasEnabled } from "@/modules/ee/license-check/lib/utils";
 import { getQuotas } from "@/modules/ee/quotas/lib/quotas";
 import { buildOrderByClause, buildWhereClause } from "@/modules/survey/lib/utils";
+import { buildViewerSurveyWhere } from "@/modules/survey/lib/fsinf-survey-visibility";
 import { doesWorkspaceExist, getWorkspaceWithLanguages } from "@/modules/survey/list/lib/workspace";
 import type { TSurvey, TWorkspaceWithLanguages } from "@/modules/survey/list/types/surveys";
 import {
@@ -42,6 +43,8 @@ export const getSurveys = reactCache(
       const surveysPrisma = await prisma.survey.findMany({
         where: {
           workspaceId,
+          // FSINF: scope the list to what this viewer may see — see fsinf-survey-visibility.ts.
+          ...(await buildViewerSurveyWhere(workspaceId)),
           ...buildWhereClause(filterCriteria),
         },
         select: surveySelect,
@@ -75,10 +78,14 @@ export const getSurveysSortedByRelevance = reactCache(
     try {
       let surveyRows: TSurveyRow[] = [];
 
+      // FSINF: one lookup for all three queries below — see fsinf-survey-visibility.ts.
+      const viewerWhere = await buildViewerSurveyWhere(workspaceId);
+
       const inProgressSurveyCount = await prisma.survey.count({
         where: {
           workspaceId,
           status: "inProgress",
+          ...viewerWhere,
           ...buildWhereClause(filterCriteria),
         },
       });
@@ -91,6 +98,7 @@ export const getSurveysSortedByRelevance = reactCache(
               where: {
                 workspaceId,
                 status: "inProgress",
+                ...viewerWhere,
                 ...buildWhereClause(filterCriteria),
               },
               select: surveySelect,
@@ -109,6 +117,7 @@ export const getSurveysSortedByRelevance = reactCache(
           where: {
             workspaceId,
             status: { not: "inProgress" },
+            ...viewerWhere,
             ...buildWhereClause(filterCriteria),
           },
           select: surveySelect,
@@ -540,6 +549,8 @@ export const getSurveyCount = reactCache(
       const surveyCount = await prisma.survey.count({
         where: {
           workspaceId,
+          // FSINF: scope the list to what this viewer may see — see fsinf-survey-visibility.ts.
+          ...(await buildViewerSurveyWhere(workspaceId)),
           ...buildWhereClause(filterCriteria),
         },
       });

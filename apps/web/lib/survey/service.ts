@@ -18,6 +18,7 @@ import {
   subscribeOrganizationMembersToSurveyResponses,
 } from "@/lib/organization/service";
 import { getSurveyWorkspaceIdMap } from "@/modules/ee/contacts/segments/lib/segments";
+import { isSurveyVisibleToViewer } from "@/modules/survey/lib/fsinf-survey-visibility";
 import { handleTriggerUpdates } from "@/modules/survey/lib/trigger-updates";
 import {
   isSurveySchedulingDue,
@@ -185,6 +186,14 @@ export const getSurvey = reactCache(async (surveyId: string): Promise<TSurvey | 
   }
 
   if (!surveyPrisma) {
+    return null;
+  }
+
+  // FSINF: per-survey isolation. This is the choke point for a single survey — pages read through it,
+  // and every survey-scoped server action authorizes via getWorkspaceIdFromSurveyId(), which calls
+  // this function and throws ResourceNotFoundError on null. Hiding here therefore denies reading AND
+  // writing for a viewer who may not see this survey. See fsinf-survey-visibility.ts.
+  if (!(await isSurveyVisibleToViewer(surveyPrisma))) {
     return null;
   }
 
