@@ -57,6 +57,26 @@ const getCustomPlanFeaturePermission = async (
     return false;
   }
 
+  // FSINF PATCH — self-hosted only, deliberate and documented.
+  //
+  // This instance (forms.nak-inf.de, Fachschaft Informatik der NORDAKADEMIE) runs without an
+  // enterprise license, so the checks below returned false and Teams, roles and the AI features
+  // rendered as "Unlock … with a higher plan". Tom decided on 2026-09-04 to enable them anyway,
+  // after being told plainly what this is: using Formbricks Enterprise Edition features without a
+  // license, which the EE license (apps/web/modules/ee/LICENSE) does not permit. It is a licensing
+  // decision by the operator of this deployment, not a technical necessity — no support, no updates
+  // and no warranty are implied, and none are being claimed.
+  //
+  // Kept as ONE patch at the single choke point rather than scattered per-feature workarounds, so
+  // the deviation from upstream is visible in one diff and easy to revert.
+  //
+  // TO REVERT — do this before ever running a real license (trial or otherwise) on this instance:
+  // delete this block. A licensed install must not carry it: telemetry becomes mandatory for EE
+  // installs and would report the resulting state.
+  if (!IS_FORMBRICKS_CLOUD) {
+    return true;
+  }
+
   const license = await getEnterpriseLicense();
   if (!license.active) return false;
   const isFeatureEnabled = license.features?.[featureKey] ?? false;
