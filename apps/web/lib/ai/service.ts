@@ -18,6 +18,7 @@ import {
 import { env } from "@/lib/env";
 import { getOrganization } from "@/lib/organization/service";
 import { type AITracingContext, wrapAiModelWithTracing } from "@/lib/posthog/ai-tracing";
+import { isFsinfAiEntitled } from "@/lib/ai/fsinf-ai-entitlement";
 import { getIsAISmartToolsEnabled } from "@/modules/ee/license-check/lib/utils";
 
 export const AI_ERROR_CODES = {
@@ -45,7 +46,10 @@ export const getOrganizationAIConfig = async (organizationId: string): Promise<T
     throw new ResourceNotFoundError("Organization", organizationId);
   }
 
-  const isAISmartToolsEntitled = await getIsAISmartToolsEnabled(organizationId);
+  // FSINF: entitled either by an enterprise license or by this instance having its own AI provider
+  // configured — see fsinf-ai-entitlement.ts for why that is a legitimate second reason. The
+  // organization's own switch and the instance check below still apply.
+  const isAISmartToolsEntitled = (await getIsAISmartToolsEnabled(organizationId)) || isFsinfAiEntitled();
 
   return {
     organizationId,
