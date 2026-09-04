@@ -5,6 +5,7 @@ import {
   getAuthentikGroupsForEmail,
   listAuthentikGroupNames,
 } from "@/modules/auth/lib/fsinf-authentik-directory";
+import { getGroupWorkspaceLinks } from "@/modules/auth/lib/fsinf-group-workspace-map";
 
 /**
  * FSINF: keep Formbricks team membership in step with Authentik group membership.
@@ -61,6 +62,57 @@ const createMissingTeamsForGroups = async (
   }
 };
 
+/**
+ * Give each configured group's team access to its workspace. Runs on every sync so the configuration
+ * stays the truth: the named pairs are written with exactly the configured permission, pairs that are
+ * not configured are never touched.
+ */
+const applyConfiguredWorkspaceLinks = async (organizationIds: string[]): Promise<void> => {
+  const links = getGroupWorkspaceLinks();
+  if (links.length === 0) return;
+
+  for (const organizationId of organizationIds) {
+    for (const link of links) {
+      try {
+        const team = await prisma.team.findUnique({
+          where: { organizationId_name: { organizationId, name: link.groupName } },
+          select: { id: true },
+        });
+        if (!team) continue; // the group has no team here yet — the next sign-in creates it
+
+        // Workspace names are not unique in the schema, so pick deterministically and say so when the
+        // configuration is ambiguous rather than silently granting access to an arbitrary one.
+        const workspaces = await prisma.workspace.findMany({
+          where: { organizationId, name: link.workspaceName },
+          select: { id: true },
+          orderBy: { createdAt: "asc" },
+        });
+        if (workspaces.length === 0) {
+          logger.warn(
+            { organizationId, link },
+            "FSINF team sync: configured workspace does not exist, skipping the mapping"
+          );
+          continue;
+        }
+        if (workspaces.length > 1) {
+          logger.warn(
+            { organizationId, link },
+            "FSINF team sync: several workspaces share that name, using the oldest"
+          );
+        }
+
+        await prisma.workspaceTeam.upsert({
+          where: { workspaceId_teamId: { workspaceId: workspaces[0].id, teamId: team.id } },
+          create: { workspaceId: workspaces[0].id, teamId: team.id, permission: link.permission },
+          update: { permission: link.permission },
+        });
+      } catch (error) {
+        logger.error({ error, organizationId, link }, "FSINF team sync: could not apply workspace mapping");
+      }
+    }
+  }
+};
+
 /** Runs on sign-in, so it must never throw and never block the login. */
 export const syncFsinfTeamsForUser = async ({
   userId,
@@ -96,6 +148,10 @@ export const syncFsinfTeamsForUser = async ({
     // having to be recreated by hand before a group can be used. Idempotent via the
     // (organizationId, name) unique index; a team that already exists is left exactly as it is.
     await createMissingTeamsForGroups(organizationIds, allGroupNames);
+
+    // Workspace access cannot follow names — a workspace is named after its purpose, not after the
+    // group working in it — so the configured pairs are applied here. See fsinf-group-workspace-map.ts.
+    await applyConfiguredWorkspaceLinks(organizationIds);
 
     const teams = await prisma.team.findMany({
       where: { organizationId: { in: organizationIds } },

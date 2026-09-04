@@ -301,6 +301,8 @@ const parsedEnv = createEnv({
     AUTHENTIK_API_TOKEN: z.string().optional(),
     /** Optional Authentik group the picker is restricted to, e.g. "Fachschaft Informatik". */
     AUTHENTIK_DIRECTORY_GROUP: z.string().optional(),
+    /** JSON mapping Authentik group → workspace access; see fsinf-group-workspace-map.ts. */
+    FSINF_GROUP_WORKSPACE_MAP: z.string().optional(),
     OIDC_CLIENT_ID: z.string().optional(),
     OIDC_CLIENT_SECRET: z.string().optional(),
     OIDC_DISPLAY_NAME: z.string().optional(),
@@ -489,6 +491,7 @@ const parsedEnv = createEnv({
     AUTHENTIK_URL: process.env.AUTHENTIK_URL,
     AUTHENTIK_API_TOKEN: process.env.AUTHENTIK_API_TOKEN,
     AUTHENTIK_DIRECTORY_GROUP: process.env.AUTHENTIK_DIRECTORY_GROUP,
+    FSINF_GROUP_WORKSPACE_MAP: process.env.FSINF_GROUP_WORKSPACE_MAP,
     OIDC_CLIENT_ID: process.env.OIDC_CLIENT_ID,
     OIDC_CLIENT_SECRET: process.env.OIDC_CLIENT_SECRET,
     OIDC_DISPLAY_NAME: process.env.OIDC_DISPLAY_NAME,
