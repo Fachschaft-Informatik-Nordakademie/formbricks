@@ -97,3 +97,70 @@ export const searchAuthentikMembers = async (query: string): Promise<TAuthentikD
     return [];
   }
 };
+
+/**
+ * Shared fetch for the Authentik API. Returns null on any failure so callers can tell "Authentik said
+ * nothing" apart from "Authentik said the empty list" — the team sync depends on that distinction:
+ * treating an outage as "user is in no groups" would revoke everyone's access.
+ */
+const authentikGet = async (path: string, params: URLSearchParams): Promise<unknown | null> => {
+  if (!isAuthentikDirectoryConfigured()) return null;
+
+  try {
+    const response = await fetch(`${AUTHENTIK_URL?.replace(/\/+$/, "")}${path}?${params}`, {
+      headers: {
+        Authorization: `Bearer ${AUTHENTIK_API_TOKEN}`,
+        Accept: "application/json",
+      },
+      cache: "no-store",
+      signal: AbortSignal.timeout(5000),
+    });
+
+    if (!response.ok) {
+      logger.error({ status: response.status, path }, "FSINF Authentik directory: request failed");
+      return null;
+    }
+
+    return await response.json();
+  } catch (error) {
+    logger.error({ error, path }, "FSINF Authentik directory: request failed");
+    return null;
+  }
+};
+
+/**
+ * The Authentik groups of one person, by email. Null means "could not ask" (see authentikGet); an
+ * empty array means "asked, and they are in no groups", which the team sync acts on.
+ */
+export const getAuthentikGroupsForEmail = async (email: string): Promise<string[] | null> => {
+  const body = (await authentikGet("/api/v3/core/users/", new URLSearchParams({ email }))) as {
+    results?: { groups_obj?: { name?: string }[] }[];
+  } | null;
+  if (!body) return null;
+
+  const user = body.results?.[0];
+  if (!user) return []; // no such account in Authentik → no groups, which is a real answer
+
+  return (user.groups_obj ?? []).map((group) => group.name ?? "").filter(Boolean);
+};
+
+/**
+ * Every group name the instance knows. The team sync uses it to decide which Formbricks teams are
+ * mirrored from Authentik at all — see fsinf-team-sync.ts.
+ */
+export const listAuthentikGroupNames = async (): Promise<string[] | null> => {
+  const names: string[] = [];
+  // Authentik pages this endpoint; a Fachschaft has a handful of groups, but paging keeps it correct
+  // if that ever grows.
+  for (let page = 1; page <= 10; page++) {
+    const body = (await authentikGet(
+      "/api/v3/core/groups/",
+      new URLSearchParams({ page: String(page), page_size: "100" })
+    )) as { results?: { name?: string }[]; pagination?: { next?: number } } | null;
+    if (!body) return null;
+
+    names.push(...(body.results ?? []).map((group) => group.name ?? "").filter(Boolean));
+    if (!body.pagination?.next) break;
+  }
+  return names;
+};

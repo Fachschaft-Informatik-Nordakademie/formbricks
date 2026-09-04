@@ -22,6 +22,7 @@ import { env } from "@/lib/env";
 import { BETTER_AUTH_IP_ADDRESS_CONFIG } from "@/lib/utils/client-ip";
 import { fsinfSsoConfig } from "@/modules/auth/lib/fsinf-sso-config";
 import { fsinfSsoDatabaseHooks } from "@/modules/auth/lib/fsinf-sso-hooks";
+import { syncFsinfTeamsOnSignIn } from "@/modules/auth/lib/fsinf-team-sync";
 import {
   accountDeletionConfig,
   requireDeletionConfirmationBeforeHandler,
@@ -276,7 +277,14 @@ export const auth = betterAuth({
     session: {
       create: {
         before: rejectInactiveUserOnSessionCreate,
-        after: signInAuditDatabaseHook.create?.after,
+        after: async (session, context) => {
+          await signInAuditDatabaseHook.create?.after?.(session, context);
+          // FSINF: mirror the user's Authentik groups onto their Formbricks teams on every sign-in,
+          // so workspace access follows group membership in both directions without a second list to
+          // maintain. Best-effort by construction — see fsinf-team-sync.ts; it never throws, and an
+          // unreachable Authentik leaves memberships untouched rather than revoking them.
+          await syncFsinfTeamsOnSignIn(session.userId);
+        },
       },
     },
   },
