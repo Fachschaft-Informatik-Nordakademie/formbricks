@@ -6,6 +6,8 @@ import { ENCRYPTION_KEY } from "@/lib/constants";
 import { symmetricDecrypt } from "@/lib/crypto";
 import { validateSurveySingleUseLinkParams } from "@/lib/utils/single-use-surveys";
 import { verifyResponseRecaptcha } from "@/modules/api/lib/verify-response-recaptcha";
+import { enforceRespondentSsoGate } from "@/modules/survey/link/lib/fsinf-respondent-sso/gate";
+import { getRespondentSessionTokenFor } from "@/modules/survey/link/lib/fsinf-respondent-sso/request-cookie";
 import { verifyLinkSurveyPinToken } from "@/modules/survey/link/lib/pin-token";
 import { enforceVerifiedEmailGate } from "@/modules/survey/link/lib/verify-email-gate";
 
@@ -103,6 +105,17 @@ export const checkSurveyValidity = async (
   });
   if (verifiedEmailErrorResponse) {
     return verifiedEmailErrorResponse;
+  }
+
+  // FSINF: SSO-protected surveys only accept responses from an allowed, logged-in respondent. Runs
+  // after the single-use check so a survey using both keeps the validated link id.
+  const respondentSsoErrorResponse = enforceRespondentSsoGate({
+    survey,
+    responseInput,
+    sessionToken: await getRespondentSessionTokenFor(survey),
+  });
+  if (respondentSsoErrorResponse) {
+    return respondentSsoErrorResponse;
   }
 
   // Shared with the v1 endpoint so the two versions cannot drift apart again.

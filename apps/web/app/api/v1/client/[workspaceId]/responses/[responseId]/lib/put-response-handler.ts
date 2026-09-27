@@ -13,6 +13,8 @@ import { formatValidationErrorsForV1Api, validateResponseData } from "@/modules/
 import { validateOtherOptionLengthForMultipleChoice } from "@/modules/api/v2/lib/element";
 import { createQuotaFullObject } from "@/modules/ee/quotas/lib/helpers";
 import { validateClientFileUploads } from "@/modules/storage/utils";
+import { enforceRespondentSsoUpdateGate } from "@/modules/survey/link/lib/fsinf-respondent-sso/gate";
+import { getRespondentSessionTokenFor } from "@/modules/survey/link/lib/fsinf-respondent-sso/request-cookie";
 import { verifyLinkSurveyPinToken } from "@/modules/survey/link/lib/pin-token";
 import { VERIFIED_EMAIL_RESPONSE_KEY } from "@/modules/survey/link/lib/verify-email-gate";
 import { updateResponseWithQuotaEvaluation } from "./response";
@@ -229,6 +231,17 @@ export const putResponseHandler = async ({
   // client-supplied value rather than letting an update overwrite it with an arbitrary address.
   if (survey.isVerifyEmailEnabled && responseUpdateInput.data) {
     delete responseUpdateInput.data[VERIFIED_EMAIL_RESPONSE_KEY];
+  }
+
+  // FSINF: an SSO survey's response may only be continued by the allowed account that started it.
+  const respondentSsoErrorResponse = enforceRespondentSsoUpdateGate({
+    survey,
+    existingResponse,
+    updateData: responseUpdateInput.data,
+    sessionToken: await getRespondentSessionTokenFor(survey),
+  });
+  if (respondentSsoErrorResponse) {
+    return { response: respondentSsoErrorResponse };
   }
 
   const validationResult = validateUpdateRequest(existingResponse, survey, responseUpdateInput, workspaceId);

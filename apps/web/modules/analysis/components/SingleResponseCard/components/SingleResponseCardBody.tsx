@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2Icon } from "lucide-react";
+import { CheckCircle2Icon, KeyRoundIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { TResponseWithQuotas } from "@formbricks/types/responses";
 import { TSurveyElementTypeEnum } from "@formbricks/types/surveys/constants";
@@ -12,6 +12,7 @@ import { getSurveyDateFormatMap } from "@/lib/utils/date-display";
 import { parseRecallInfo } from "@/lib/utils/recall";
 import { ResponseCardQuotas } from "@/modules/ee/quotas/components/single-response-card-quotas";
 import { getElementsFromBlocks } from "@/modules/survey/lib/client-utils";
+import { formatRecordedFsinfSsoIdentity } from "@/modules/survey/link/lib/fsinf-respondent-sso/access";
 import { isValidValue } from "../util";
 import { ElementSkip } from "./ElementSkip";
 import { HiddenFields } from "./HiddenFields";
@@ -72,6 +73,17 @@ export const SingleResponseCardBody = ({
       <div className="space-y-6">
         {survey.isVerifyEmailEnabled && response.data["verifiedEmail"] && (
           <VerifiedEmail responseData={response.data} />
+        )}
+        {formatRecordedFsinfSsoIdentity(response.data) && (
+          <div>
+            <p className="flex items-center gap-x-2 text-sm text-slate-500">
+              <KeyRoundIcon className="size-4" />
+              <span>NAK-Studis-Account</span>
+            </p>
+            <p className="ph-no-capture my-1 font-semibold text-slate-700">
+              {formatRecordedFsinfSsoIdentity(response.data)}
+            </p>
+          </div>
         )}
         {elements.map((question) => {
           // Skip CTA elements without external buttons only if they have no response data

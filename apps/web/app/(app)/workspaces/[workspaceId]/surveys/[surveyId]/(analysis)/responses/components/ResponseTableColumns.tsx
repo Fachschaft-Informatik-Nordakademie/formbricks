@@ -17,6 +17,7 @@ import { recallToHeadline } from "@/lib/utils/recall";
 import { RenderResponse } from "@/modules/analysis/components/SingleResponseCard/components/RenderResponse";
 import { getElementsFromBlocks } from "@/modules/survey/lib/client-utils";
 import { VARIABLES_ICON_MAP, getElementIconMap } from "@/modules/survey/lib/elements";
+import { formatRecordedFsinfSsoIdentity } from "@/modules/survey/link/lib/fsinf-respondent-sso/access";
 import { getSelectionColumn } from "@/modules/ui/components/data-table";
 import { IdBadge } from "@/modules/ui/components/id-badge";
 import { ResponseBadges } from "@/modules/ui/components/response-badges";
@@ -308,9 +309,10 @@ export const generateResponseTableColumns = (
     ),
     size: 275,
     cell: ({ row }) => {
+      // FSINF: an SSO survey that records identities knows who answered even without a contact.
       const personId = row.original.person
         ? getContactIdentifier(row.original.person, row.original.contactAttributes)
-        : t("common.anonymous");
+        : formatRecordedFsinfSsoIdentity(row.original.responseData) || t("common.anonymous");
       return <p className="truncate text-slate-900">{personId}</p>;
     },
   };

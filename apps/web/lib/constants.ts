@@ -63,6 +63,11 @@ export const AUTHENTIK_API_TOKEN = env.AUTHENTIK_API_TOKEN;
 export const AUTHENTIK_DIRECTORY_GROUP = env.AUTHENTIK_DIRECTORY_GROUP;
 export const FSINF_GROUP_WORKSPACE_MAP = env.FSINF_GROUP_WORKSPACE_MAP;
 
+// FSINF: respondent login for SSO-protected link surveys (modules/survey/link/lib/fsinf-respondent-sso).
+export const FSINF_RESPONDENT_OIDC_CLIENT_ID = env.FSINF_RESPONDENT_OIDC_CLIENT_ID;
+export const FSINF_RESPONDENT_OIDC_CLIENT_SECRET = env.FSINF_RESPONDENT_OIDC_CLIENT_SECRET;
+export const FSINF_RESPONDENT_OIDC_ISSUER = env.FSINF_RESPONDENT_OIDC_ISSUER;
+
 export const SAML_DATABASE_URL = env.SAML_DATABASE_URL;
 export const SAML_TENANT = "formbricks.com";
 export const SAML_PRODUCT = "formbricks";

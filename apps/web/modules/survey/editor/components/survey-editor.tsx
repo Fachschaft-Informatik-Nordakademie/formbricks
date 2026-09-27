@@ -13,6 +13,7 @@ import { useDocumentVisibility } from "@/lib/useDocumentVisibility";
 import { TTeamPermission } from "@/modules/ee/teams/workspace-teams/types/team";
 import { EditPublicSurveyAlertDialog } from "@/modules/survey/components/edit-public-survey-alert-dialog";
 import { ElementsView } from "@/modules/survey/editor/components/elements-view";
+import type { TFsinfSsoEditorContext } from "@/modules/survey/editor/components/fsinf-sso-card";
 import { LoadingSkeleton } from "@/modules/survey/editor/components/loading-skeleton";
 import { SettingsView } from "@/modules/survey/editor/components/settings-view";
 import { StylingView } from "@/modules/survey/editor/components/styling-view";
@@ -37,6 +38,7 @@ interface SurveyEditorProps {
   colors: string[];
   isUserTargetingAllowed?: boolean;
   isSpamProtectionAllowed?: boolean;
+  fsinfSsoContext?: TFsinfSsoEditorContext;
   isFormbricksCloud: boolean;
   isUnsplashConfigured: boolean;
   isQuotasAllowed: boolean;
@@ -69,6 +71,7 @@ export const SurveyEditor = ({
   colors,
   isUserTargetingAllowed = false,
   isSpamProtectionAllowed = false,
+  fsinfSsoContext,
   isFormbricksCloud,
   isUnsplashConfigured,
   isQuotasAllowed,
@@ -266,6 +269,7 @@ export const SurveyEditor = ({
               membershipRole={membershipRole}
               isUserTargetingAllowed={isUserTargetingAllowed}
               isSpamProtectionAllowed={isSpamProtectionAllowed}
+              fsinfSsoContext={fsinfSsoContext}
               workspacePermission={workspacePermission}
               isFormbricksCloud={isFormbricksCloud}
               isQuotasAllowed={isQuotasAllowed}

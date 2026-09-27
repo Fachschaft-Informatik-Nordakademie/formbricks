@@ -303,6 +303,11 @@ const parsedEnv = createEnv({
     AUTHENTIK_DIRECTORY_GROUP: z.string().optional(),
     /** JSON mapping Authentik group → workspace access; see fsinf-group-workspace-map.ts. */
     FSINF_GROUP_WORKSPACE_MAP: z.string().optional(),
+    // FSINF: respondent-only OIDC client for SSO-protected link surveys (fsinf-respondent-sso/oidc.ts).
+    // Separate from OIDC_* on purpose: respondents must never become Formbricks users.
+    FSINF_RESPONDENT_OIDC_CLIENT_ID: z.string().optional(),
+    FSINF_RESPONDENT_OIDC_CLIENT_SECRET: z.string().optional(),
+    FSINF_RESPONDENT_OIDC_ISSUER: z.string().optional(),
     OIDC_CLIENT_ID: z.string().optional(),
     OIDC_CLIENT_SECRET: z.string().optional(),
     OIDC_DISPLAY_NAME: z.string().optional(),
@@ -492,6 +497,9 @@ const parsedEnv = createEnv({
     AUTHENTIK_API_TOKEN: process.env.AUTHENTIK_API_TOKEN,
     AUTHENTIK_DIRECTORY_GROUP: process.env.AUTHENTIK_DIRECTORY_GROUP,
     FSINF_GROUP_WORKSPACE_MAP: process.env.FSINF_GROUP_WORKSPACE_MAP,
+    FSINF_RESPONDENT_OIDC_CLIENT_ID: process.env.FSINF_RESPONDENT_OIDC_CLIENT_ID,
+    FSINF_RESPONDENT_OIDC_CLIENT_SECRET: process.env.FSINF_RESPONDENT_OIDC_CLIENT_SECRET,
+    FSINF_RESPONDENT_OIDC_ISSUER: process.env.FSINF_RESPONDENT_OIDC_ISSUER,
     OIDC_CLIENT_ID: process.env.OIDC_CLIENT_ID,
     OIDC_CLIENT_SECRET: process.env.OIDC_CLIENT_SECRET,
     OIDC_DISPLAY_NAME: process.env.OIDC_DISPLAY_NAME,

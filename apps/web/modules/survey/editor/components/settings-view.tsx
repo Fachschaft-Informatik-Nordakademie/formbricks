@@ -8,6 +8,7 @@ import { TUserLocale } from "@formbricks/types/user";
 import { TargetingCard } from "@/modules/ee/contacts/segments/components/targeting-card";
 import { QuotasCard } from "@/modules/ee/quotas/components/quotas-card";
 import { TTeamPermission } from "@/modules/ee/teams/workspace-teams/types/team";
+import { FsinfSsoCard, type TFsinfSsoEditorContext } from "@/modules/survey/editor/components/fsinf-sso-card";
 import { HowToSendCard } from "@/modules/survey/editor/components/how-to-send-card";
 import { RecontactOptionsCard } from "@/modules/survey/editor/components/recontact-options-card";
 import { ResponseOptionsCard } from "@/modules/survey/editor/components/response-options-card";
@@ -27,6 +28,7 @@ interface SettingsViewProps {
   membershipRole?: OrganizationRole;
   isUserTargetingAllowed?: boolean;
   isSpamProtectionAllowed: boolean;
+  fsinfSsoContext?: TFsinfSsoEditorContext;
   workspacePermission: TTeamPermission | null;
   isFormbricksCloud: boolean;
   isQuotasAllowed: boolean;
@@ -48,6 +50,7 @@ export const SettingsView = ({
   membershipRole,
   isUserTargetingAllowed = false,
   isSpamProtectionAllowed,
+  fsinfSsoContext,
   isQuotasAllowed,
   workspacePermission,
   isFormbricksCloud,
@@ -116,6 +119,10 @@ export const SettingsView = ({
         surveySchedulingConfig={surveySchedulingConfig}
         locale={locale}
       />
+
+      {fsinfSsoContext && (
+        <FsinfSsoCard localSurvey={localSurvey} setLocalSurvey={setLocalSurvey} context={fsinfSsoContext} />
+      )}
 
       <RecontactOptionsCard localSurvey={localSurvey} setLocalSurvey={setLocalSurvey} />
 

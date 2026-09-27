@@ -14,11 +14,15 @@ import {
 } from "@/lib/constants";
 import { getPublicDomain } from "@/lib/getPublicUrl";
 import { getIsContactsEnabled } from "@/modules/ee/license-check/lib/utils";
+import { FsinfRespondentSsoScreen } from "@/modules/survey/link/components/fsinf-respondent-sso-screen";
 import { PinScreen } from "@/modules/survey/link/components/pin-screen";
 import { SurveyClientWrapper } from "@/modules/survey/link/components/survey-client-wrapper";
 import { SurveyCompletedMessage } from "@/modules/survey/link/components/survey-completed-message";
 import { SurveyInactive } from "@/modules/survey/link/components/survey-inactive";
 import { VerifyEmail } from "@/modules/survey/link/components/verify-email";
+import { getResponseBySingleUseId } from "@/modules/survey/link/lib/data";
+import { RESPONDENT_SSO_ERROR_PARAM } from "@/modules/survey/link/lib/fsinf-respondent-sso/oidc";
+import { buildLoginLinks, getPageAccess } from "@/modules/survey/link/lib/fsinf-respondent-sso/page-gate";
 import { getEmailVerificationDetails } from "@/modules/survey/link/lib/helper";
 import type { TLinkSurveySearchParams } from "@/modules/survey/link/lib/types";
 import { hasUserIdSearchParam } from "@/modules/survey/link/lib/user-id";
@@ -76,7 +80,12 @@ export const renderSurvey = async ({
   // Every prop passed to a client component is serialized into the RSC payload and readable in the
   // page source, so the survey handed to them must never carry the PIN — the pin gate itself stays
   // server-side (see the `survey.pin` branch below and `validateSurveyPinAction`).
-  const publicSurvey: TSurvey = { ...survey, pin: null };
+  // FSINF: likewise the SSO allowlist — who may answer is nobody else's business.
+  const publicSurvey: TSurvey = {
+    ...survey,
+    pin: null,
+    fsinfSso: survey.fsinfSso ? { ...survey.fsinfSso, allowedGroups: [], allowedUsers: [] } : survey.fsinfSso,
+  };
 
   const isSpamProtectionEnabled = Boolean(IS_RECAPTCHA_CONFIGURED && survey.recaptcha?.enabled);
   const isScheduled = survey.status === "paused" && survey.publishOn !== null;
@@ -95,6 +104,40 @@ export const renderSurvey = async ({
   // Check if single-use survey has already been completed
   if (singleUseResponse?.finished) {
     return <SurveyCompletedMessage singleUseMessage={survey.singleUse} workspace={workspace} />;
+  }
+
+  // FSINF: SSO-protected survey — only an allowed, signed-in NAK-Studis account gets past this point.
+  // The response endpoints enforce the same decision server-side (fsinf-respondent-sso/gate.ts).
+  // Deliberately NOT skipped for `?preview=true`: that is a public query parameter, and skipping on it
+  // would show the questions to anyone who appends it. Editors preview inside the survey editor.
+  if (survey.fsinfSso?.enabled) {
+    const access = await getPageAccess(survey);
+    if (access.kind !== "allowed") {
+      const { loginUrl, switchAccountUrl } = buildLoginLinks(survey.id, searchParams);
+      const error = searchParams[RESPONDENT_SSO_ERROR_PARAM];
+      return (
+        <FsinfRespondentSsoScreen
+          mode={access.kind}
+          surveyName={survey.name}
+          loginUrl={loginUrl}
+          switchAccountUrl={switchAccountUrl}
+          recordIdentity={survey.fsinfSso.recordIdentity}
+          oneResponsePerUser={survey.fsinfSso.oneResponsePerUser && !survey.singleUse?.enabled}
+          signedInAs={access.kind === "denied" ? access.signedInAs : undefined}
+          error={typeof error === "string" ? error : undefined}
+        />
+      );
+    }
+
+    // One response per account: the pseudonym stands in for a single-use id, so a finished response
+    // shows "already answered" and an unfinished one is continued instead of started over.
+    if (access.singleUseId) {
+      singleUseId = access.singleUseId;
+      singleUseResponse = (await getResponseBySingleUseId(survey.id, access.singleUseId)()) ?? undefined;
+      if (singleUseResponse?.finished) {
+        return <SurveyInactive status="response submitted" workspace={workspace} />;
+      }
+    }
   }
 
   // Handle email verification flow if enabled

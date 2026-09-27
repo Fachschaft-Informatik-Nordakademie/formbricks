@@ -76,6 +76,7 @@ export const selectSurvey = {
   pin: true,
   showLanguageSwitch: true,
   recaptcha: true,
+  fsinfSso: true,
   metadata: true,
   customHeadScripts: true,
   customHeadScriptsMode: true,

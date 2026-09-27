@@ -50,6 +50,7 @@ export const getSurveyWithMetadata = reactCache(async (surveyId: string) => {
         isBackButtonHidden: true,
         isAutoProgressingEnabled: true,
         isCaptureIpEnabled: true,
+        fsinfSso: true,
 
         // Single use configuration
         singleUse: true,

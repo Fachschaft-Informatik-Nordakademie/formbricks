@@ -19,6 +19,8 @@ import { verifyResponseRecaptcha } from "@/modules/api/lib/verify-response-recap
 import { getIsContactsEnabled } from "@/modules/ee/license-check/lib/utils";
 import { createQuotaFullObject } from "@/modules/ee/quotas/lib/helpers";
 import { validateClientFileUploads } from "@/modules/storage/utils";
+import { enforceRespondentSsoGate } from "@/modules/survey/link/lib/fsinf-respondent-sso/gate";
+import { getRespondentSessionTokenFor } from "@/modules/survey/link/lib/fsinf-respondent-sso/request-cookie";
 import { verifyLinkSurveyPinToken } from "@/modules/survey/link/lib/pin-token";
 import { enforceVerifiedEmailGate } from "@/modules/survey/link/lib/verify-email-gate";
 import { createResponseWithQuotaEvaluation } from "./lib/response";
@@ -183,6 +185,16 @@ export const POST = withV1ApiWrapper({
         return { response: singleUseValidationResult.response };
       }
       responseInputData.singleUseId = singleUseValidationResult.singleUseId;
+    }
+
+    // FSINF: same respondent SSO gate as the v2 endpoint (after single-use, see there).
+    const respondentSsoErrorResponse = enforceRespondentSsoGate({
+      survey,
+      responseInput: responseInputData,
+      sessionToken: await getRespondentSessionTokenFor(survey),
+    });
+    if (respondentSsoErrorResponse) {
+      return { response: respondentSsoErrorResponse };
     }
 
     if (

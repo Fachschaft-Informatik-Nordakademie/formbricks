@@ -10,6 +10,7 @@ import {
 } from "@/lib/constants";
 import { getPublicDomain } from "@/lib/getPublicUrl";
 import { getTranslate } from "@/lingodotdev/server";
+import { listAuthentikGroupNames } from "@/modules/auth/lib/fsinf-authentik-directory";
 import { getContactAttributeKeys } from "@/modules/ee/contacts/lib/contact-attribute-keys";
 import { getSegments } from "@/modules/ee/contacts/segments/lib/segments";
 import {
@@ -30,6 +31,7 @@ import {
 } from "@/modules/survey/lib/response";
 import { getOrganizationBilling, getSurvey } from "@/modules/survey/lib/survey";
 import { getWorkspaceWithTeamIds } from "@/modules/survey/lib/workspace";
+import { isRespondentSsoConfigured } from "@/modules/survey/link/lib/fsinf-respondent-sso/oidc";
 import { SURVEY_SCHEDULING_CONFIG } from "@/modules/survey/scheduling/lib/constants";
 import { ErrorComponent } from "@/modules/ui/components/error-component";
 import { getWorkspaceAuth } from "@/modules/workspaces/lib/utils";
@@ -64,6 +66,7 @@ export const SurveyEditorPage = async (props: {
     responseCount,
     finishedResponseCount,
     segments,
+    fsinfSsoGroups,
   ] = await Promise.all([
     getSurvey(params.surveyId),
     getWorkspaceWithTeamIds(params.workspaceId),
@@ -72,6 +75,8 @@ export const SurveyEditorPage = async (props: {
     getResponseCountBySurveyId(params.surveyId),
     getFinishedResponseCountBySurveyId(params.surveyId),
     getSegments(workspace.id),
+    // FSINF: group picker of the "Zugang per NAK-Studis-Login" card; null → free-text fallback.
+    listAuthentikGroupNames(),
   ]);
 
   if (!workspaceWithTeamIds) {
@@ -137,6 +142,7 @@ export const SurveyEditorPage = async (props: {
       segments={segments}
       isUserTargetingAllowed={isUserTargetingAllowed}
       isSpamProtectionAllowed={isSpamProtectionAllowed}
+      fsinfSsoContext={{ isAvailable: isRespondentSsoConfigured(), groups: fsinfSsoGroups }}
       workspaceLanguages={workspaceLanguages}
       isFormbricksCloud={IS_FORMBRICKS_CLOUD}
       isUnsplashConfigured={!!UNSPLASH_ACCESS_KEY}

@@ -278,6 +278,28 @@ export const ZSurveyRecaptcha = z
 
 export type TSurveyRecaptcha = z.infer<typeof ZSurveyRecaptcha>;
 
+/**
+ * FSINF: "only people with a NAK-Studis (Authentik) account may answer this link survey".
+ *
+ * Respondents sign in through a separate, respondent-only OIDC client — they never become Formbricks
+ * users. `allowedGroups` / `allowedUsers` narrow who may answer; both empty means "every Authentik
+ * account". Users are matched by username or email, groups by exact Authentik group name (both
+ * case-insensitive). See apps/web/modules/survey/link/lib/fsinf-respondent-sso/.
+ */
+export const ZSurveyFsinfSso = z
+  .object({
+    enabled: z.boolean(),
+    allowedGroups: z.array(z.string().trim().min(1)).prefault([]),
+    allowedUsers: z.array(z.string().trim().min(1)).prefault([]),
+    /** Store name, username and email of the respondent with the response. Off = pseudonymous. */
+    recordIdentity: z.boolean().prefault(false),
+    /** At most one response per account — enforced by a per-survey pseudonym as singleUseId. */
+    oneResponsePerUser: z.boolean().prefault(true),
+  })
+  .nullable();
+
+export type TSurveyFsinfSso = z.infer<typeof ZSurveyFsinfSso>;
+
 export const ZSurveyMetadata = z
   .object({
     title: ZI18nString.optional(),
@@ -970,6 +992,7 @@ export const ZSurveyBase = z.object({
   singleUse: ZSurveySingleUse.nullable(),
   isVerifyEmailEnabled: z.boolean(),
   recaptcha: ZSurveyRecaptcha.nullable(),
+  fsinfSso: ZSurveyFsinfSso.nullish(),
   isSingleResponsePerEmailEnabled: z.boolean(),
   isBackButtonHidden: z.boolean(),
   isAutoProgressingEnabled: z.boolean().optional().prefault(false),

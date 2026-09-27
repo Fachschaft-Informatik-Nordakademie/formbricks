@@ -42,6 +42,7 @@ export const selectSurvey = {
   pin: true,
   showLanguageSwitch: true,
   recaptcha: true,
+  fsinfSso: true,
   isBackButtonHidden: true,
   isAutoProgressingEnabled: true,
   metadata: true,

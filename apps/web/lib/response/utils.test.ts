@@ -697,6 +697,35 @@ describe("Response Utils", () => {
       expect(result[0]["person.email"]).toBe("test@example.com");
     });
 
+    test("exports the recorded SSO identity of FSINF SSO surveys", () => {
+      const responsesWithIdentity = [
+        {
+          ...mockResponses[0],
+          data: {
+            q1: "answer1",
+            fsinfSsoName: "Max Muster",
+            fsinfSsoUsername: "max",
+            fsinfSsoEmail: "m@x.de",
+          },
+        },
+        { ...mockResponses[0], id: "response2" },
+      ] as TResponse[];
+      const result = getResponsesJson(
+        mockSurvey as TSurvey,
+        responsesWithIdentity,
+        [["1. Question 1"]],
+        [],
+        [],
+        false
+      );
+      expect(result[0]).toMatchObject({
+        "SSO Name": "Max Muster",
+        "SSO Username": "max",
+        "SSO Email": "m@x.de",
+      });
+      expect(result[1]["SSO Name"]).toBe("");
+    });
+
     test("should namespace person attributes for link surveys too", () => {
       const linkSurvey = { ...mockSurvey, type: "link" } as TSurvey;
       const responsesWithContact = [

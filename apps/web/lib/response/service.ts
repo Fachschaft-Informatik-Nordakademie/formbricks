@@ -26,6 +26,10 @@ import { deleteFile } from "@/modules/storage/service";
 import { parseStorageFileUrl, resolveStorageUrlsInObject } from "@/modules/storage/utils";
 import { getOrganizationIdFromWorkspaceId } from "@/modules/survey/lib/organization";
 import { getOrganizationBilling } from "@/modules/survey/lib/survey";
+import {
+  FSINF_SSO_EXPORT_HEADERS,
+  getRecordedFsinfSsoIdentity,
+} from "@/modules/survey/link/lib/fsinf-respondent-sso/access";
 import { ITEMS_PER_PAGE } from "../constants";
 import { deleteDisplay } from "../display/service";
 import { getOrganization } from "../organization/service";
@@ -475,6 +479,12 @@ export const getResponseDownloadFile = async (
 
     if (survey.isVerifyEmailEnabled) {
       headers.push("Verified Email");
+    }
+    // FSINF: recorded respondent identity (SSO surveys with recordIdentity). Decided by the data, not
+    // the current setting, so answers collected before the setting was switched off still export.
+    const hasFsinfSsoIdentity = responses.some((response) => getRecordedFsinfSsoIdentity(response.data));
+    if (hasFsinfSsoIdentity) {
+      headers.push(...FSINF_SSO_EXPORT_HEADERS);
     }
     const resolvedResponses = responses.map((r) => ({ ...r, data: resolveStorageUrlsInObject(r.data) }));
     const jsonData = getResponsesJson(
