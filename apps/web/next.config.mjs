@@ -52,6 +52,9 @@ const nextConfig = {
   allowedDevOrigins: process.env.NODE_ENV === "production" ? undefined : LOOPBACK_HOSTS,
   basePath: process.env.BASE_PATH || undefined,
   output: "standalone",
+  // Next >= 16.3 type-checks every file in tsconfig.json during `next build`, including tests and
+  // Playwright specs. Use the app-only config (same one `pnpm typecheck` uses) for the build.
+  typescript: { tsconfigPath: "tsconfig.typecheck.json" },
   poweredByHeader: false,
   // Enable source maps only when uploading to Sentry (CI/production); skip for faster local builds
   productionBrowserSourceMaps: !!process.env.SENTRY_AUTH_TOKEN,
