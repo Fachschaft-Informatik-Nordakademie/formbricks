@@ -87,11 +87,10 @@ export const FsinfFingerprintCard = ({
               </p>
               <p className="mt-1">
                 Rechtlich ist das ein Zugriff auf das Endgerät (§ 25 TDDDG): Befragte werden vor der Umfrage
-                um Einwilligung gebeten und können auch ohne teilnehmen. Sie sehen einen allgemeinen Hinweis
-                („Zum Schutz vor Mehrfachabstimmungen speichern wir mit deiner Antwort technische
-                Informationen über dein Gerät“); die Begründung und die technischen Details
-                (Geräte-Fingerabdruck, FingerprintJS, Speicherung) stehen aufklappbar unter „Details und
-                Datenschutz“.
+                um Einwilligung gebeten und können auch nach Ablehnen teilnehmen. Sie sehen einen allgemeinen
+                Datenschutz-Hinweis wie auf jeder Website („Wir verwenden Cookies und ähnliche Technologien,
+                um diese Umfrage vor Missbrauch zu schützen.“, Akzeptieren / Ablehnen); die Begründung und die
+                technischen Details stehen aufklappbar unter „Details“.
               </p>
             </AlertDescription>
           </Alert>
@@ -117,7 +116,7 @@ export const FsinfFingerprintCard = ({
               />
               <p className="text-xs text-slate-500">
                 Optional. Leer gelassen sehen Teilnehmende den Standardtext. Angezeigt wird die Begründung
-                unter „Details und Datenschutz“ im Hinweis vor der Umfrage.
+                unter „Details“ im Datenschutz-Hinweis vor der Umfrage.
               </p>
             </div>
           </AdvancedOptionToggle>
