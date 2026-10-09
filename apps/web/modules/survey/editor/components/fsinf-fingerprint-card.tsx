@@ -3,12 +3,17 @@
 import * as Collapsible from "@radix-ui/react-collapsible";
 import { FingerprintIcon } from "lucide-react";
 import { useState } from "react";
-import { FSINF_FINGERPRINT_DEFAULT_PURPOSE, TSurvey } from "@formbricks/types/surveys/types";
+import { TSurvey } from "@formbricks/types/surveys/types";
 import { cn } from "@/lib/cn";
 import { AdvancedOptionToggle } from "@/modules/ui/components/advanced-option-toggle";
 import { Alert, AlertDescription, AlertTitle } from "@/modules/ui/components/alert";
 import { Label } from "@/modules/ui/components/label";
 import { Textarea } from "@/modules/ui/components/textarea";
+import {
+  type TFsinfFingerprintConfig,
+  setFingerprintEnabled,
+  withFingerprintDefaults,
+} from "./fsinf-fingerprint-card-utils";
 
 /**
  * FSINF: survey editor card for the device fingerprint audit. German like the other FSINF UI.
@@ -24,15 +29,15 @@ export const FsinfFingerprintCard = ({
   localSurvey,
   setLocalSurvey,
 }: Readonly<FsinfFingerprintCardProps>) => {
-  const config = { enabled: false, purpose: "", ...localSurvey.fsinfFingerprint };
+  const config = withFingerprintDefaults(localSurvey.fsinfFingerprint);
   const [open, setOpen] = useState(config.enabled);
 
   if (localSurvey.type !== "link") return null;
 
-  const update = (patch: Partial<typeof config>) =>
+  const update = (change: (current: TFsinfFingerprintConfig) => TFsinfFingerprintConfig) =>
     setLocalSurvey((prev) => ({
       ...prev,
-      fsinfFingerprint: { enabled: false, purpose: "", ...prev.fsinfFingerprint, ...patch },
+      fsinfFingerprint: change(withFingerprintDefaults(prev.fsinfFingerprint)),
     }));
 
   return (
@@ -98,7 +103,7 @@ export const FsinfFingerprintCard = ({
           <AdvancedOptionToggle
             htmlId="fsinfFingerprintEnabled"
             isChecked={config.enabled}
-            onToggle={(enabled) => update({ enabled })}
+            onToggle={(enabled) => update((current) => setFingerprintEnabled(current, enabled))}
             title="Geräte-Fingerabdruck mit jeder Antwort speichern"
             description="Vor der Umfrage erscheint eine Einwilligungsabfrage. In der Antwortübersicht und im Export stehen dann Geräte-ID, Browser-ID und eine Kurzbeschreibung des Geräts."
             childBorder={true}>
@@ -111,12 +116,11 @@ export const FsinfFingerprintCard = ({
                 className="bg-white"
                 value={config.purpose}
                 maxLength={500}
-                placeholder={FSINF_FINGERPRINT_DEFAULT_PURPOSE}
-                onChange={(event) => update({ purpose: event.target.value })}
+                onChange={(event) => update((current) => ({ ...current, purpose: event.target.value }))}
               />
               <p className="text-xs text-slate-500">
-                Optional. Leer gelassen sehen Teilnehmende den Standardtext. Angezeigt wird die Begründung
-                unter „Details“ im Datenschutz-Hinweis vor der Umfrage.
+                Vorausgefüllt mit dem Standardtext — anpassen oder so lassen (leer = Standardtext).
+                Teilnehmende sehen die Begründung unter „Details“ im Datenschutz-Hinweis vor der Umfrage.
               </p>
             </div>
           </AdvancedOptionToggle>
