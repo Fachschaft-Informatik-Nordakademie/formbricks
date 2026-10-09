@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { TFunction } from "i18next";
-import { CircleHelpIcon, EyeOffIcon, MailIcon, TagIcon } from "lucide-react";
+import { CircleHelpIcon, EyeOffIcon, FingerprintIcon, MailIcon, TagIcon } from "lucide-react";
 import Link from "next/link";
 import { TResponseTableData } from "@formbricks/types/responses";
 import { TSurveyElement, TSurveyElementTypeEnum } from "@formbricks/types/surveys/elements";
@@ -17,6 +17,11 @@ import { recallToHeadline } from "@/lib/utils/recall";
 import { RenderResponse } from "@/modules/analysis/components/SingleResponseCard/components/RenderResponse";
 import { getElementsFromBlocks } from "@/modules/survey/lib/client-utils";
 import { VARIABLES_ICON_MAP, getElementIconMap } from "@/modules/survey/lib/elements";
+import {
+  FSINF_FP_STATUS_LABELS,
+  countSameDevice,
+  getRecordedFingerprint,
+} from "@/modules/survey/link/lib/fsinf-device-fingerprint/traits";
 import { formatRecordedFsinfSsoIdentity } from "@/modules/survey/link/lib/fsinf-respondent-sso/access";
 import { getSelectionColumn } from "@/modules/ui/components/data-table";
 import { IdBadge } from "@/modules/ui/components/id-badge";
@@ -427,6 +432,42 @@ export const generateResponseTableColumns = (
     ),
   };
 
+  // FSINF: device fingerprint audit. Counts same-device responses among the rows loaded in the table.
+  const fsinfFingerprintColumn: ColumnDef<TResponseTableData> = {
+    accessorKey: "fsinfFingerprint",
+    header: () => (
+      <div className="flex items-center gap-x-2 overflow-hidden">
+        <span className="size-4">
+          <FingerprintIcon className="size-4" />
+        </span>
+        <span className="truncate">Gerät (Fingerabdruck)</span>
+      </div>
+    ),
+    size: 300,
+    cell: ({ row, table }) => {
+      const fingerprint = getRecordedFingerprint(row.original.responseData);
+      if (!fingerprint) return null;
+      if (fingerprint.status !== "recorded") {
+        return <p className="text-slate-500 italic">{FSINF_FP_STATUS_LABELS[fingerprint.status]}</p>;
+      }
+      const sameDevice =
+        countSameDevice(table.getCoreRowModel().rows.map((r) => r.original.responseData)).get(
+          fingerprint.device
+        ) ?? 1;
+      return (
+        <div className="flex items-center gap-x-2 overflow-hidden" title={fingerprint.info}>
+          <code className="rounded bg-slate-100 px-1 text-xs text-slate-700">{fingerprint.device}</code>
+          {sameDevice > 1 && (
+            <span className="rounded-full bg-amber-100 px-2 text-xs font-medium whitespace-nowrap text-amber-800">
+              {sameDevice}× dieses Gerät
+            </span>
+          )}
+          <span className="truncate text-slate-500">{fingerprint.info}</span>
+        </div>
+      );
+    },
+  };
+
   // Combine the selection column with the dynamic element columns
   const baseColumns = [
     personColumn,
@@ -436,6 +477,7 @@ export const generateResponseTableColumns = (
     ...(showQuotasColumn ? [quotasColumn] : []),
     statusColumn,
     ...(survey.isVerifyEmailEnabled ? [verifiedEmailColumn] : []),
+    ...(survey.fsinfFingerprint?.enabled ? [fsinfFingerprintColumn] : []),
     ...elementColumns,
     ...variableColumns,
     ...hiddenFieldColumns,

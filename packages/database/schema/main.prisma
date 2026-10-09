@@ -411,6 +411,8 @@ model Survey {
   recaptcha                       Json?                             @default("{\"enabled\": false, \"threshold\":0.1}")
   /// [SurveyFsinfSso]
   fsinfSso                        Json?                             @default("{\"enabled\": false}")
+  /// [SurveyFsinfFingerprint]
+  fsinfFingerprint                Json?                             @default("{\"enabled\": false}")
   /// [SurveyLinkMetadata]
   metadata                        Json                              @default("{}")
   feedbackSourceMappings          FeedbackSourceFormbricksMapping[]

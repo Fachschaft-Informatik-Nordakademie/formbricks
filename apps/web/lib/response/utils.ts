@@ -19,6 +19,7 @@ import { getTextContent } from "@formbricks/types/surveys/validation";
 import { getLocalizedValue } from "@/lib/i18n/utils";
 import { replaceHeadlineRecall } from "@/lib/utils/recall";
 import { getElementsFromBlocks } from "@/modules/survey/lib/client-utils";
+import { FSINF_FP_EXPORT_COLUMNS } from "@/modules/survey/link/lib/fsinf-device-fingerprint/traits";
 import { FSINF_SSO_EXPORT_COLUMNS } from "@/modules/survey/link/lib/fsinf-respondent-sso/access";
 import { processResponseData } from "../responses";
 import { getTodaysDateTimeFormatted } from "../time";
@@ -274,6 +275,12 @@ export const getResponsesJson = (
 
     // FSINF: recorded SSO identity; columns only appear in the export when some response has one.
     FSINF_SSO_EXPORT_COLUMNS.forEach(({ header, key }) => {
+      const value = response.data[key];
+      jsonData[idx][header] = typeof value === "string" ? value : "";
+    });
+
+    // FSINF: device fingerprint audit entry; columns only appear when some response has one.
+    FSINF_FP_EXPORT_COLUMNS.forEach(({ header, key }) => {
       const value = response.data[key];
       jsonData[idx][header] = typeof value === "string" ? value : "";
     });

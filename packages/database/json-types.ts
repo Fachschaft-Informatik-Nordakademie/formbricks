@@ -23,6 +23,7 @@ import type { TSurveyFollowUpAction, TSurveyFollowUpTrigger } from "@formbricks/
 import {
   type TSurveyClosedMessage,
   type TSurveyEnding,
+  type TSurveyFsinfFingerprint,
   type TSurveyFsinfSso,
   type TSurveyHiddenFields,
   type TSurveyInlineTriggers,
@@ -70,6 +71,7 @@ declare global {
     export type SurveySingleUse = TSurveySingleUse;
     export type SurveyRecaptcha = TSurveyRecaptcha;
     export type SurveyFsinfSso = TSurveyFsinfSso;
+    export type SurveyFsinfFingerprint = TSurveyFsinfFingerprint;
     export type SurveyLinkMetadata = TSurveyMetadata;
     export type OrganizationBilling = TOrganizationBilling;
     export type OrganizationBillingPlanLimits = TOrganizationBillingPlanLimits;

@@ -19,6 +19,8 @@ import { verifyResponseRecaptcha } from "@/modules/api/lib/verify-response-recap
 import { getIsContactsEnabled } from "@/modules/ee/license-check/lib/utils";
 import { createQuotaFullObject } from "@/modules/ee/quotas/lib/helpers";
 import { validateClientFileUploads } from "@/modules/storage/utils";
+import { applyDeviceFingerprint } from "@/modules/survey/link/lib/fsinf-device-fingerprint/gate";
+import { getFingerprintTokenFor } from "@/modules/survey/link/lib/fsinf-device-fingerprint/request-cookie";
 import { enforceRespondentSsoGate } from "@/modules/survey/link/lib/fsinf-respondent-sso/gate";
 import { getRespondentSessionTokenFor } from "@/modules/survey/link/lib/fsinf-respondent-sso/request-cookie";
 import { verifyLinkSurveyPinToken } from "@/modules/survey/link/lib/pin-token";
@@ -196,6 +198,13 @@ export const POST = withV1ApiWrapper({
     if (respondentSsoErrorResponse) {
       return { response: respondentSsoErrorResponse };
     }
+
+    // FSINF: same device fingerprint audit entry as the v2 endpoint.
+    applyDeviceFingerprint({
+      survey,
+      data: responseInputData.data,
+      token: await getFingerprintTokenFor(survey),
+    });
 
     if (
       !validateClientFileUploads({

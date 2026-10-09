@@ -14,6 +14,7 @@ import {
 } from "@/lib/constants";
 import { getPublicDomain } from "@/lib/getPublicUrl";
 import { getIsContactsEnabled } from "@/modules/ee/license-check/lib/utils";
+import { FsinfFingerprintConsentScreen } from "@/modules/survey/link/components/fsinf-fingerprint-consent-screen";
 import { FsinfRespondentSsoScreen } from "@/modules/survey/link/components/fsinf-respondent-sso-screen";
 import { PinScreen } from "@/modules/survey/link/components/pin-screen";
 import { SurveyClientWrapper } from "@/modules/survey/link/components/survey-client-wrapper";
@@ -21,6 +22,7 @@ import { SurveyCompletedMessage } from "@/modules/survey/link/components/survey-
 import { SurveyInactive } from "@/modules/survey/link/components/survey-inactive";
 import { VerifyEmail } from "@/modules/survey/link/components/verify-email";
 import { getResponseBySingleUseId } from "@/modules/survey/link/lib/data";
+import { getFingerprintDecision } from "@/modules/survey/link/lib/fsinf-device-fingerprint/page-gate";
 import { RESPONDENT_SSO_ERROR_PARAM } from "@/modules/survey/link/lib/fsinf-respondent-sso/oidc";
 import { buildLoginLinks, getPageAccess } from "@/modules/survey/link/lib/fsinf-respondent-sso/page-gate";
 import { getEmailVerificationDetails } from "@/modules/survey/link/lib/helper";
@@ -138,6 +140,21 @@ export const renderSurvey = async ({
         return <SurveyInactive status="response submitted" workspace={workspace} />;
       }
     }
+  }
+
+  // FSINF: device fingerprint audit — ask for consent before the survey (log only, declining is fine).
+  // After the SSO gate on purpose: nobody is asked about a survey they may not answer anyway.
+  if (survey.fsinfFingerprint?.enabled && !(await getFingerprintDecision(survey.id))) {
+    return (
+      <FsinfFingerprintConsentScreen
+        surveyId={survey.id}
+        surveyName={survey.name}
+        purpose={survey.fsinfFingerprint.purpose}
+        publicDomain={getPublicDomain()}
+        privacyUrl={PRIVACY_URL}
+        imprintUrl={IMPRINT_URL}
+      />
+    );
   }
 
   // Handle email verification flow if enabled

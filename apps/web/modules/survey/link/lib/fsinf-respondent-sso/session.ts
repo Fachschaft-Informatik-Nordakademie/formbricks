@@ -38,10 +38,14 @@ const deriveKey = (label: string): string => {
   return createHmac("sha256", secret).update(`fsinf-respondent-sso:${label}`).digest("hex");
 };
 
-const sign = (payload: object, purpose: string, ttlSeconds: number): string =>
+/** Also used by the other FSINF respondent-side cookies (device fingerprint), each with its own purpose. */
+export const signFsinfToken = (payload: object, purpose: string, ttlSeconds: number): string =>
   jwt.sign({ ...payload, purpose }, deriveKey(purpose), { algorithm: "HS256", expiresIn: ttlSeconds });
 
-const verify = (token: string | null | undefined, purpose: string): jwt.JwtPayload | null => {
+export const verifyFsinfToken = (
+  token: string | null | undefined,
+  purpose: string
+): jwt.JwtPayload | null => {
   if (!token) return null;
   try {
     const payload = jwt.verify(token, deriveKey(purpose), { algorithms: ["HS256"] });
@@ -59,7 +63,7 @@ const verify = (token: string | null | undefined, purpose: string): jwt.JwtPaylo
 const asString = (value: unknown): string => (typeof value === "string" ? value : "");
 
 export const createRespondentSessionToken = (identity: TRespondentIdentity): string =>
-  sign(
+  signFsinfToken(
     {
       sub: identity.sub,
       username: identity.username,
@@ -72,7 +76,7 @@ export const createRespondentSessionToken = (identity: TRespondentIdentity): str
   );
 
 export const readRespondentSessionToken = (token: string | null | undefined): TRespondentIdentity | null => {
-  const payload = verify(token, SESSION_PURPOSE);
+  const payload = verifyFsinfToken(token, SESSION_PURPOSE);
   if (!payload || !asString(payload.sub)) return null;
   return {
     sub: asString(payload.sub),
@@ -96,10 +100,10 @@ export interface TRespondentLoginState {
 }
 
 export const createLoginStateToken = (loginState: TRespondentLoginState): string =>
-  sign(loginState, LOGIN_STATE_PURPOSE, RESPONDENT_LOGIN_STATE_TTL_SECONDS);
+  signFsinfToken(loginState, LOGIN_STATE_PURPOSE, RESPONDENT_LOGIN_STATE_TTL_SECONDS);
 
 export const readLoginStateToken = (token: string | null | undefined): TRespondentLoginState | null => {
-  const payload = verify(token, LOGIN_STATE_PURPOSE);
+  const payload = verifyFsinfToken(token, LOGIN_STATE_PURPOSE);
   if (!payload) return null;
   const loginState = {
     state: asString(payload.state),

@@ -8,6 +8,7 @@ import { TUserLocale } from "@formbricks/types/user";
 import { TargetingCard } from "@/modules/ee/contacts/segments/components/targeting-card";
 import { QuotasCard } from "@/modules/ee/quotas/components/quotas-card";
 import { TTeamPermission } from "@/modules/ee/teams/workspace-teams/types/team";
+import { FsinfFingerprintCard } from "@/modules/survey/editor/components/fsinf-fingerprint-card";
 import { FsinfSsoCard, type TFsinfSsoEditorContext } from "@/modules/survey/editor/components/fsinf-sso-card";
 import { HowToSendCard } from "@/modules/survey/editor/components/how-to-send-card";
 import { RecontactOptionsCard } from "@/modules/survey/editor/components/recontact-options-card";
@@ -123,6 +124,8 @@ export const SettingsView = ({
       {fsinfSsoContext && (
         <FsinfSsoCard localSurvey={localSurvey} setLocalSurvey={setLocalSurvey} context={fsinfSsoContext} />
       )}
+
+      <FsinfFingerprintCard localSurvey={localSurvey} setLocalSurvey={setLocalSurvey} />
 
       <RecontactOptionsCard localSurvey={localSurvey} setLocalSurvey={setLocalSurvey} />
 

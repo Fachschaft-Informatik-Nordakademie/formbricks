@@ -27,6 +27,10 @@ import { parseStorageFileUrl, resolveStorageUrlsInObject } from "@/modules/stora
 import { getOrganizationIdFromWorkspaceId } from "@/modules/survey/lib/organization";
 import { getOrganizationBilling } from "@/modules/survey/lib/survey";
 import {
+  FSINF_FP_EXPORT_HEADERS,
+  getRecordedFingerprint,
+} from "@/modules/survey/link/lib/fsinf-device-fingerprint/traits";
+import {
   FSINF_SSO_EXPORT_HEADERS,
   getRecordedFsinfSsoIdentity,
 } from "@/modules/survey/link/lib/fsinf-respondent-sso/access";
@@ -485,6 +489,10 @@ export const getResponseDownloadFile = async (
     const hasFsinfSsoIdentity = responses.some((response) => getRecordedFsinfSsoIdentity(response.data));
     if (hasFsinfSsoIdentity) {
       headers.push(...FSINF_SSO_EXPORT_HEADERS);
+    }
+    // FSINF: device fingerprint audit columns, likewise decided by the data.
+    if (responses.some((response) => getRecordedFingerprint(response.data))) {
+      headers.push(...FSINF_FP_EXPORT_HEADERS);
     }
     const resolvedResponses = responses.map((r) => ({ ...r, data: resolveStorageUrlsInObject(r.data) }));
     const jsonData = getResponsesJson(

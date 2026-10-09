@@ -300,6 +300,36 @@ export const ZSurveyFsinfSso = z
 
 export type TSurveyFsinfSso = z.infer<typeof ZSurveyFsinfSso>;
 
+/** Minimum length of the documented purpose a device-fingerprint survey must state. */
+export const FSINF_FINGERPRINT_PURPOSE_MIN_LENGTH = 20;
+
+/**
+ * FSINF: log a device fingerprint with every response of a link survey, for a later audit (e.g. "did
+ * one device vote several times?"). Never blocks anyone.
+ *
+ * Reading device properties is an access to the respondent's terminal equipment (§ 25 TDDDG), so it
+ * only happens after the respondent consented; declining still lets them answer. `purpose` is the
+ * reason this survey strictly needs it — mandatory, shown to respondents with the consent request.
+ * See apps/web/modules/survey/link/lib/fsinf-device-fingerprint/.
+ */
+export const ZSurveyFsinfFingerprint = z
+  .object({
+    enabled: z.boolean(),
+    purpose: z.string().trim().max(500).prefault(""),
+  })
+  .superRefine((config, ctx) => {
+    if (config.enabled && config.purpose.length < FSINF_FINGERPRINT_PURPOSE_MIN_LENGTH) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["purpose"],
+        message: `Geräte-Fingerabdruck: Bitte begründen, warum diese Umfrage ihn unbedingt braucht (mindestens ${FSINF_FINGERPRINT_PURPOSE_MIN_LENGTH} Zeichen).`,
+      });
+    }
+  })
+  .nullable();
+
+export type TSurveyFsinfFingerprint = z.infer<typeof ZSurveyFsinfFingerprint>;
+
 export const ZSurveyMetadata = z
   .object({
     title: ZI18nString.optional(),
@@ -993,6 +1023,7 @@ export const ZSurveyBase = z.object({
   isVerifyEmailEnabled: z.boolean(),
   recaptcha: ZSurveyRecaptcha.nullable(),
   fsinfSso: ZSurveyFsinfSso.nullish(),
+  fsinfFingerprint: ZSurveyFsinfFingerprint.nullish(),
   isSingleResponsePerEmailEnabled: z.boolean(),
   isBackButtonHidden: z.boolean(),
   isAutoProgressingEnabled: z.boolean().optional().prefault(false),

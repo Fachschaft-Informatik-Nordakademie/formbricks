@@ -6,6 +6,8 @@ import { ENCRYPTION_KEY } from "@/lib/constants";
 import { symmetricDecrypt } from "@/lib/crypto";
 import { validateSurveySingleUseLinkParams } from "@/lib/utils/single-use-surveys";
 import { verifyResponseRecaptcha } from "@/modules/api/lib/verify-response-recaptcha";
+import { applyDeviceFingerprint } from "@/modules/survey/link/lib/fsinf-device-fingerprint/gate";
+import { getFingerprintTokenFor } from "@/modules/survey/link/lib/fsinf-device-fingerprint/request-cookie";
 import { enforceRespondentSsoGate } from "@/modules/survey/link/lib/fsinf-respondent-sso/gate";
 import { getRespondentSessionTokenFor } from "@/modules/survey/link/lib/fsinf-respondent-sso/request-cookie";
 import { verifyLinkSurveyPinToken } from "@/modules/survey/link/lib/pin-token";
@@ -117,6 +119,13 @@ export const checkSurveyValidity = async (
   if (respondentSsoErrorResponse) {
     return respondentSsoErrorResponse;
   }
+
+  // FSINF: device fingerprint audit entry from the consent cookie (log only, never rejects).
+  applyDeviceFingerprint({
+    survey,
+    data: responseInput.data,
+    token: await getFingerprintTokenFor(survey),
+  });
 
   // Shared with the v1 endpoint so the two versions cannot drift apart again.
   return await verifyResponseRecaptcha({

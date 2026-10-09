@@ -726,6 +726,37 @@ describe("Response Utils", () => {
       expect(result[1]["SSO Name"]).toBe("");
     });
 
+    test("exports the device fingerprint audit entry of FSINF fingerprint surveys", () => {
+      const responsesWithFingerprint = [
+        {
+          ...mockResponses[0],
+          data: {
+            q1: "answer1",
+            fsinfFpStatus: "recorded",
+            fsinfFpDevice: "dev_abc",
+            fsinfFpBrowser: "brw_def",
+            fsinfFpDeviceInfo: "Win32 · 1920×1080",
+          },
+        },
+        { ...mockResponses[0], id: "response2", data: { q1: "x", fsinfFpStatus: "declined" } },
+      ] as TResponse[];
+      const result = getResponsesJson(
+        mockSurvey as TSurvey,
+        responsesWithFingerprint,
+        [["1. Question 1"]],
+        [],
+        [],
+        false
+      );
+      expect(result[0]).toMatchObject({
+        "Fingerprint Status": "recorded",
+        "Device ID": "dev_abc",
+        "Browser ID": "brw_def",
+        Device: "Win32 · 1920×1080",
+      });
+      expect(result[1]).toMatchObject({ "Fingerprint Status": "declined", "Device ID": "" });
+    });
+
     test("should namespace person attributes for link surveys too", () => {
       const linkSurvey = { ...mockSurvey, type: "link" } as TSurvey;
       const responsesWithContact = [

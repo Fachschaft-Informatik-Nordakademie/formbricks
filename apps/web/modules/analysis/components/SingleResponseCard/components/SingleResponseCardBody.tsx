@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2Icon, KeyRoundIcon } from "lucide-react";
+import { CheckCircle2Icon, FingerprintIcon, KeyRoundIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { TResponseWithQuotas } from "@formbricks/types/responses";
 import { TSurveyElementTypeEnum } from "@formbricks/types/surveys/constants";
@@ -12,6 +12,10 @@ import { getSurveyDateFormatMap } from "@/lib/utils/date-display";
 import { parseRecallInfo } from "@/lib/utils/recall";
 import { ResponseCardQuotas } from "@/modules/ee/quotas/components/single-response-card-quotas";
 import { getElementsFromBlocks } from "@/modules/survey/lib/client-utils";
+import {
+  FSINF_FP_STATUS_LABELS,
+  getRecordedFingerprint,
+} from "@/modules/survey/link/lib/fsinf-device-fingerprint/traits";
 import { formatRecordedFsinfSsoIdentity } from "@/modules/survey/link/lib/fsinf-respondent-sso/access";
 import { isValidValue } from "../util";
 import { ElementSkip } from "./ElementSkip";
@@ -36,6 +40,7 @@ export const SingleResponseCardBody = ({
   const elements = getElementsFromBlocks(survey.blocks);
   const dateFormats = getSurveyDateFormatMap(elements);
   const isFirstElementAnswered = elements[0] ? !!response.data[elements[0].id] : false;
+  const fingerprint = getRecordedFingerprint(response.data);
   const { t } = useTranslation();
   const formatTextWithSlashes = (text: string) => {
     // Updated regex to match content between #/ and \#
@@ -73,6 +78,26 @@ export const SingleResponseCardBody = ({
       <div className="space-y-6">
         {survey.isVerifyEmailEnabled && response.data["verifiedEmail"] && (
           <VerifiedEmail responseData={response.data} />
+        )}
+        {fingerprint && (
+          <div>
+            <p className="flex items-center gap-x-2 text-sm text-slate-500">
+              <FingerprintIcon className="size-4" />
+              <span>Geräte-Fingerabdruck</span>
+            </p>
+            {fingerprint.status === "recorded" ? (
+              <p className="ph-no-capture my-1 text-sm text-slate-700">
+                <span className="font-semibold">{fingerprint.info}</span>
+                <br />
+                Geräte-ID <code className="text-xs">{fingerprint.device}</code> · Browser-ID{" "}
+                <code className="text-xs">{fingerprint.browser}</code>
+              </p>
+            ) : (
+              <p className="my-1 text-sm text-slate-500 italic">
+                {FSINF_FP_STATUS_LABELS[fingerprint.status]}
+              </p>
+            )}
+          </div>
         )}
         {formatRecordedFsinfSsoIdentity(response.data) && (
           <div>
