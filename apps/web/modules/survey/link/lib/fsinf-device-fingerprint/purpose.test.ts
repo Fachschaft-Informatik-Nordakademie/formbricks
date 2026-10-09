@@ -4,7 +4,7 @@ import {
   FSINF_FINGERPRINT_DEFAULT_PURPOSE,
   ZSurveyFsinfFingerprint,
 } from "@formbricks/types/surveys/types";
-import { fingerprintBannerFor, fingerprintPurposeFor } from "./traits";
+import { fingerprintBannerFor, fingerprintPurposeFor, needsFingerprintConsent } from "./traits";
 
 describe("fingerprint purpose", () => {
   test("is optional — enabling without a justification is valid", () => {
@@ -24,5 +24,19 @@ describe("fingerprint purpose", () => {
     expect(fingerprintBannerFor({ enabled: true, purpose: "", bannerText: "Eigener Text" })).toBe(
       "Eigener Text"
     );
+  });
+});
+
+describe("needsFingerprintConsent", () => {
+  const on = { enabled: true, purpose: "", bannerText: "" };
+  test("asks until the respondent accepted", () => {
+    expect(needsFingerprintConsent(on, null)).toBe(true);
+    expect(needsFingerprintConsent(on, { status: "declined" })).toBe(true);
+    expect(needsFingerprintConsent(on, { status: "recorded" })).toBe(false);
+  });
+
+  test("never asks on surveys without fingerprinting", () => {
+    expect(needsFingerprintConsent({ ...on, enabled: false }, null)).toBe(false);
+    expect(needsFingerprintConsent(null, null)).toBe(false);
   });
 });

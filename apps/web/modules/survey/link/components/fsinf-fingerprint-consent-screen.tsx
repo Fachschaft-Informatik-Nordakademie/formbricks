@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { extractDeviceTraits } from "@/modules/survey/link/lib/fsinf-device-fingerprint/traits";
 import { Button } from "@/modules/ui/components/button";
 
@@ -32,6 +31,8 @@ interface FsinfFingerprintConsentScreenProps {
   publicDomain: string;
   privacyUrl?: string;
   imprintUrl?: string;
+  /** The survey itself — shown as soon as the respondent decided, without a reload. */
+  children: ReactNode;
 }
 
 const collectFingerprint = async () => {
@@ -50,8 +51,9 @@ export const FsinfFingerprintConsentScreen = ({
   publicDomain,
   privacyUrl,
   imprintUrl,
+  children,
 }: Readonly<FsinfFingerprintConsentScreenProps>) => {
-  const router = useRouter();
+  const [decided, setDecided] = useState(false);
   const [busy, setBusy] = useState<"consent" | "decline" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,7 +75,7 @@ export const FsinfFingerprintConsentScreen = ({
         body: JSON.stringify(body),
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      router.refresh();
+      setDecided(true);
     } catch {
       setError(
         consent
@@ -83,6 +85,8 @@ export const FsinfFingerprintConsentScreen = ({
       setBusy(null);
     }
   };
+
+  if (decided) return <>{children}</>;
 
   return (
     <div className="flex h-full min-h-screen flex-col items-center justify-center bg-linear-to-br from-slate-200 to-slate-50 px-4 py-8">
@@ -110,7 +114,8 @@ export const FsinfFingerprintConsentScreen = ({
             <p>
               <span className="font-semibold text-slate-700">Verfahren:</span> Geräte-Fingerabdruck mit
               FingerprintJS. Das Skript wird erst nach deiner Zustimmung geladen und läuft auf diesem Server,
-              ohne Verbindung zum Hersteller. Ein Cookie merkt sich deine Entscheidung für 24 Stunden.
+              ohne Verbindung zum Hersteller. Ein Cookie merkt sich deine Zustimmung für 24 Stunden; lehnst du
+              ab, wirst du beim nächsten Aufruf erneut gefragt.
             </p>
             <p>
               <span className="font-semibold text-slate-700">Was gelesen wird:</span> Eigenschaften deines

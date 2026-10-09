@@ -181,3 +181,13 @@ export const fingerprintPurposeFor = (
 export const fingerprintBannerFor = (
   config: Partial<NonNullable<TSurveyFsinfFingerprint>> | null | undefined
 ): string => config?.bannerText?.trim() || FSINF_FINGERPRINT_DEFAULT_BANNER;
+
+/**
+ * Whether the survey page shows the consent popup. Only an accepted decision is remembered across page
+ * loads; a declined one is asked again on the next load (the "declined" cookie still marks a response
+ * submitted right after declining).
+ */
+export const needsFingerprintConsent = (
+  config: Partial<NonNullable<TSurveyFsinfFingerprint>> | null | undefined,
+  decision: { status: string } | null
+): boolean => Boolean(config?.enabled) && decision?.status !== "recorded";

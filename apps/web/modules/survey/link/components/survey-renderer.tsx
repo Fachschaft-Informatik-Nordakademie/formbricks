@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 import { type Response } from "@formbricks/database/prisma-browser";
 import { normalizeLanguageCode } from "@formbricks/i18n-utils/src/canonical";
 import { TSurvey, TSurveyStyling } from "@formbricks/types/surveys/types";
@@ -26,6 +27,7 @@ import { getFingerprintDecision } from "@/modules/survey/link/lib/fsinf-device-f
 import {
   fingerprintBannerFor,
   fingerprintPurposeFor,
+  needsFingerprintConsent,
 } from "@/modules/survey/link/lib/fsinf-device-fingerprint/traits";
 import { RESPONDENT_SSO_ERROR_PARAM } from "@/modules/survey/link/lib/fsinf-respondent-sso/oidc";
 import { buildLoginLinks, getPageAccess } from "@/modules/survey/link/lib/fsinf-respondent-sso/page-gate";
@@ -146,10 +148,16 @@ export const renderSurvey = async ({
     }
   }
 
-  // FSINF: device fingerprint audit — ask for consent before the survey (log only, declining is fine).
-  // After the SSO gate on purpose: nobody is asked about a survey they may not answer anyway.
-  if (survey.fsinfFingerprint?.enabled && !(await getFingerprintDecision(survey.id))) {
-    return (
+  // FSINF: device fingerprint audit — the consent popup wraps the survey (see wrapForFingerprintConsent
+  // below). After the SSO gate on purpose: nobody is asked about a survey they may not answer anyway.
+  const askForFingerprintConsent = needsFingerprintConsent(
+    survey.fsinfFingerprint,
+    survey.fsinfFingerprint?.enabled ? await getFingerprintDecision(survey.id) : null
+  );
+  // The survey is handed to the popup as children and shown right after Accept or Decline, without a
+  // reload. Only an accepted decision skips the popup on later page loads; a declined one is asked again.
+  const wrapForFingerprintConsent = (content: ReactNode) =>
+    askForFingerprintConsent ? (
       <FsinfFingerprintConsentScreen
         surveyId={survey.id}
         surveyName={survey.name}
@@ -157,10 +165,12 @@ export const renderSurvey = async ({
         bannerText={fingerprintBannerFor(survey.fsinfFingerprint)}
         publicDomain={getPublicDomain()}
         privacyUrl={PRIVACY_URL}
-        imprintUrl={IMPRINT_URL}
-      />
+        imprintUrl={IMPRINT_URL}>
+        {content}
+      </FsinfFingerprintConsentScreen>
+    ) : (
+      content
     );
-  }
 
   // Handle email verification flow if enabled
   let emailVerificationStatus = "";
@@ -211,7 +221,7 @@ export const renderSurvey = async ({
 
   // Handle PIN-protected surveys
   if (survey.pin) {
-    return (
+    return wrapForFingerprintConsent(
       <PinScreen
         surveyId={survey.id}
         styling={styling}
@@ -237,7 +247,7 @@ export const renderSurvey = async ({
   }
 
   // Render interactive survey with client component for interactivity
-  return (
+  return wrapForFingerprintConsent(
     <SurveyClientWrapper
       survey={publicSurvey}
       workspace={workspace}

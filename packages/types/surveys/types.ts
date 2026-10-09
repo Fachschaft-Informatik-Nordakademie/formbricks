@@ -302,7 +302,7 @@ export type TSurveyFsinfSso = z.infer<typeof ZSurveyFsinfSso>;
 
 /** The always-visible popup text, unless a survey sets its own (bannerText). Generic like any consent banner. */
 export const FSINF_FINGERPRINT_DEFAULT_BANNER =
-  "Wir verwenden Cookies und ähnliche Technologien, um diese Umfrage vor Missbrauch zu schützen.";
+  "Bitte erlaube uns, Cookies und ähnliche Technologien zu verwenden, um diese Umfrage vor Missbrauch zu schützen.";
 
 /** Shown to respondents (under "Details") when a survey gives no purpose of its own. */
 export const FSINF_FINGERPRINT_DEFAULT_PURPOSE =
