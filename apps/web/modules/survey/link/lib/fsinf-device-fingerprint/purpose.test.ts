@@ -1,6 +1,10 @@
 import { describe, expect, test } from "vitest";
-import { FSINF_FINGERPRINT_DEFAULT_PURPOSE, ZSurveyFsinfFingerprint } from "@formbricks/types/surveys/types";
-import { fingerprintPurposeFor } from "./traits";
+import {
+  FSINF_FINGERPRINT_DEFAULT_BANNER,
+  FSINF_FINGERPRINT_DEFAULT_PURPOSE,
+  ZSurveyFsinfFingerprint,
+} from "@formbricks/types/surveys/types";
+import { fingerprintBannerFor, fingerprintPurposeFor } from "./traits";
 
 describe("fingerprint purpose", () => {
   test("is optional — enabling without a justification is valid", () => {
@@ -11,5 +15,14 @@ describe("fingerprint purpose", () => {
   test("falls back to the generic default text", () => {
     expect(fingerprintPurposeFor({ enabled: true, purpose: "  " })).toBe(FSINF_FINGERPRINT_DEFAULT_PURPOSE);
     expect(fingerprintPurposeFor({ enabled: true, purpose: "Satzungsänderung" })).toBe("Satzungsänderung");
+  });
+
+  test("banner text falls back to the generic default", () => {
+    expect(fingerprintBannerFor({ enabled: true, purpose: "", bannerText: "" })).toBe(
+      FSINF_FINGERPRINT_DEFAULT_BANNER
+    );
+    expect(fingerprintBannerFor({ enabled: true, purpose: "", bannerText: "Eigener Text" })).toBe(
+      "Eigener Text"
+    );
   });
 });

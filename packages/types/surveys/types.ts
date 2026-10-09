@@ -300,7 +300,11 @@ export const ZSurveyFsinfSso = z
 
 export type TSurveyFsinfSso = z.infer<typeof ZSurveyFsinfSso>;
 
-/** Shown to respondents (under "Details und Datenschutz") when a survey gives no purpose of its own. */
+/** The always-visible popup text, unless a survey sets its own (bannerText). Generic like any consent banner. */
+export const FSINF_FINGERPRINT_DEFAULT_BANNER =
+  "Wir verwenden Cookies und ähnliche Technologien, um diese Umfrage vor Missbrauch zu schützen.";
+
+/** Shown to respondents (under "Details") when a survey gives no purpose of its own. */
 export const FSINF_FINGERPRINT_DEFAULT_PURPOSE =
   "Das Ergebnis dieser Abstimmung soll sich nachträglich auf Mehrfachabstimmungen prüfen lassen.";
 
@@ -309,14 +313,16 @@ export const FSINF_FINGERPRINT_DEFAULT_PURPOSE =
  * one device vote several times?"). Never blocks anyone.
  *
  * Reading device properties is an access to the respondent's terminal equipment (§ 25 TDDDG), so it
- * only happens after the respondent consented; declining still lets them answer. `purpose` optionally
- * replaces the generic default reason shown to respondents.
+ * only happens after the respondent consented; declining still lets them answer. `bannerText` and
+ * `purpose` optionally replace the generic popup text and the default reason under "Details".
  * See apps/web/modules/survey/link/lib/fsinf-device-fingerprint/.
  */
 export const ZSurveyFsinfFingerprint = z
   .object({
     enabled: z.boolean(),
     purpose: z.string().trim().max(500).prefault(""),
+    /** Replaces the always-visible popup text; empty = FSINF_FINGERPRINT_DEFAULT_BANNER. */
+    bannerText: z.string().trim().max(300).prefault(""),
   })
   .nullable();
 

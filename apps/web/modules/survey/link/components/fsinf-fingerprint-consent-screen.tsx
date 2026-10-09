@@ -27,6 +27,8 @@ interface FsinfFingerprintConsentScreenProps {
   surveyId: string;
   surveyName: string;
   purpose: string;
+  /** The always-visible text (survey's own or the generic default). */
+  bannerText: string;
   publicDomain: string;
   privacyUrl?: string;
   imprintUrl?: string;
@@ -44,6 +46,7 @@ export const FsinfFingerprintConsentScreen = ({
   surveyId,
   surveyName,
   purpose,
+  bannerText,
   publicDomain,
   privacyUrl,
   imprintUrl,
@@ -94,9 +97,7 @@ export const FsinfFingerprintConsentScreen = ({
         <h1 id="fsinf-consent-title" className="text-lg font-semibold text-slate-800">
           Hinweis zum Datenschutz
         </h1>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
-          Wir verwenden Cookies und ähnliche Technologien, um diese Umfrage vor Missbrauch zu schützen.
-        </p>
+        <p className="mt-2 text-sm leading-6 whitespace-pre-line text-slate-600">{bannerText}</p>
 
         <details className="mt-3 text-sm text-slate-600">
           <summary className="cursor-pointer text-slate-500 underline-offset-2 hover:underline">

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  FSINF_FINGERPRINT_DEFAULT_BANNER,
   FSINF_FINGERPRINT_DEFAULT_PURPOSE,
   type TSurveyFsinfFingerprint,
 } from "@formbricks/types/surveys/types";
@@ -172,5 +173,11 @@ export const FSINF_FP_EXPORT_COLUMNS = [
 export const FSINF_FP_EXPORT_HEADERS: string[] = FSINF_FP_EXPORT_COLUMNS.map((column) => column.header);
 
 /** The reason shown to respondents: the survey's own, or the generic default. */
-export const fingerprintPurposeFor = (config: TSurveyFsinfFingerprint | undefined): string =>
-  config?.purpose?.trim() || FSINF_FINGERPRINT_DEFAULT_PURPOSE;
+export const fingerprintPurposeFor = (
+  config: Partial<NonNullable<TSurveyFsinfFingerprint>> | null | undefined
+): string => config?.purpose?.trim() || FSINF_FINGERPRINT_DEFAULT_PURPOSE;
+
+/** The always-visible popup text: the survey's own, or the generic default. */
+export const fingerprintBannerFor = (
+  config: Partial<NonNullable<TSurveyFsinfFingerprint>> | null | undefined
+): string => config?.bannerText?.trim() || FSINF_FINGERPRINT_DEFAULT_BANNER;

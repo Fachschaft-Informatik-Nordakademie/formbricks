@@ -93,9 +93,8 @@ export const FsinfFingerprintCard = ({
               <p className="mt-1">
                 Rechtlich ist das ein Zugriff auf das Endgerät (§ 25 TDDDG): Befragte werden vor der Umfrage
                 um Einwilligung gebeten und können auch nach Ablehnen teilnehmen. Sie sehen einen allgemeinen
-                Datenschutz-Hinweis wie auf jeder Website („Wir verwenden Cookies und ähnliche Technologien,
-                um diese Umfrage vor Missbrauch zu schützen.“, Akzeptieren / Ablehnen); die Begründung und die
-                technischen Details stehen aufklappbar unter „Details“.
+                Datenschutz-Hinweis wie auf jeder Website (Text unten, Akzeptieren / Ablehnen); Zweck und
+                technische Details stehen aufklappbar unter „Details“.
               </p>
             </AlertDescription>
           </Alert>
@@ -108,19 +107,20 @@ export const FsinfFingerprintCard = ({
             description="Vor der Umfrage erscheint eine Einwilligungsabfrage. In der Antwortübersicht und im Export stehen dann Geräte-ID, Browser-ID und eine Kurzbeschreibung des Geräts."
             childBorder={true}>
             <div className="w-full space-y-2 p-4">
-              <Label htmlFor="fsinfFingerprintPurpose">
-                Eigene Begründung (optional, für Teilnehmende sichtbar)
+              <Label htmlFor="fsinfFingerprintBanner">
+                Text im Datenschutz-Hinweis (für Teilnehmende sichtbar)
               </Label>
               <Textarea
-                id="fsinfFingerprintPurpose"
+                id="fsinfFingerprintBanner"
                 className="bg-white"
-                value={config.purpose}
-                maxLength={500}
-                onChange={(event) => update((current) => ({ ...current, purpose: event.target.value }))}
+                value={config.bannerText}
+                maxLength={300}
+                onChange={(event) => update((current) => ({ ...current, bannerText: event.target.value }))}
               />
               <p className="text-xs text-slate-500">
-                Vorausgefüllt mit dem Standardtext — anpassen oder so lassen (leer = Standardtext).
-                Teilnehmende sehen die Begründung unter „Details“ im Datenschutz-Hinweis vor der Umfrage.
+                Vorausgefüllt mit dem Standardtext — anpassen oder so lassen (leer = Standardtext). Der Text
+                muss weiterhin nennen, <em>was</em> verwendet wird (z. B. „Cookies und ähnliche Technologien“)
+                und <em>wozu</em> — sonst ist die Einwilligung unwirksam.
               </p>
             </div>
           </AdvancedOptionToggle>
