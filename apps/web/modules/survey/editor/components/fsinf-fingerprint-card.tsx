@@ -3,7 +3,7 @@
 import * as Collapsible from "@radix-ui/react-collapsible";
 import { FingerprintIcon } from "lucide-react";
 import { useState } from "react";
-import { FSINF_FINGERPRINT_PURPOSE_MIN_LENGTH, TSurvey } from "@formbricks/types/surveys/types";
+import { FSINF_FINGERPRINT_DEFAULT_PURPOSE, TSurvey } from "@formbricks/types/surveys/types";
 import { cn } from "@/lib/cn";
 import { AdvancedOptionToggle } from "@/modules/ui/components/advanced-option-toggle";
 import { Alert, AlertDescription, AlertTitle } from "@/modules/ui/components/alert";
@@ -34,9 +34,6 @@ export const FsinfFingerprintCard = ({
       ...prev,
       fsinfFingerprint: { enabled: false, purpose: "", ...prev.fsinfFingerprint, ...patch },
     }));
-
-  const purposeLength = config.purpose.trim().length;
-  const purposeMissing = config.enabled && purposeLength < FSINF_FINGERPRINT_PURPOSE_MIN_LENGTH;
 
   return (
     <Collapsible.Root
@@ -92,7 +89,7 @@ export const FsinfFingerprintCard = ({
                 Rechtlich ist das ein Zugriff auf das Endgerät (§ 25 TDDDG): Befragte werden vor der Umfrage
                 um Einwilligung gebeten und können auch ohne teilnehmen. Sie sehen einen allgemeinen Hinweis
                 („Zum Schutz vor Mehrfachabstimmungen speichern wir mit deiner Antwort technische
-                Informationen über dein Gerät“); deine Begründung und die technischen Details
+                Informationen über dein Gerät“); die Begründung und die technischen Details
                 (Geräte-Fingerabdruck, FingerprintJS, Speicherung) stehen aufklappbar unter „Details und
                 Datenschutz“.
               </p>
@@ -108,20 +105,19 @@ export const FsinfFingerprintCard = ({
             childBorder={true}>
             <div className="w-full space-y-2 p-4">
               <Label htmlFor="fsinfFingerprintPurpose">
-                Begründung — wird allen Teilnehmenden angezeigt (Pflichtfeld)
+                Eigene Begründung (optional, für Teilnehmende sichtbar)
               </Label>
               <Textarea
                 id="fsinfFingerprintPurpose"
-                className={cn("bg-white", purposeMissing && "border-red-400")}
+                className="bg-white"
                 value={config.purpose}
                 maxLength={500}
-                placeholder="z. B. Das Ergebnis dieser Abstimmung über die Satzungsänderung ist bindend. Mehrfachabstimmungen müssen sich nachträglich prüfen lassen."
+                placeholder={FSINF_FINGERPRINT_DEFAULT_PURPOSE}
                 onChange={(event) => update({ purpose: event.target.value })}
               />
-              <p className={cn("text-xs", purposeMissing ? "text-red-600" : "text-slate-500")}>
-                {purposeMissing
-                  ? `Bitte begründen (noch ${FSINF_FINGERPRINT_PURPOSE_MIN_LENGTH - purposeLength} Zeichen) — ohne Begründung lässt sich die Umfrage nicht speichern.`
-                  : "Sichtbar für alle Teilnehmenden im Hinweis vor der Umfrage (unter „Details und Datenschutz“). Sachlich formulieren, keine internen Details."}
+              <p className="text-xs text-slate-500">
+                Optional. Leer gelassen sehen Teilnehmende den Standardtext. Angezeigt wird die Begründung
+                unter „Details und Datenschutz“ im Hinweis vor der Umfrage.
               </p>
             </div>
           </AdvancedOptionToggle>

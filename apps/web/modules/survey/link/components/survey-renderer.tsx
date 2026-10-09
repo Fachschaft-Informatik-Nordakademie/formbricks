@@ -23,6 +23,7 @@ import { SurveyInactive } from "@/modules/survey/link/components/survey-inactive
 import { VerifyEmail } from "@/modules/survey/link/components/verify-email";
 import { getResponseBySingleUseId } from "@/modules/survey/link/lib/data";
 import { getFingerprintDecision } from "@/modules/survey/link/lib/fsinf-device-fingerprint/page-gate";
+import { fingerprintPurposeFor } from "@/modules/survey/link/lib/fsinf-device-fingerprint/traits";
 import { RESPONDENT_SSO_ERROR_PARAM } from "@/modules/survey/link/lib/fsinf-respondent-sso/oidc";
 import { buildLoginLinks, getPageAccess } from "@/modules/survey/link/lib/fsinf-respondent-sso/page-gate";
 import { getEmailVerificationDetails } from "@/modules/survey/link/lib/helper";
@@ -149,7 +150,7 @@ export const renderSurvey = async ({
       <FsinfFingerprintConsentScreen
         surveyId={survey.id}
         surveyName={survey.name}
-        purpose={survey.fsinfFingerprint.purpose}
+        purpose={fingerprintPurposeFor(survey.fsinfFingerprint)}
         publicDomain={getPublicDomain()}
         privacyUrl={PRIVACY_URL}
         imprintUrl={IMPRINT_URL}

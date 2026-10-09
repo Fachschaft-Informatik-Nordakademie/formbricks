@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  FSINF_FINGERPRINT_DEFAULT_PURPOSE,
+  type TSurveyFsinfFingerprint,
+} from "@formbricks/types/surveys/types";
 
 /**
  * FSINF: device fingerprint audit for link surveys — the parts shared by browser and server.
@@ -166,3 +170,7 @@ export const FSINF_FP_EXPORT_COLUMNS = [
 ] as const;
 
 export const FSINF_FP_EXPORT_HEADERS: string[] = FSINF_FP_EXPORT_COLUMNS.map((column) => column.header);
+
+/** The reason shown to respondents: the survey's own, or the generic default. */
+export const fingerprintPurposeFor = (config: TSurveyFsinfFingerprint | undefined): string =>
+  config?.purpose?.trim() || FSINF_FINGERPRINT_DEFAULT_PURPOSE;
