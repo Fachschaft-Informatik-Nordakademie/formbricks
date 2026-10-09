@@ -90,9 +90,11 @@ export const FsinfFingerprintCard = ({
               </p>
               <p className="mt-1">
                 Rechtlich ist das ein Zugriff auf das Endgerät (§ 25 TDDDG): Befragte werden vor der Umfrage
-                um Einwilligung gebeten und können auch ohne teilnehmen. Sie sehen einen kurzen Hinweis
-                „Schutz vor Mehrfachabstimmung“ mit deiner Begründung; die technischen Details
-                (Geräte-Fingerabdruck, FingerprintJS, Speicherung) stehen aufklappbar darunter.
+                um Einwilligung gebeten und können auch ohne teilnehmen. Sie sehen einen allgemeinen Hinweis
+                („Zum Schutz vor Mehrfachabstimmungen speichern wir mit deiner Antwort technische
+                Informationen über dein Gerät“); deine Begründung und die technischen Details
+                (Geräte-Fingerabdruck, FingerprintJS, Speicherung) stehen aufklappbar unter „Details und
+                Datenschutz“.
               </p>
             </AlertDescription>
           </Alert>
@@ -119,7 +121,7 @@ export const FsinfFingerprintCard = ({
               <p className={cn("text-xs", purposeMissing ? "text-red-600" : "text-slate-500")}>
                 {purposeMissing
                   ? `Bitte begründen (noch ${FSINF_FINGERPRINT_PURPOSE_MIN_LENGTH - purposeLength} Zeichen) — ohne Begründung lässt sich die Umfrage nicht speichern.`
-                  : "Sichtbar für alle Teilnehmenden im Hinweis vor der Umfrage, unter „Warum“. Sachlich formulieren, keine internen Details."}
+                  : "Sichtbar für alle Teilnehmenden im Hinweis vor der Umfrage (unter „Details und Datenschutz“). Sachlich formulieren, keine internen Details."}
               </p>
             </div>
           </AdvancedOptionToggle>

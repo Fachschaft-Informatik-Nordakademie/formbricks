@@ -9,9 +9,10 @@ import { Button } from "@/modules/ui/components/button";
 
 /**
  * FSINF: consent step of the device fingerprint audit, shown instead of the survey until the respondent
- * decided. Layered notice: the first layer says in plain words what is read, why (the survey's own
- * purpose) and that it is optional; the technical details sit in an expandable section. The first layer
- * must stay complete enough for an informed choice — otherwise the consent would not be valid. Reading device properties needs consent (§ 25 Abs. 1 TDDDG) even though it is only logged,
+ * decided. Layered notice: the first layer is a generic banner text that still
+ * names what (device information), why (duplicate votes) and that it is optional; the survey's purpose
+ * and the technical details sit in the expandable section. Do not strip the first layer further — it must
+ * stay enough for an informed choice, otherwise the consent is not valid. Reading device properties needs consent (§ 25 Abs. 1 TDDDG) even though it is only logged,
  * so nothing is read before "Einverstanden" — FingerprintJS is not even loaded until then. Declining is
  * an equal option and still leads to the survey; the response is then marked "abgelehnt".
  *
@@ -86,24 +87,20 @@ export const FsinfFingerprintConsentScreen = ({
         <div className="flex flex-col items-center gap-y-3 text-center">
           <ShieldCheckIcon className="size-16 text-slate-400" />
           <p className="text-sm font-medium tracking-wide text-slate-500 uppercase">{surveyName}</p>
-          <h1 className="text-3xl font-bold text-slate-800">Schutz vor Mehrfachabstimmung</h1>
+          <h1 className="text-3xl font-bold text-slate-800">Bevor es losgeht</h1>
         </div>
 
-        {/* First layer: short, but complete enough for an informed choice — what is read, why, and that
-            it is optional. The full details are one click away (layered notice). */}
+        {/* First layer: generic like any consent banner, but still says what (device information), why
+            (duplicate votes) and that it is optional. Purpose and technical details: one click away. */}
         <p className="text-base leading-7 text-slate-600">
-          Damit sich im Nachhinein prüfen lässt, ob jemand mehrfach abgestimmt hat, möchten wir mit deiner
-          Antwort einige technische Merkmale deines Geräts speichern (z. B. Bildschirm, Prozessor,
-          Betriebssystem). Das ist freiwillig — du kannst in jedem Fall teilnehmen.
+          Zum Schutz vor Mehrfachabstimmungen speichern wir mit deiner Antwort technische Informationen über
+          dein Gerät. Das ist freiwillig — du kannst auch ohne teilnehmen.
         </p>
-
-        <div className="rounded-lg border border-slate-200 bg-white px-4 py-3">
-          <p className="text-xs font-semibold tracking-wide text-slate-500 uppercase">Warum</p>
-          <p className="mt-1 text-sm whitespace-pre-line text-slate-700">{purpose}</p>
-        </div>
 
         <details className="group rounded-lg border border-slate-200 bg-white/60 px-4 py-2 text-sm text-slate-600">
           <summary className="cursor-pointer font-medium text-slate-700">Details und Datenschutz</summary>
+          <p className="mt-2 font-semibold text-slate-700">Warum diese Umfrage das braucht</p>
+          <p className="whitespace-pre-line">{purpose}</p>
           <ul className="mt-2 list-disc space-y-1 pb-1 pl-5 leading-6">
             <li>
               <span className="font-semibold">Verfahren:</span> Geräte-Fingerabdruck mit FingerprintJS. Das
