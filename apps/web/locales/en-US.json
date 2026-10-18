@@ -1586,6 +1586,8 @@
       "how_do_code_actions_work": "How do Code Actions work?",
       "if_a_user_clicks_a_button_with_a_specific_css_class_or_id": "If a user clicks a button with a specific CSS class or id",
       "if_a_user_clicks_a_button_with_a_specific_text": "If a user clicks a button with a specific text",
+      "ignore_recontact": "Ignore the waiting time between surveys",
+      "ignore_recontact_description": "A survey triggered by this action is shown even if the user saw a survey recently. Other triggers of the survey keep the waiting time.",
       "in_your_code_read_more_in_our": "in your code. Read more in our",
       "inner_text": "Inner Text",
       "invalid_action_type_code": "Invalid action type for code action.",

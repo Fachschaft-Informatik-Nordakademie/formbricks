@@ -67,6 +67,55 @@ export const surveyHasSegmentFilters = (survey: TWorkspaceStateSurvey): boolean 
 };
 
 /**
+ * Whether the cooldown (recontactDays) since the user's last display still blocks the survey
+ */
+const isRecontactBlocked = (
+  survey: TWorkspaceStateSurvey,
+  settings: TWorkspaceStateSettings,
+  lastDisplayAt: Date | null
+): boolean => {
+  // if no survey was displayed yet, show the survey
+  if (!lastDisplayAt) {
+    return false;
+  }
+
+  // The previous approach checked the last display for each survey which is why we still have a surveyId in the displays array.
+  // TODO: Remove the surveyId from the displays array
+  if (survey.recontactDays !== null) {
+    return diffInDays(new Date(), new Date(lastDisplayAt)) < survey.recontactDays;
+  }
+
+  // use recontactDays of the workspace if survey does not have recontactDays
+  if (settings.recontactDays) {
+    return diffInDays(new Date(), new Date(lastDisplayAt)) < settings.recontactDays;
+  }
+
+  // if no recontactDays is set, show the survey
+  return false;
+};
+
+// the trigger carries only the action name, the config comes from the workspace action classes
+const isRecontactBypassAction = (actionClasses: TWorkspaceStateActionClass[], actionName: string): boolean =>
+  actionClasses.some(
+    (actionClass) =>
+      actionClass.name === actionName &&
+      actionClass.type === "noCode" &&
+      actionClass.noCodeConfig?.ignoreRecontact === true
+  );
+
+/**
+ * Whether tracking this action must not show the survey because of the cooldown
+ */
+export const isRecontactBlockedForAction = (
+  survey: TWorkspaceStateSurvey,
+  actionName: string,
+  workspace: TWorkspaceState,
+  user: TUserState
+): boolean =>
+  isRecontactBlocked(survey, workspace.data.settings, user.data.lastDisplayAt) &&
+  !isRecontactBypassAction(workspace.data.actionClasses, actionName);
+
+/**
  * Filters surveys based on the displayOption, recontactDays, and segments
  * @param workspace -  The workspace state
  * @param userState - The user state
@@ -106,29 +155,15 @@ export const filterSurveys = (workspace: TWorkspaceState, userState: TUserState)
     }
   });
 
-  // filter surveys that meet the recontactDays criteria
-  filteredSurveys = filteredSurveys.filter((survey) => {
-    // if no survey was displayed yet, show the survey
-    if (!lastDisplayAt) {
-      return true;
-    }
-
-    // if survey has recontactDays, check if the last display was more than recontactDays ago
-    // The previous approach checked the last display for each survey which is why we still have a surveyId in the displays array.
-    // TODO: Remove the surveyId from the displays array
-    if (survey.recontactDays !== null) {
-      return diffInDays(new Date(), new Date(lastDisplayAt)) >= survey.recontactDays;
-    }
-
-    // use recontactDays of the workspace if survey does not have recontactDays
-    if (settings.recontactDays) {
-      return diffInDays(new Date(), new Date(lastDisplayAt)) >= settings.recontactDays;
-    }
-
-    // if no recontactDays is set, show the survey
-
-    return true;
-  });
+  // filter surveys that meet the recontactDays criteria; a survey with an ignoreRecontact trigger stays,
+  // trackAction() then lets only that trigger through while the cooldown runs
+  filteredSurveys = filteredSurveys.filter(
+    (survey) =>
+      !isRecontactBlocked(survey, settings, lastDisplayAt) ||
+      survey.triggers?.some((trigger) =>
+        isRecontactBypassAction(workspace.data.actionClasses, trigger.actionClass.name)
+      )
+  );
 
   if (!userId) {
     // exclude surveys that have a segment with filters

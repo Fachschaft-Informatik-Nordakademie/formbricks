@@ -14,6 +14,7 @@ import {
   handleHiddenFields,
   handleUrlFilters,
   isNowExpired,
+  isRecontactBlockedForAction,
   shouldDisplayBasedOnPercentage,
   wrapThrows,
   wrapThrowsAsync,
@@ -276,6 +277,119 @@ describe("utils.ts", () => {
       ];
       const result = filterSurveys(workspace, user);
       expect(result).toHaveLength(1);
+    });
+
+    describe("recontact bypass via action class (ignoreRecontact)", () => {
+      const DAY = 24 * 60 * 60 * 1000;
+      const bypassAction = {
+        id: "ac_bypass",
+        key: null,
+        type: "noCode",
+        name: "Feedback-Kachel",
+        noCodeConfig: { type: "pageView", urlFilters: [], ignoreRecontact: true },
+      } as TWorkspaceStateActionClass;
+      const autoAction = {
+        id: "ac_auto",
+        key: null,
+        type: "noCode",
+        name: "after 30s",
+        noCodeConfig: { type: "pageDwell", urlFilters: [], timeInSeconds: 30 },
+      } as TWorkspaceStateActionClass;
+      const surveyWith = (names: string[], extra: Partial<TWorkspaceStateSurvey> = {}) =>
+        ({
+          ...baseSurvey,
+          id: mockSurveyId1,
+          displayOption: "respondMultiple",
+          recontactDays: 30,
+          triggers: names.map((name) => ({ actionClass: { name } })),
+          ...extra,
+        }) as unknown as TWorkspaceStateSurvey;
+
+      beforeEach(() => {
+        workspace.data.actionClasses = [bypassAction, autoAction];
+        user.data.lastDisplayAt = new Date(Date.now() - 5 * DAY);
+      });
+
+      test("keeps a survey blocked by recontactDays when one trigger ignores the cooldown", () => {
+        workspace.data.surveys = [surveyWith(["after 30s", "Feedback-Kachel"])];
+        expect(filterSurveys(workspace, user)).toHaveLength(1);
+      });
+
+      test("still hides it when no trigger ignores the cooldown", () => {
+        workspace.data.surveys = [surveyWith(["after 30s"])];
+        expect(filterSurveys(workspace, user)).toHaveLength(0);
+      });
+
+      test("does not bypass the displayOption", () => {
+        workspace.data.surveys = [surveyWith(["Feedback-Kachel"], { displayOption: "displayOnce" })];
+        user.data.displays = [{ surveyId: mockSurveyId1, createdAt: new Date() }];
+        expect(filterSurveys(workspace, user)).toHaveLength(0);
+      });
+
+      test("ignores unknown trigger names", () => {
+        workspace.data.surveys = [surveyWith(["gibt-es-nicht"])];
+        expect(filterSurveys(workspace, user)).toHaveLength(0);
+      });
+    });
+
+    describe("isRecontactBlockedForAction()", () => {
+      const DAY = 24 * 60 * 60 * 1000;
+      const actionClasses = [
+        {
+          id: "a",
+          key: null,
+          type: "noCode",
+          name: "kachel",
+          noCodeConfig: { type: "pageView", urlFilters: [], ignoreRecontact: true },
+        },
+        {
+          id: "b",
+          key: null,
+          type: "noCode",
+          name: "auto",
+          noCodeConfig: { type: "exitIntent", urlFilters: [] },
+        },
+      ] as TWorkspaceStateActionClass[];
+      const survey = { id: "s", recontactDays: 30, triggers: [] } as unknown as TWorkspaceStateSurvey;
+      const mk = (lastDisplayDaysAgo: number | null) => ({
+        workspace: {
+          expiresAt: new Date(),
+          data: { settings: { recontactDays: 7 }, surveys: [], actionClasses },
+        } as unknown as TWorkspaceState,
+        user: {
+          expiresAt: null,
+          data: {
+            lastDisplayAt:
+              lastDisplayDaysAgo === null ? null : new Date(Date.now() - lastDisplayDaysAgo * DAY),
+          },
+        } as unknown as TUserState,
+      });
+
+      test("blocks a normal action inside the cooldown", () => {
+        const { workspace, user } = mk(5);
+        expect(isRecontactBlockedForAction(survey, "auto", workspace, user)).toBe(true);
+      });
+
+      test("lets the ignoreRecontact action through inside the cooldown", () => {
+        const { workspace, user } = mk(5);
+        expect(isRecontactBlockedForAction(survey, "kachel", workspace, user)).toBe(false);
+      });
+
+      test("lets every action through once the cooldown has elapsed", () => {
+        const { workspace, user } = mk(31);
+        expect(isRecontactBlockedForAction(survey, "auto", workspace, user)).toBe(false);
+      });
+
+      test("lets every action through when nothing was displayed yet", () => {
+        const { workspace, user } = mk(null);
+        expect(isRecontactBlockedForAction(survey, "auto", workspace, user)).toBe(false);
+      });
+
+      test("falls back to the workspace cooldown when the survey has none", () => {
+        const { workspace, user } = mk(3);
+        const noOwn = { ...survey, recontactDays: null } as TWorkspaceStateSurvey;
+        expect(isRecontactBlockedForAction(noOwn, "auto", workspace, user)).toBe(true);
+      });
     });
 
     test("anonymous user: excludes segment-targeted surveys (new shape: hasFilters=true)", () => {

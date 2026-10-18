@@ -50,6 +50,7 @@ export type TActionClassNoCodeConfig =
         rule: TActionClassPageUrlRule;
       }[];
       urlFiltersConnector?: "or" | "and";
+      ignoreRecontact?: boolean;
       elementSelector: {
         cssSelector?: string | undefined;
         innerHtml?: string | undefined;
@@ -62,6 +63,7 @@ export type TActionClassNoCodeConfig =
         rule: TActionClassPageUrlRule;
       }[];
       urlFiltersConnector?: "or" | "and";
+      ignoreRecontact?: boolean;
     }
   | {
       type: "exitIntent";
@@ -70,6 +72,7 @@ export type TActionClassNoCodeConfig =
         rule: TActionClassPageUrlRule;
       }[];
       urlFiltersConnector?: "or" | "and";
+      ignoreRecontact?: boolean;
     }
   | {
       type: "fiftyPercentScroll";
@@ -78,6 +81,7 @@ export type TActionClassNoCodeConfig =
         rule: TActionClassPageUrlRule;
       }[];
       urlFiltersConnector?: "or" | "and";
+      ignoreRecontact?: boolean;
     }
   | {
       type: "pageDwell";
@@ -86,6 +90,7 @@ export type TActionClassNoCodeConfig =
         rule: TActionClassPageUrlRule;
       }[];
       urlFiltersConnector?: "or" | "and";
+      ignoreRecontact?: boolean;
       timeInSeconds: number;
     };
 

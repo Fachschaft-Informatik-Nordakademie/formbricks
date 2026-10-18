@@ -14,6 +14,7 @@ export type TActionClassNoCodeConfig =
       type: "click";
       urlFilters: { value: string; rule: TActionClassPageUrlRule }[];
       urlFiltersConnector?: "or" | "and";
+      ignoreRecontact?: boolean;
       elementSelector: {
         cssSelector?: string;
         innerHtml?: string;
@@ -23,11 +24,13 @@ export type TActionClassNoCodeConfig =
       type: "pageView" | "exitIntent" | "fiftyPercentScroll";
       urlFilters: { value: string; rule: TActionClassPageUrlRule }[];
       urlFiltersConnector?: "or" | "and";
+      ignoreRecontact?: boolean;
     }
   | {
       type: "pageDwell";
       urlFilters: { value: string; rule: TActionClassPageUrlRule }[];
       urlFiltersConnector?: "or" | "and";
+      ignoreRecontact?: boolean;
       timeInSeconds: number;
     };
 

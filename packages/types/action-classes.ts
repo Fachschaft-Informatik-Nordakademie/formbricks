@@ -77,6 +77,9 @@ const ZActionClassNoCodeConfigBase = z.object({
   type: z.enum(["click", "pageView", "exitIntent", "fiftyPercentScroll", "pageDwell"]),
   urlFilters: z.array(ZActionClassUrlFilter),
   urlFiltersConnector: z.enum(["or", "and"]).optional(),
+  // Fork: a survey triggered by this action is shown even inside its recontact cooldown
+  // (the cooldown keeps applying to the survey's other triggers).
+  ignoreRecontact: z.boolean().optional(),
 });
 
 const ZActionClassNoCodeConfigClick = ZActionClassNoCodeConfigBase.extend({

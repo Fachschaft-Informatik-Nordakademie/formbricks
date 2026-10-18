@@ -1,5 +1,6 @@
 import { Config } from "@/lib/common/config";
 import { Logger } from "@/lib/common/logger";
+import { isRecontactBlockedForAction } from "@/lib/common/utils";
 import { triggerSurvey } from "@/lib/survey/widget";
 import { type InvalidCodeError, type NetworkError, type Result, err, okVoid } from "@/types/error";
 import { type TTrackProperties } from "@/types/survey";
@@ -24,12 +25,16 @@ export const trackAction = async (
   logger.debug(`Formbricks: Action "${aliasName}" tracked`);
 
   // get a list of surveys that are collecting insights
-  const activeSurveys = appConfig.get().filteredSurveys;
+  const { filteredSurveys: activeSurveys, workspace, user } = appConfig.get();
 
   if (Boolean(activeSurveys) && activeSurveys.length > 0) {
     for (const survey of activeSurveys) {
       for (const trigger of survey.triggers) {
         if (trigger.actionClass.name === name) {
+          if (isRecontactBlockedForAction(survey, name, workspace, user)) {
+            logger.debug(`Formbricks: Survey ${survey.id} is in its recontact cooldown, skipped`);
+            continue;
+          }
           await triggerSurvey(survey, name, properties);
         }
       }

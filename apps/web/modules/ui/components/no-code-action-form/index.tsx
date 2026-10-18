@@ -4,6 +4,7 @@ import { InfoIcon } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { TActionClassInput } from "@formbricks/types/action-classes";
+import { AdvancedOptionToggle } from "@/modules/ui/components/advanced-option-toggle";
 import { Alert, AlertDescription, AlertTitle } from "@/modules/ui/components/alert";
 import { FormControl, FormError, FormField, FormItem } from "@/modules/ui/components/form";
 import { Input } from "@/modules/ui/components/input";
@@ -134,6 +135,25 @@ export const NoCodeActionForm = ({ form, isReadOnly }: NoCodeActionFormProps) =>
           </div>
         )}
         <PageUrlSelector form={form} isReadOnly={isReadOnly} />
+        <FormField
+          control={control}
+          name="noCodeConfig.ignoreRecontact"
+          render={({ field }) => (
+            <FormItem className="mt-4">
+              <FormControl>
+                <AdvancedOptionToggle
+                  disabled={isReadOnly}
+                  htmlId="ignoreRecontact"
+                  isChecked={field.value === true}
+                  onToggle={(checked) => field.onChange(checked ? true : undefined)}
+                  title={t("workspace.actions.ignore_recontact")}
+                  description={t("workspace.actions.ignore_recontact_description")}
+                  childBorder={false}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
       </div>
     </div>
   );

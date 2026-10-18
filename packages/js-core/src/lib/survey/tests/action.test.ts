@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { Config } from "@/lib/common/config";
 import { Logger } from "@/lib/common/logger";
+import { isRecontactBlockedForAction } from "@/lib/common/utils";
 import { trackAction, trackCodeAction, trackNoCodeAction } from "@/lib/survey/action";
 import { SurveyStore } from "@/lib/survey/store";
 import { triggerSurvey } from "@/lib/survey/widget";
@@ -34,6 +35,7 @@ vi.mock("@/lib/common/logger", () => ({
 vi.mock("@/lib/common/utils", () => ({
   shouldDisplayBasedOnPercentage: vi.fn(),
   handleHiddenFields: vi.fn(),
+  isRecontactBlockedForAction: vi.fn(),
 }));
 
 vi.mock("@/lib/survey/widget", () => ({
@@ -127,6 +129,26 @@ describe("survey/action.ts", () => {
 
       expect(result.ok).toBe(true);
       expect(triggerSurvey).toHaveBeenCalledTimes(2);
+    });
+
+    test("skips a survey when the cooldown blocks this action", async () => {
+      mockConfig.get.mockReturnValue({ filteredSurveys: [mockSurvey], workspace: {}, user: {} });
+      vi.mocked(isRecontactBlockedForAction).mockReturnValueOnce(true);
+
+      const result = await trackAction("testAction");
+
+      expect(result.ok).toBe(true);
+      expect(isRecontactBlockedForAction).toHaveBeenCalledWith(mockSurvey, "testAction", {}, {});
+      expect(triggerSurvey).not.toHaveBeenCalled();
+    });
+
+    test("still triggers the survey when the cooldown does not block this action", async () => {
+      mockConfig.get.mockReturnValue({ filteredSurveys: [mockSurvey], workspace: {}, user: {} });
+      vi.mocked(isRecontactBlockedForAction).mockReturnValueOnce(false);
+
+      await trackAction("testAction");
+
+      expect(triggerSurvey).toHaveBeenCalledWith(mockSurvey, "testAction", undefined);
     });
 
     test("logs when no active surveys", async () => {
