@@ -2,6 +2,7 @@ import "server-only";
 import { cache as reactCache } from "react";
 import { prisma } from "@formbricks/database";
 import { logger } from "@formbricks/logger";
+import { FSINF_SURVEY_ISOLATION_WORKSPACES } from "@/lib/constants";
 import { getSession } from "@/modules/auth/lib/session";
 
 /**
@@ -11,7 +12,12 @@ import { getSession } from "@/modules/auth/lib/session";
  * survey in it, including the responses. `Survey.createdBy` exists but is only a display filter
  * ("Created by: you / others"), never a permission. This module turns it into one.
  *
- * THE RULE (decided 2026-09-04): a viewer is RESTRICTED in a workspace when their access to it comes
+ * SCOPE (decided 2026-10-23): the isolation applies ONLY to the "Studierende" workspace. In every other
+ * workspace (e.g. "INF + BWL + WING") everyone with access sees all surveys. The isolated workspaces are
+ * matched by name (case-insensitive) and configurable via FSINF_SURVEY_ISOLATION_WORKSPACES
+ * (comma-separated), default "Studierende".
+ *
+ * THE RULE (decided 2026-09-04): a viewer is RESTRICTED in an isolated workspace when their access to it comes
  * only from being a team `contributor`. Then they see exactly the surveys they created. Anyone who is
  * an organization owner or manager, or a `admin` of a team that reaches the workspace, is unrestricted
  * and sees everything — that is the Vorstand's view.
@@ -41,6 +47,17 @@ export interface TSurveyViewerRestriction {
   restrictedToCreatorId: string;
 }
 
+const DEFAULT_ISOLATED_WORKSPACES = "Studierende";
+
+const normalizeName = (value: string): string => value.trim().toLowerCase();
+
+const isIsolatedWorkspaceName = (name: string): boolean =>
+  (FSINF_SURVEY_ISOLATION_WORKSPACES?.trim() || DEFAULT_ISOLATED_WORKSPACES)
+    .split(",")
+    .map(normalizeName)
+    .filter(Boolean)
+    .includes(normalizeName(name));
+
 /**
  * Resolve whether the CURRENT request's viewer is restricted in this workspace.
  *
@@ -58,9 +75,10 @@ export const getSurveyViewerRestriction = reactCache(
 
       const workspace = await prisma.workspace.findUnique({
         where: { id: workspaceId },
-        select: { organizationId: true },
+        select: { organizationId: true, name: true },
       });
       if (!workspace) return null;
+      if (!isIsolatedWorkspaceName(workspace.name)) return null;
 
       const membership = await prisma.membership.findUnique({
         where: { userId_organizationId: { userId, organizationId: workspace.organizationId } },
@@ -106,9 +124,7 @@ export const isSurveyVisibleToViewer = async (survey: {
  * The Prisma clause that scopes a survey LIST to what the current viewer may see. Empty object when
  * unrestricted, so it can be spread into any existing `where` without changing it.
  */
-export const buildViewerSurveyWhere = async (
-  workspaceId: string
-): Promise<{ createdBy?: string }> => {
+export const buildViewerSurveyWhere = async (workspaceId: string): Promise<{ createdBy?: string }> => {
   const restriction = await getSurveyViewerRestriction(workspaceId);
   return restriction ? { createdBy: restriction.restrictedToCreatorId } : {};
 };

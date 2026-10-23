@@ -8,8 +8,10 @@ const prismaMock = {
 };
 
 vi.mock("server-only", () => ({}));
-vi.mock("react", () => ({ cache: <T,>(fn: T) => fn }));
+vi.mock("react", () => ({ cache: <T>(fn: T) => fn }));
 vi.mock("@formbricks/database", () => ({ prisma: prismaMock }));
+const constants = vi.hoisted(() => ({ FSINF_SURVEY_ISOLATION_WORKSPACES: undefined as string | undefined }));
+vi.mock("@/lib/constants", () => constants);
 vi.mock("@formbricks/logger", () => ({ logger: { debug: vi.fn(), error: vi.fn() } }));
 vi.mock("@/modules/auth/lib/session", () => ({ getSession }));
 
@@ -20,7 +22,7 @@ const load = async () => {
 
 const asMember = () => {
   getSession.mockResolvedValue({ user: { id: "student-1" } });
-  prismaMock.workspace.findUnique.mockResolvedValue({ organizationId: "org-1" });
+  prismaMock.workspace.findUnique.mockResolvedValue({ organizationId: "org-1", name: "Studierende" });
   prismaMock.membership.findUnique.mockResolvedValue({ role: "member" });
   prismaMock.teamUser.findFirst.mockResolvedValue(null);
 };
@@ -35,6 +37,36 @@ describe("FSINF survey visibility", () => {
     const { getSurveyViewerRestriction } = await load();
 
     expect(await getSurveyViewerRestriction("ws-1")).toEqual({ restrictedToCreatorId: "student-1" });
+  });
+
+  test("leaves workspaces other than Studierende unrestricted", async () => {
+    asMember();
+    prismaMock.workspace.findUnique.mockResolvedValue({ organizationId: "org-1", name: "INF + BWL + WING" });
+    const { getSurveyViewerRestriction, isSurveyVisibleToViewer } = await load();
+
+    expect(await getSurveyViewerRestriction("ws-2")).toBeNull();
+    expect(await isSurveyVisibleToViewer({ workspaceId: "ws-2", createdBy: "someone-else" })).toBe(true);
+    expect(prismaMock.membership.findUnique).not.toHaveBeenCalled();
+  });
+
+  test("matches the workspace name case-insensitively", async () => {
+    asMember();
+    prismaMock.workspace.findUnique.mockResolvedValue({ organizationId: "org-1", name: " studierende " });
+    const { getSurveyViewerRestriction } = await load();
+
+    expect(await getSurveyViewerRestriction("ws-1")).toEqual({ restrictedToCreatorId: "student-1" });
+  });
+
+  test("takes the isolated workspaces from FSINF_SURVEY_ISOLATION_WORKSPACES", async () => {
+    constants.FSINF_SURVEY_ISOLATION_WORKSPACES = "Alpha, Beta";
+    asMember();
+    prismaMock.workspace.findUnique.mockResolvedValue({ organizationId: "org-1", name: "Beta" });
+    const { getSurveyViewerRestriction } = await load();
+    expect(await getSurveyViewerRestriction("ws-1")).toEqual({ restrictedToCreatorId: "student-1" });
+
+    prismaMock.workspace.findUnique.mockResolvedValue({ organizationId: "org-1", name: "Studierende" });
+    expect(await getSurveyViewerRestriction("ws-1")).toBeNull();
+    constants.FSINF_SURVEY_ISOLATION_WORKSPACES = undefined;
   });
 
   test.each(["owner", "manager"])("leaves an organization %s unrestricted", async (role) => {
