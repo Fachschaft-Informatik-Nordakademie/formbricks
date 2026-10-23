@@ -305,6 +305,8 @@ const parsedEnv = createEnv({
     FSINF_GROUP_WORKSPACE_MAP: z.string().optional(),
     /** Comma-separated workspace names where contributors only see their own surveys; default "Studierende". */
     FSINF_SURVEY_ISOLATION_WORKSPACES: z.string().optional(),
+    /** Workspace every Authentik-mirrored team can read by default; default "Studierende". */
+    FSINF_DEFAULT_READ_WORKSPACE: z.string().optional(),
     // FSINF: respondent-only OIDC client for SSO-protected link surveys (fsinf-respondent-sso/oidc.ts).
     // Separate from OIDC_* on purpose: respondents must never become Formbricks users.
     FSINF_RESPONDENT_OIDC_CLIENT_ID: z.string().optional(),
@@ -500,6 +502,7 @@ const parsedEnv = createEnv({
     AUTHENTIK_DIRECTORY_GROUP: process.env.AUTHENTIK_DIRECTORY_GROUP,
     FSINF_GROUP_WORKSPACE_MAP: process.env.FSINF_GROUP_WORKSPACE_MAP,
     FSINF_SURVEY_ISOLATION_WORKSPACES: process.env.FSINF_SURVEY_ISOLATION_WORKSPACES,
+    FSINF_DEFAULT_READ_WORKSPACE: process.env.FSINF_DEFAULT_READ_WORKSPACE,
     FSINF_RESPONDENT_OIDC_CLIENT_ID: process.env.FSINF_RESPONDENT_OIDC_CLIENT_ID,
     FSINF_RESPONDENT_OIDC_CLIENT_SECRET: process.env.FSINF_RESPONDENT_OIDC_CLIENT_SECRET,
     FSINF_RESPONDENT_OIDC_ISSUER: process.env.FSINF_RESPONDENT_OIDC_ISSUER,

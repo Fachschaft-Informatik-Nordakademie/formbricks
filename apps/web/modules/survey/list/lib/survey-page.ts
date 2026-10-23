@@ -5,6 +5,7 @@ import { Prisma } from "@formbricks/database/prisma";
 import { logger } from "@formbricks/logger";
 import { DatabaseError, InvalidInputError } from "@formbricks/types/errors";
 import type { TSurveyFilterCriteria } from "@formbricks/types/surveys/types";
+import { buildViewerSurveyWhere } from "@/modules/survey/lib/fsinf-survey-visibility";
 import { buildWhereClause } from "@/modules/survey/lib/utils";
 import type { TSurvey } from "../types/surveys";
 import {
@@ -152,13 +153,15 @@ function buildStandardCursorWhere(
   }
 }
 
-function buildBaseWhere(
+async function buildBaseWhere(
   workspaceId: string,
   filterCriteria?: TSurveyFilterCriteria,
   extraWhere?: Prisma.SurveyWhereInput
-): Prisma.SurveyWhereInput {
+): Promise<Prisma.SurveyWhereInput> {
   return {
     workspaceId,
+    // FSINF: scope the list to what this viewer may see — see fsinf-survey-visibility.ts.
+    ...(await buildViewerSurveyWhere(workspaceId)),
     ...buildWhereClause(filterCriteria),
     ...extraWhere,
   };
@@ -212,7 +215,7 @@ async function findSurveyRows(
   const cursorWhere = cursor ? buildStandardCursorWhere(sortBy, cursor) : undefined;
 
   return prisma.survey.findMany({
-    where: buildBaseWhere(workspaceId, filterCriteria, {
+    where: await buildBaseWhere(workspaceId, filterCriteria, {
       ...extraWhere,
       ...cursorWhere,
     }),
@@ -281,7 +284,7 @@ async function findRelevanceRows(
     : undefined;
 
   return prisma.survey.findMany({
-    where: buildBaseWhere(workspaceId, filterCriteria, {
+    where: await buildBaseWhere(workspaceId, filterCriteria, {
       ...statusWhere,
       ...cursorWhere,
     }),

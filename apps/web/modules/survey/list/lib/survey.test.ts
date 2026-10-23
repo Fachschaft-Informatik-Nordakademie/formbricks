@@ -25,6 +25,11 @@ import {
 } from "./survey";
 import { surveySelect } from "./survey-record";
 
+vi.mock("@/modules/survey/lib/fsinf-survey-visibility", () => ({
+  buildViewerSurveyWhere: vi.fn(async () => ({})),
+  isSurveyVisibleToViewer: vi.fn(async () => true),
+}));
+
 vi.mock("server-only", () => ({}));
 
 vi.mock("react", async (importOriginal) => {

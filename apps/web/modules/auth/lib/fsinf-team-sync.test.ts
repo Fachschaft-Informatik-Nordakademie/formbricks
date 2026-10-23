@@ -8,11 +8,18 @@ const prismaMock = {
   membership: { findMany: vi.fn() },
   teamUser: { upsert: vi.fn(), deleteMany: vi.fn() },
   team: { findMany: vi.fn(), upsert: vi.fn() },
+  workspace: { findMany: vi.fn() },
+  workspaceTeam: { createMany: vi.fn() },
 };
 
 vi.mock("server-only", () => ({}));
 vi.mock("@formbricks/database", () => ({ prisma: prismaMock }));
 vi.mock("@formbricks/logger", () => ({ logger: { info: vi.fn(), error: vi.fn() } }));
+const constants = vi.hoisted(() => ({
+  FSINF_DEFAULT_READ_WORKSPACE: undefined as string | undefined,
+  FSINF_GROUP_WORKSPACE_MAP: undefined as string | undefined,
+}));
+vi.mock("@/lib/constants", () => constants);
 vi.mock("@/modules/auth/lib/fsinf-authentik-directory", () => ({
   getAuthentikGroupsForEmail,
   listAuthentikGroupNames,
@@ -40,13 +47,66 @@ describe("FSINF team sync", () => {
     prismaMock.teamUser.upsert.mockResolvedValue({});
     prismaMock.team.upsert.mockResolvedValue({});
     listAuthentikGroupNames.mockResolvedValue(["Studierende", "Fachschaft Informatik"]);
+    prismaMock.workspace.findMany.mockResolvedValue([]);
+    prismaMock.workspaceTeam.createMany.mockResolvedValue({ count: 0 });
+    constants.FSINF_DEFAULT_READ_WORKSPACE = undefined;
+  });
+
+  describe("default read access", () => {
+    beforeEach(() => {
+      getAuthentikGroupsForEmail.mockResolvedValue(["Studierende"]);
+      prismaMock.team.findMany.mockResolvedValue([
+        { id: "team-stud", name: "Studierende" },
+        { id: "team-inf", name: "Fachschaft Informatik" },
+      ]);
+      prismaMock.workspace.findMany.mockResolvedValue([{ id: "ws-stud" }]);
+    });
+
+    test("gives every team read access to the Studierende workspace, without overwriting existing links", async () => {
+      await (
+        await loadSync()
+      )(user);
+
+      expect(prismaMock.workspace.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { organizationId: "org-1", name: "Studierende" } })
+      );
+      expect(prismaMock.workspaceTeam.createMany).toHaveBeenCalledWith({
+        data: [
+          { workspaceId: "ws-stud", teamId: "team-stud", permission: "read" },
+          { workspaceId: "ws-stud", teamId: "team-inf", permission: "read" },
+        ],
+        skipDuplicates: true,
+      });
+    });
+
+    test("uses the workspace named in FSINF_DEFAULT_READ_WORKSPACE", async () => {
+      constants.FSINF_DEFAULT_READ_WORKSPACE = "Alumni Hub";
+      await (
+        await loadSync()
+      )(user);
+
+      expect(prismaMock.workspace.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { organizationId: "org-1", name: "Alumni Hub" } })
+      );
+    });
+
+    test("does nothing when the workspace does not exist", async () => {
+      prismaMock.workspace.findMany.mockResolvedValue([]);
+      await (
+        await loadSync()
+      )(user);
+
+      expect(prismaMock.workspaceTeam.createMany).not.toHaveBeenCalled();
+    });
   });
 
   test("adds the user to the team mirroring their Authentik group", async () => {
     getAuthentikGroupsForEmail.mockResolvedValue(["Studierende"]);
     prismaMock.team.findMany.mockResolvedValue([{ id: "team-stud", name: "Studierende" }]);
 
-    await (await loadSync())(user);
+    await (
+      await loadSync()
+    )(user);
 
     expect(prismaMock.teamUser.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -61,7 +121,9 @@ describe("FSINF team sync", () => {
     getAuthentikGroupsForEmail.mockResolvedValue(["studierende"]);
     prismaMock.team.findMany.mockResolvedValue([{ id: "team-stud", name: "  Studierende " }]);
 
-    await (await loadSync())(user);
+    await (
+      await loadSync()
+    )(user);
 
     expect(prismaMock.teamUser.upsert).toHaveBeenCalledTimes(1);
   });
@@ -73,7 +135,9 @@ describe("FSINF team sync", () => {
       { id: "team-fsinf", name: "Fachschaft Informatik" },
     ]);
 
-    await (await loadSync())(user);
+    await (
+      await loadSync()
+    )(user);
 
     expect(prismaMock.teamUser.deleteMany).toHaveBeenCalledWith({
       where: { userId: "user-1", teamId: { in: ["team-stud"] } },
@@ -84,7 +148,9 @@ describe("FSINF team sync", () => {
     getAuthentikGroupsForEmail.mockResolvedValue([]);
     prismaMock.team.findMany.mockResolvedValue([{ id: "team-hand", name: "Orga-Team" }]);
 
-    await (await loadSync())(user);
+    await (
+      await loadSync()
+    )(user);
 
     expect(prismaMock.teamUser.upsert).not.toHaveBeenCalled();
     expect(prismaMock.teamUser.deleteMany).not.toHaveBeenCalled();
@@ -95,17 +161,21 @@ describe("FSINF team sync", () => {
     getAuthentikGroupsForEmail.mockResolvedValue(null);
     listAuthentikGroupNames.mockResolvedValue(null);
 
-    await (await loadSync())(user);
+    await (
+      await loadSync()
+    )(user);
 
     expect(prismaMock.team.findMany).not.toHaveBeenCalled();
     expect(prismaMock.teamUser.deleteMany).not.toHaveBeenCalled();
   });
 
-test("creates a Formbricks team for every Authentik group", async () => {
+  test("creates a Formbricks team for every Authentik group", async () => {
     getAuthentikGroupsForEmail.mockResolvedValue(["Studierende"]);
     prismaMock.team.findMany.mockResolvedValue([{ id: "team-stud", name: "Studierende" }]);
 
-    await (await loadSync())(user);
+    await (
+      await loadSync()
+    )(user);
 
     expect(prismaMock.team.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -125,12 +195,14 @@ test("creates a Formbricks team for every Authentik group", async () => {
     getAuthentikGroupsForEmail.mockResolvedValue(null);
     listAuthentikGroupNames.mockResolvedValue(null);
 
-    await (await loadSync())(user);
+    await (
+      await loadSync()
+    )(user);
 
     expect(prismaMock.team.upsert).not.toHaveBeenCalled();
   });
 
-    test("never lets a failure escape into the sign-in", async () => {
+  test("never lets a failure escape into the sign-in", async () => {
     getAuthentikGroupsForEmail.mockRejectedValue(new Error("boom"));
 
     await expect((await loadSync())(user)).resolves.toBeUndefined();
@@ -155,7 +227,9 @@ describe("FSINF team sync on sign-in", () => {
       identityProvider: "openid",
     });
 
-    await (await loadSignIn())("user-1");
+    await (
+      await loadSignIn()
+    )("user-1");
 
     expect(getAuthentikGroupsForEmail).toHaveBeenCalledWith("20066@nordakademie.de");
     expect(prismaMock.teamUser.upsert).toHaveBeenCalledTimes(1);
@@ -167,7 +241,9 @@ describe("FSINF team sync on sign-in", () => {
       identityProvider: "email",
     });
 
-    await (await loadSignIn())("user-1");
+    await (
+      await loadSignIn()
+    )("user-1");
 
     expect(getAuthentikGroupsForEmail).not.toHaveBeenCalled();
     expect(prismaMock.teamUser.upsert).not.toHaveBeenCalled();

@@ -12,6 +12,9 @@ vi.mock("@/modules/survey/lib/utils", () => ({
   buildWhereClause: vi.fn(() => ({ AND: [] })),
 }));
 
+const buildViewerSurveyWhere = vi.hoisted(() => vi.fn(async () => ({})));
+vi.mock("@/modules/survey/lib/fsinf-survey-visibility", () => ({ buildViewerSurveyWhere }));
+
 vi.mock("@formbricks/database", () => ({
   prisma: {
     survey: {
@@ -80,6 +83,19 @@ describe("getSurveyListPage", () => {
     vi.clearAllMocks();
     vi.mocked(prisma.survey.findMany).mockReset();
     vi.mocked(prisma.response.groupBy).mockReset();
+  });
+
+  test("scopes the page to the viewer's own surveys when the workspace isolates them", async () => {
+    buildViewerSurveyWhere.mockResolvedValueOnce({ createdBy: "student-1" });
+    vi.mocked(prisma.survey.findMany).mockResolvedValue([makeSurveyRow()] as never);
+    vi.mocked(prisma.response.groupBy).mockResolvedValue([] as never);
+
+    await getSurveyListPage(workspaceId, { limit: 10, cursor: null, sortBy: "updatedAt" });
+
+    expect(buildViewerSurveyWhere).toHaveBeenCalledWith(workspaceId);
+    expect(prisma.survey.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { workspaceId, createdBy: "student-1", AND: [] } })
+    );
   });
 
   test("uses a stable updatedAt order with a next cursor", async () => {

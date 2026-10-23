@@ -18,7 +18,10 @@ import {
   subscribeOrganizationMembersToSurveyResponses,
 } from "@/lib/organization/service";
 import { getSurveyWorkspaceIdMap } from "@/modules/ee/contacts/segments/lib/segments";
-import { isSurveyVisibleToViewer } from "@/modules/survey/lib/fsinf-survey-visibility";
+import {
+  buildViewerSurveyWhere,
+  isSurveyVisibleToViewer,
+} from "@/modules/survey/lib/fsinf-survey-visibility";
 import { handleTriggerUpdates } from "@/modules/survey/lib/trigger-updates";
 import {
   isSurveySchedulingDue,
@@ -234,6 +237,8 @@ export const getSurveysByActionClassId = reactCache(
     const surveys: TSurvey[] = [];
 
     for (const surveyPrisma of surveysPrisma) {
+      // FSINF: skip surveys this viewer may not see — see fsinf-survey-visibility.ts.
+      if (!(await isSurveyVisibleToViewer(surveyPrisma))) continue;
       const transformedSurvey = transformPrismaSurvey<TSurvey>(surveyPrisma);
       surveys.push(transformedSurvey);
     }
@@ -252,6 +257,8 @@ export const getSurveys = reactCache(
           workspaceId,
           // Archived surveys are hidden by default across the app.
           archivedAt: null,
+          // FSINF: scope to what this viewer may see — see fsinf-survey-visibility.ts.
+          ...(await buildViewerSurveyWhere(workspaceId)),
         },
         select: selectSurvey,
         orderBy: {
@@ -979,6 +986,8 @@ export const getSurveysBySegmentId = reactCache(async (segmentId: string): Promi
     const surveys: TSurvey[] = [];
 
     for (const surveyPrisma of surveysPrisma) {
+      // FSINF: skip surveys this viewer may not see — see fsinf-survey-visibility.ts.
+      if (!(await isSurveyVisibleToViewer(surveyPrisma))) continue;
       const transformedSurvey = transformPrismaSurvey<TSurvey>(surveyPrisma);
       surveys.push(transformedSurvey);
     }

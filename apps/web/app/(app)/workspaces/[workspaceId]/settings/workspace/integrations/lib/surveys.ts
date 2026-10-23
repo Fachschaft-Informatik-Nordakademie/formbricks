@@ -9,6 +9,7 @@ import { TSurvey } from "@formbricks/types/surveys/types";
 import { selectSurvey } from "@/lib/survey/service";
 import { transformPrismaSurvey } from "@/lib/survey/utils";
 import { validateInputs } from "@/lib/utils/validate";
+import { buildViewerSurveyWhere } from "@/modules/survey/lib/fsinf-survey-visibility";
 
 export const getSurveys = reactCache(async (workspaceId: string): Promise<TSurvey[]> => {
   validateInputs([workspaceId, ZId]);
@@ -22,6 +23,8 @@ export const getSurveys = reactCache(async (workspaceId: string): Promise<TSurve
         },
         // Archived surveys must not be selectable as integration targets.
         archivedAt: null,
+        // FSINF: scope to what this viewer may see — see fsinf-survey-visibility.ts.
+        ...(await buildViewerSurveyWhere(workspaceId)),
       },
       select: selectSurvey,
       orderBy: {

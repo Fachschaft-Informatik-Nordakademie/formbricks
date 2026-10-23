@@ -36,6 +36,7 @@ import {
 import { getSurvey } from "@/lib/survey/service";
 import { validateInputs } from "@/lib/utils/validate";
 import { isResourceFilter, searchForAttributeKeyInSegment } from "@/modules/ee/contacts/segments/lib/utils";
+import { buildViewerSurveyWhere } from "@/modules/survey/lib/fsinf-survey-visibility";
 import { isSameDay, subtractTimeUnit } from "./date-utils";
 import { combineFilterResults, evaluateSurveyInteractionFilterInMemory } from "./filter/survey-interaction";
 
@@ -158,7 +159,7 @@ export const getSurveyRefsForWorkspace = reactCache(
     validateInputs([workspaceId, ZId]);
     try {
       return await prisma.survey.findMany({
-        where: { workspaceId },
+        where: { workspaceId, ...(await buildViewerSurveyWhere(workspaceId)) },
         select: { id: true, name: true, status: true },
         orderBy: { updatedAt: "desc" },
         take: SURVEY_FILTER_REF_LIMIT,

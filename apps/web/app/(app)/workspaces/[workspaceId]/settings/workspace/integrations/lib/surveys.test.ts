@@ -10,6 +10,11 @@ import { validateInputs } from "@/lib/utils/validate";
 import { getSurveys } from "./surveys";
 
 // Mock dependencies
+vi.mock("@/modules/survey/lib/fsinf-survey-visibility", () => ({
+  buildViewerSurveyWhere: vi.fn(async () => ({})),
+  isSurveyVisibleToViewer: vi.fn(async () => true),
+}));
+
 vi.mock("@/lib/survey/service", () => ({
   selectSurvey: { id: true, name: true, status: true, updatedAt: true }, // Expanded mock based on usage
 }));

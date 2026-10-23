@@ -14,8 +14,8 @@ import { validateInputs } from "@/lib/utils/validate";
 import { getTranslate } from "@/lingodotdev/server";
 import { getIsQuotasEnabled } from "@/modules/ee/license-check/lib/utils";
 import { getQuotas } from "@/modules/ee/quotas/lib/quotas";
-import { buildOrderByClause, buildWhereClause } from "@/modules/survey/lib/utils";
 import { buildViewerSurveyWhere } from "@/modules/survey/lib/fsinf-survey-visibility";
+import { buildOrderByClause, buildWhereClause } from "@/modules/survey/lib/utils";
 import { doesWorkspaceExist, getWorkspaceWithLanguages } from "@/modules/survey/list/lib/workspace";
 import type { TSurvey, TWorkspaceWithLanguages } from "@/modules/survey/list/types/surveys";
 import {
@@ -572,7 +572,7 @@ export const hasArchivedSurveys = reactCache(async (workspaceId: string): Promis
   validateInputs([workspaceId, z.cuid2()]);
   try {
     const archivedSurvey = await prisma.survey.findFirst({
-      where: { workspaceId, archivedAt: { not: null } },
+      where: { workspaceId, archivedAt: { not: null }, ...(await buildViewerSurveyWhere(workspaceId)) },
       select: { id: true },
     });
 

@@ -1,6 +1,7 @@
 import "server-only";
 import { prisma } from "@formbricks/database";
 import { logger } from "@formbricks/logger";
+import { FSINF_DEFAULT_READ_WORKSPACE } from "@/lib/constants";
 import {
   getAuthentikGroupsForEmail,
   listAuthentikGroupNames,
@@ -58,6 +59,42 @@ const createMissingTeamsForGroups = async (
         // One group failing to materialise must not stop the rest, nor the sign-in.
         logger.error({ error, organizationId, name: trimmed }, "FSINF team sync: could not create team");
       }
+    }
+  }
+};
+
+const DEFAULT_READ_WORKSPACE = "Studierende";
+
+/**
+ * Give every team read access to the default workspace (Studierende), so each group can at least look
+ * around there. Only MISSING links are created (`skipDuplicates`): an existing link — a higher
+ * permission set by hand or by the configured mapping — is never changed, so this can only add `read`.
+ */
+const applyDefaultReadAccess = async (organizationIds: string[]): Promise<void> => {
+  const workspaceName = FSINF_DEFAULT_READ_WORKSPACE?.trim() || DEFAULT_READ_WORKSPACE;
+
+  for (const organizationId of organizationIds) {
+    try {
+      const workspaces = await prisma.workspace.findMany({
+        where: { organizationId, name: workspaceName },
+        select: { id: true },
+        orderBy: { createdAt: "asc" },
+      });
+      if (workspaces.length === 0) continue;
+
+      const teams = await prisma.team.findMany({ where: { organizationId }, select: { id: true } });
+      if (teams.length === 0) continue;
+
+      await prisma.workspaceTeam.createMany({
+        data: teams.map((team) => ({
+          workspaceId: workspaces[0].id,
+          teamId: team.id,
+          permission: "read" as const,
+        })),
+        skipDuplicates: true,
+      });
+    } catch (error) {
+      logger.error({ error, organizationId, workspaceName }, "FSINF team sync: could not apply default read");
     }
   }
 };
@@ -151,6 +188,7 @@ export const syncFsinfTeamsForUser = async ({
 
     // Workspace access cannot follow names — a workspace is named after its purpose, not after the
     // group working in it — so the configured pairs are applied here. See fsinf-group-workspace-map.ts.
+    await applyDefaultReadAccess(organizationIds);
     await applyConfiguredWorkspaceLinks(organizationIds);
 
     const teams = await prisma.team.findMany({
