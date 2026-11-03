@@ -12,7 +12,7 @@ import type { TWorkspaceConfigChannel } from "@formbricks/types/workspace";
 import { CUSTOM_SURVEY_TEMPLATE_ID } from "@/app/lib/templates";
 import { FORMBRICKS_SURVEYS_FILTERS_KEY_LS } from "@/lib/localStorage";
 import { getV3ApiErrorMessage } from "@/modules/api/lib/v3-client";
-import type { TAIUnavailableReason } from "@/modules/ee/analysis/charts/lib/ai-availability";
+import type { TAIUnavailableReason } from "@/lib/ai/service";
 import { CreateWithAIDialog } from "@/modules/survey/components/template-list/components/create-with-ai-dialog";
 import { useCreateSurveyFromTemplate } from "@/modules/survey/components/template-list/hooks/use-create-survey-from-template";
 import { useArchiveSurvey } from "@/modules/survey/list/hooks/use-archive-survey";

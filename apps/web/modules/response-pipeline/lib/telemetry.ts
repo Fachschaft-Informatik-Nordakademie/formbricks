@@ -6,7 +6,6 @@ import { E2E_TESTING, IS_DEVELOPMENT, TELEMETRY_DISABLED } from "@/lib/constants
 import { env } from "@/lib/env";
 import { hashString } from "@/lib/hash-string";
 import { getInstanceInfo } from "@/lib/instance";
-import { getEnterpriseLicense } from "@/modules/ee/license-check/lib/license";
 import packageJson from "@/package.json";
 
 const TELEMETRY_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -32,14 +31,10 @@ let nextTelemetryCheck = 0;
 const hashedLicenseKey = env.ENTERPRISE_LICENSE_KEY ? hashString(env.ENTERPRISE_LICENSE_KEY) : null;
 
 /**
- * Returns true if telemetry is disabled via env var AND there is no active EE license.
- * EE customers cannot opt out — telemetry is always enforced for license compliance.
+ * FSINF CE: true when the operator opted out via TELEMETRY_DISABLED. There is no enterprise license in
+ * this build, so the opt-out always applies.
  */
-const isTelemetryDisabledForCE = async (): Promise<boolean> => {
-  if (!TELEMETRY_DISABLED) return false;
-  const license = await getEnterpriseLicense();
-  return !license.active;
-};
+const isTelemetryDisabledForCE = async (): Promise<boolean> => TELEMETRY_DISABLED;
 
 export const sendTelemetryEvents = async () => {
   try {

@@ -11,7 +11,6 @@ import { getIntegrations } from "@/lib/integration/service";
 import { isDatabasePoolExhaustionError } from "@/lib/jobs/pool-exhaustion";
 import { getResponseCountBySurveyId } from "@/lib/response/service";
 import { createPinnedDispatcher, validateAndResolveWebhookUrl } from "@/lib/utils/validate-webhook-url";
-import { recordResponseCreatedMeterEvent } from "@/modules/ee/billing/lib/metering";
 import { sendResponseFinishedEmail } from "@/modules/email";
 import { queueAuditEventWithoutRequest } from "@/modules/fsinf-ce/audit-logs/lib/handler";
 import { type TAuditStatus, UNKNOWN_DATA } from "@/modules/fsinf-ce/audit-logs/types/audit-log";
@@ -732,30 +731,14 @@ const runResponseCreatedSideEffects = async ({
   logContext,
   organizationId,
   survey,
-  stripeCustomerId,
 }: {
   data: TResponsePipelineJobData;
   logContext: ReturnType<typeof getPipelineLogContext>;
   organizationId: string;
   survey: TPipelineSurvey;
+  // FSINF CE: kept in the contract for callers; there is no Stripe metering in this build.
   stripeCustomerId: string | null | undefined;
 }) => {
-  try {
-    await recordResponseCreatedMeterEvent({
-      stripeCustomerId,
-      responseId: data.response.id,
-      createdAt: data.response.createdAt,
-    });
-  } catch (error) {
-    logger.error(
-      {
-        ...logContext,
-        err: error,
-      },
-      "Response pipeline meter event failed"
-    );
-  }
-
   if (POSTHOG_KEY) {
     try {
       const responseCount = await getResponseCountBySurveyId(data.surveyId);

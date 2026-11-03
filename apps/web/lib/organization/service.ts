@@ -18,7 +18,6 @@ import { IS_FORMBRICKS_CLOUD, ITEMS_PER_PAGE } from "@/lib/constants";
 import { updateUser } from "@/lib/user/service";
 import { getBillingUsageCycleWindow } from "@/lib/utils/billing";
 import { getWorkspaces } from "@/lib/workspace/service";
-import { cleanupStripeCustomer } from "@/modules/ee/billing/lib/organization-billing";
 import { deleteHubTenantData } from "@/modules/hub/service";
 import { validateInputs } from "../utils/validate";
 
@@ -304,11 +303,6 @@ export const deleteOrganization = async (organizationId: string) => {
         },
       },
     });
-
-    const stripeCustomerId = deletedOrganization.billing?.stripeCustomerId;
-    if (IS_FORMBRICKS_CLOUD && stripeCustomerId) {
-      await cleanupStripeCustomer(stripeCustomerId);
-    }
 
     // Best-effort: purge Hub-owned data (feedback records, embeddings, webhooks) for each
     // directory tenant. Failures are logged inside the gateway and do not roll back the

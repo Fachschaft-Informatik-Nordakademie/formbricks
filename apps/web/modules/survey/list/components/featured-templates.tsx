@@ -27,7 +27,7 @@ import type { TTemplateRole } from "@formbricks/types/templates";
 import type { TUserLocale } from "@formbricks/types/user";
 import { templates } from "@/app/lib/templates";
 import { getV3ApiErrorMessage } from "@/modules/api/lib/v3-client";
-import type { TAIUnavailableReason } from "@/modules/ee/analysis/charts/lib/ai-availability";
+import type { TAIUnavailableReason } from "@/lib/ai/service";
 import { CreateWithAIDialog } from "@/modules/survey/components/template-list/components/create-with-ai-dialog";
 import { useCreateSurveyFromTemplate } from "@/modules/survey/components/template-list/hooks/use-create-survey-from-template";
 import { getRoleMapping } from "@/modules/survey/components/template-list/lib/utils";

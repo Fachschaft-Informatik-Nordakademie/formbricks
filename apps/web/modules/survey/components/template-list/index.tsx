@@ -12,7 +12,7 @@ import { ZWorkspaceConfigChannel, ZWorkspaceConfigIndustry } from "@formbricks/t
 import { CUSTOM_SURVEY_TEMPLATE_ID, templates } from "@/app/lib/templates";
 import { IS_DEVELOPMENT_BUILD } from "@/lib/env-client";
 import { getV3ApiErrorMessage } from "@/modules/api/lib/v3-client";
-import type { TAIUnavailableReason } from "@/modules/ee/analysis/charts/lib/ai-availability";
+import type { TAIUnavailableReason } from "@/lib/ai/service";
 import { CreateWithAITemplate } from "./components/create-with-ai-template";
 import { StartFromScratchTemplate } from "./components/start-from-scratch-template";
 import { Template } from "./components/template";
