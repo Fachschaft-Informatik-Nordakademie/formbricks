@@ -2,7 +2,7 @@ import { isAPIError } from "better-auth/api";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { prisma } from "@formbricks/database";
 import { buildReencodedTwoFactorData } from "@/modules/auth/lib/cutover/reencode-two-factor";
-import type { AuthHookContext } from "@/modules/ee/sso/lib/better-auth-hooks";
+import type { AuthHookContext } from "@/modules/auth/lib/auth-hook-context";
 import { twoFactorBackfillAfterHandler } from "./better-auth-two-factor-backfill";
 
 vi.mock("@formbricks/database", () => ({

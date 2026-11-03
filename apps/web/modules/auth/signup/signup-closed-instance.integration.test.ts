@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { prisma } from "@formbricks/database";
 import { resetDb } from "@/integration/reset-db";
 import { auth } from "@/modules/auth/lib/auth";
-import { runWithSsoRequestContext } from "@/modules/ee/sso/lib/sso-request-context";
 
 /**
  * ENG-2293 at the FRAMEWORK boundary: Better Auth's native `POST /sign-up/email` against a real
@@ -16,7 +15,7 @@ import { runWithSsoRequestContext } from "@/modules/ee/sso/lib/sso-request-conte
  * route is actually gated or that the caller gets a 403.
  *
  * Driven through `auth.handler` with a real `Request` — the same call `app/api/auth/[...all]/route.ts`
- * makes, wrapped the same way — rather than `auth.api.signUpEmail`. That is not stylistic: an `APIError`
+ * makes — rather than `auth.api.signUpEmail`. That is not stylistic: an `APIError`
  * thrown from a `hooks.before` middleware propagates to an `auth.api` caller as a rejected promise, and
  * only the HTTP handler turns it into the 403 an attacker would actually receive. Asserting the status
  * code is the whole point here, so the test has to go through the layer that produces one.
@@ -47,14 +46,12 @@ const SIGNUP_URL = "http://localhost:3000/api/auth/sign-up/email";
 
 /** An unauthenticated POST to the mounted route — the request the vulnerability was reported against. */
 const rawSignUp = (email: string): Promise<Response> =>
-  runWithSsoRequestContext(() =>
-    auth.handler(
-      new Request(SIGNUP_URL, {
-        method: "POST",
-        headers: { "content-type": "application/json", origin: "http://localhost:3000" },
-        body: JSON.stringify({ email, password: PASSWORD, name: "Someone" }),
-      })
-    )
+  auth.handler(
+    new Request(SIGNUP_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: "http://localhost:3000" },
+      body: JSON.stringify({ email, password: PASSWORD, name: "Someone" }),
+    })
   );
 
 const userCount = (email: string): Promise<number> => prisma.user.count({ where: { email } });

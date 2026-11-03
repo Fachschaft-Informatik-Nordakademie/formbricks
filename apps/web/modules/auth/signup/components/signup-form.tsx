@@ -23,7 +23,6 @@ import {
 } from "@/modules/auth/lib/verification-links";
 import { createUserAction } from "@/modules/auth/signup/actions";
 import { TermsPrivacyLinks } from "@/modules/auth/signup/components/terms-privacy-links";
-import { SSOOptions } from "@/modules/ee/sso/components/sso-options";
 import { Button } from "@/modules/ui/components/button";
 import { FormControl, FormError, FormField, FormItem } from "@/modules/ui/components/form";
 import { Input } from "@/modules/ui/components/input";
@@ -64,16 +63,9 @@ export const SignupForm = ({
   privacyUrl,
   termsUrl,
   emailAuthEnabled,
-  googleOAuthEnabled,
-  githubOAuthEnabled,
-  azureOAuthEnabled,
-  oidcOAuthEnabled,
-  oidcDisplayName,
   userLocale,
   emailFromSearchParams,
   emailVerificationDisabled,
-  isSsoEnabled,
-  samlSsoEnabled,
   isTurnstileConfigured,
   turnstileSiteKey,
 }: Readonly<SignupFormProps>) => {
@@ -320,18 +312,6 @@ export const SignupForm = ({
             </Button>
           </form>
         </FormProvider>
-      )}
-      {isSsoEnabled && (
-        <SSOOptions
-          googleOAuthEnabled={googleOAuthEnabled}
-          githubOAuthEnabled={githubOAuthEnabled}
-          azureOAuthEnabled={azureOAuthEnabled}
-          oidcOAuthEnabled={oidcOAuthEnabled}
-          oidcDisplayName={oidcDisplayName}
-          samlSsoEnabled={samlSsoEnabled}
-          returnToUrl={returnToUrl}
-          source="signup"
-        />
       )}
       <TermsPrivacyLinks termsUrl={termsUrl} privacyUrl={privacyUrl} />
       <div className="mt-9 text-center text-xs">

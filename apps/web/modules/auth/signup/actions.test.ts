@@ -15,7 +15,6 @@ import { auth } from "@/modules/auth/lib/auth";
 import { updateUser } from "@/modules/auth/lib/user";
 import { getInvite, resolveInviteMatch } from "@/modules/auth/signup/lib/invite";
 import { applyIPRateLimit } from "@/modules/core/rate-limit/helpers";
-import { subscribeUserToMailingList } from "@/modules/ee/mailing/lib/mailing-subscription";
 import { UNKNOWN_DATA } from "@/modules/fsinf-ce/audit-logs/types/audit-log";
 import { getIsMultiOrgEnabled } from "@/modules/fsinf-ce/features";
 import { createUserAction } from "./actions";
@@ -66,11 +65,7 @@ vi.mock("@/lib/posthog", () => ({
   identifyPostHogPerson: vi.fn(),
   getEmailDomain: (email: string) => email.split("@")[1]?.toLowerCase() || undefined,
 }));
-vi.mock("@/modules/ee/billing/lib/organization-billing", () => ({
-  ensureCloudStripeSetupForOrganization: vi.fn(),
-}));
 vi.mock("@/modules/fsinf-ce/features", () => ({ getIsMultiOrgEnabled: vi.fn() }));
-vi.mock("@/modules/ee/mailing/lib/mailing-subscription", () => ({ subscribeUserToMailingList: vi.fn() }));
 vi.mock("@/modules/email", () => ({ sendInviteAcceptedEmail: vi.fn() }));
 vi.mock("@/modules/workspaces/settings/lib/workspace", () => ({ createWorkspace: vi.fn() }));
 
@@ -257,7 +252,6 @@ describe("createUserAction — signup verification email callbackURL", () => {
     const result = await createUserAction({ ctx, parsedInput: baseInput } as never);
 
     expect(result).toEqual({ success: true }); // same response as a real signup
-    expect(subscribeUserToMailingList).not.toHaveBeenCalled();
     expect(updateUser).not.toHaveBeenCalled(); // no locale write on someone else's account
     expect(capturePostHogEvent).not.toHaveBeenCalled();
     // No `created` audit attribution for an account that was not created (S1) — and no `created` event
@@ -326,7 +320,6 @@ describe("createUserAction — signup verification email callbackURL", () => {
 
     expect(result).toEqual({ success: true });
     // already-existed short-circuits handlePostUserCreation + mailing-list subscription.
-    expect(subscribeUserToMailingList).not.toHaveBeenCalled();
   });
 });
 

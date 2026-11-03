@@ -3,7 +3,7 @@ import { isAPIError } from "better-auth/api";
 import { prisma } from "@formbricks/database";
 import { logger } from "@formbricks/logger";
 import { buildReencodedTwoFactorData } from "@/modules/auth/lib/cutover/reencode-two-factor";
-import type { AuthHookContext } from "@/modules/ee/sso/lib/better-auth-hooks";
+import type { AuthHookContext } from "@/modules/auth/lib/auth-hook-context";
 
 /**
  * ENG-1824 self-heal. The custom 2FA enable flow (`modules/ee/two-factor-auth`) historically wrote the

@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { logger } from "@formbricks/logger";
 import { PASSWORD_COMPROMISED_ERROR_CODE } from "@formbricks/types/errors";
 import { PASSWORD_HIBP_CHECK_DISABLED } from "@/lib/constants";
-import type { AuthHookContext } from "@/modules/ee/sso/lib/better-auth-hooks";
+import type { AuthHookContext } from "@/modules/auth/lib/auth-hook-context";
 
 /**
  * Have-I-Been-Pwned breach check on password set (ENG-1587).

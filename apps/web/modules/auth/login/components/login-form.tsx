@@ -13,7 +13,6 @@ import { FORMBRICKS_LOGGED_IN_WITH_LS } from "@/lib/localStorage";
 import { buildAttributionQuerySuffix } from "@/modules/auth/lib/attribution";
 import { authClient } from "@/modules/auth/lib/auth-client";
 import { FsinfAuthentikButton } from "@/modules/auth/components/fsinf-authentik-button";
-import { SSOOptions } from "@/modules/ee/sso/components/sso-options";
 import { TwoFactor, TwoFactorBackup } from "@/modules/fsinf-ce/two-factor-auth/login-challenge";
 import { Alert, AlertDescription, AlertTitle } from "@/modules/ui/components/alert";
 import { Button } from "@/modules/ui/components/button";
@@ -62,14 +61,7 @@ export const LoginForm = ({
   emailAuthEnabled,
   publicSignUpEnabled,
   passwordResetEnabled,
-  googleOAuthEnabled,
-  githubOAuthEnabled,
-  azureOAuthEnabled,
-  oidcOAuthEnabled,
-  oidcDisplayName,
   isMultiOrgEnabled,
-  isSsoEnabled,
-  samlSsoEnabled,
   fsinfSsoEnabled,
   fsinfSsoDisplayName,
   fsinfSsoCanonicalOrigin,
@@ -293,18 +285,6 @@ export const LoginForm = ({
               </Button>
             )}
           </form>
-          {isSsoEnabled && (
-            <SSOOptions
-              googleOAuthEnabled={googleOAuthEnabled}
-              githubOAuthEnabled={githubOAuthEnabled}
-              azureOAuthEnabled={azureOAuthEnabled}
-              oidcOAuthEnabled={oidcOAuthEnabled}
-              oidcDisplayName={oidcDisplayName}
-              samlSsoEnabled={samlSsoEnabled}
-              returnToUrl={resolvedCallbackUrl}
-              source="signin"
-            />
-          )}
           {fsinfSsoEnabled && (
             <FsinfAuthentikButton
               displayName={fsinfSsoDisplayName}

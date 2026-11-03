@@ -1,12 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-const signupDisabled = () => {
-  throw new Error("Signup is disabled on this instance.");
-};
-
-const baseUserCreateBefore = vi.fn(async () => signupDisabled());
-const baseUserCreateAfter = vi.fn(async () => undefined);
-const baseAccountCreateAfter = vi.fn(async () => undefined);
 const provisionFsinfSsoUser = vi.fn(async () => undefined);
 
 vi.mock("server-only", () => ({}));
@@ -16,12 +9,6 @@ vi.mock("@formbricks/types/user", () => ({
 vi.mock("@/lib/utils/locale", () => ({ findMatchingLocale: async () => "de-DE" }));
 vi.mock("@/modules/auth/lib/fsinf-sso-config", () => ({ FSINF_SSO_PROVIDER_ID: "fsinf-authentik" }));
 vi.mock("@/modules/auth/lib/fsinf-sso-provisioning", () => ({ provisionFsinfSsoUser }));
-vi.mock("@/modules/ee/sso/lib/better-auth-hooks", () => ({
-  ssoDatabaseHooks: {
-    user: { create: { before: baseUserCreateBefore, after: baseUserCreateAfter } },
-    account: { create: { after: baseAccountCreateAfter } },
-  },
-}));
 
 const loadHooks = async () => {
   vi.resetModules();
@@ -39,15 +26,12 @@ describe("FSINF SSO database hooks", () => {
   test("does not run the credential sign-up branch for our Authentik callback", async () => {
     const hooks = await loadHooks();
 
-    // The bug: the EE hook cannot recognise "fsinf-authentik" as SSO, so it treated the callback as a
-    // credential sign-up and rejected it with "Signup is disabled on this instance." on this closed
-    // instance. Ours must handle the callback itself and never delegate.
+    // Our callback must produce a fully enriched SSO row in the single INSERT.
     const result = await hooks.user?.create?.before?.(ssoUser as never, {
       path: "/oauth2/callback/:providerId",
       params: { providerId: "fsinf-authentik" },
     } as never);
 
-    expect(baseUserCreateBefore).not.toHaveBeenCalled();
     expect(result).toMatchObject({
       data: {
         emailVerified: true,
@@ -67,7 +51,6 @@ describe("FSINF SSO database hooks", () => {
       path: "/oauth2/callback/fsinf-authentik",
     } as never);
 
-    expect(baseUserCreateBefore).not.toHaveBeenCalled();
     expect(result).toMatchObject({ data: { identityProvider: "openid" } });
   });
 
@@ -82,19 +65,17 @@ describe("FSINF SSO database hooks", () => {
     expect(result).toMatchObject({ data: { name: "Erika Vorstand Musterfrau" } });
   });
 
-  test("leaves every other provider to the stock SSO hooks", async () => {
+  test("leaves every other write to Better Auth's defaults", async () => {
     const hooks = await loadHooks();
 
     await expect(
       hooks.user?.create?.before?.(ssoUser as never, { path: "/sign-up/email" } as never)
-    ).rejects.toThrow("Signup is disabled on this instance.");
-    expect(baseUserCreateBefore).toHaveBeenCalledTimes(1);
+    ).resolves.toBeUndefined();
 
     await hooks.user?.create?.after?.(ssoUser as never, {
       path: "/oauth2/callback/openid",
       params: { providerId: "openid" },
     } as never);
-    expect(baseUserCreateAfter).toHaveBeenCalledTimes(1);
     expect(provisionFsinfSsoUser).not.toHaveBeenCalled();
   });
 
@@ -106,7 +87,6 @@ describe("FSINF SSO database hooks", () => {
     } as never);
 
     expect(provisionFsinfSsoUser).toHaveBeenCalledWith({ userId: "user-1" });
-    expect(baseUserCreateAfter).not.toHaveBeenCalled();
   });
 
   test("denormalises the identity provider onto the user once our account row exists", async () => {
@@ -122,17 +102,17 @@ describe("FSINF SSO database hooks", () => {
       identityProvider: "openid",
       identityProviderAccountId: "authentik-sub-1",
     });
-    expect(baseAccountCreateAfter).not.toHaveBeenCalled();
   });
 
-  test("leaves credential account rows to the stock hook", async () => {
+  test("does not touch the user for credential account rows", async () => {
     const hooks = await loadHooks();
+    const updateUser = vi.fn(async () => undefined);
 
     await hooks.account?.create?.after?.(
       { userId: "user-1", accountId: "user-1", providerId: "credential" } as never,
-      null as never
+      { context: { internalAdapter: { updateUser } } } as never
     );
 
-    expect(baseAccountCreateAfter).toHaveBeenCalledTimes(1);
+    expect(updateUser).not.toHaveBeenCalled();
   });
 });

@@ -11,7 +11,7 @@ const mocks = {
   getMonthlyOrganizationResponseCount: vi.fn(),
   getUser: vi.fn(),
   getWorkspace: vi.fn(),
-  getEnterpriseLicense: vi.fn(),
+  getIsMultiOrgEnabled: vi.fn(),
   getAccessControlPermission: vi.fn(),
   getOrganizationWorkspacesLimit: vi.fn(),
   getPublicDomain: vi.fn(),
@@ -42,11 +42,9 @@ vi.mock("@/lib/organization/service", () => ({
 }));
 vi.mock("@/lib/user/service", () => ({ getUser: (...a: unknown[]) => mocks.getUser(...a) }));
 vi.mock("@/lib/workspace/service", () => ({ getWorkspace: (...a: unknown[]) => mocks.getWorkspace(...a) }));
-vi.mock("@/modules/ee/license-check/lib/license", () => ({
-  getEnterpriseLicense: (...a: unknown[]) => mocks.getEnterpriseLicense(...a),
-}));
 vi.mock("@/modules/fsinf-ce/features", () => ({
   getAccessControlPermission: (...a: unknown[]) => mocks.getAccessControlPermission(...a),
+  getIsMultiOrgEnabled: (...a: unknown[]) => mocks.getIsMultiOrgEnabled(...a),
   getOrganizationWorkspacesLimit: (...a: unknown[]) => mocks.getOrganizationWorkspacesLimit(...a),
 }));
 
@@ -58,7 +56,7 @@ const seedSuccess = () => {
   mocks.getOrganization.mockResolvedValue({ id: "org-1", name: "Org", billing: {} });
   mocks.getMembershipByUserIdOrganizationId.mockResolvedValue({ role: "owner" });
   mocks.getAccessControlPermission.mockResolvedValue(true);
-  mocks.getEnterpriseLicense.mockResolvedValue({ features: { isMultiOrgEnabled: true } });
+  mocks.getIsMultiOrgEnabled.mockResolvedValue(true);
   mocks.getOrganizationWorkspacesLimit.mockResolvedValue(3);
   mocks.getMonthlyOrganizationResponseCount.mockResolvedValue(42);
   mocks.getPublicDomain.mockReturnValue("https://app.formbricks.com");

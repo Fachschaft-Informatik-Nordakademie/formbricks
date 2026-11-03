@@ -21,7 +21,6 @@ const {
   mockPrismaUserFindMany,
   mockPrismaWebhookFindMany,
   mockQueueAuditEventWithoutRequest,
-  mockRecordResponseCreatedMeterEvent,
   mockSendFollowUpsForResponse,
   mockSendResponseFinishedEmail,
   mockSendTelemetryEvents,
@@ -48,7 +47,6 @@ const {
     mockPrismaUserFindMany: vi.fn(),
     mockPrismaWebhookFindMany: vi.fn(),
     mockQueueAuditEventWithoutRequest: vi.fn(),
-    mockRecordResponseCreatedMeterEvent: vi.fn(),
     mockSendFollowUpsForResponse: vi.fn(),
     mockSendResponseFinishedEmail: vi.fn(),
     mockSendTelemetryEvents: vi.fn(),
@@ -124,10 +122,6 @@ vi.mock("@/lib/utils/validate-webhook-url", () => ({
 
 vi.mock("@/modules/fsinf-ce/audit-logs/lib/handler", () => ({
   queueAuditEventWithoutRequest: mockQueueAuditEventWithoutRequest,
-}));
-
-vi.mock("@/modules/ee/billing/lib/metering", () => ({
-  recordResponseCreatedMeterEvent: mockRecordResponseCreatedMeterEvent,
 }));
 
 vi.mock("@/modules/email", () => ({
@@ -234,7 +228,6 @@ describe("processResponsePipelineJob", () => {
     mockDispatcherDestroy.mockResolvedValue(undefined);
     mockCreatePinnedDispatcher.mockImplementation(() => ({ destroy: mockDispatcherDestroy }));
     mockQueueAuditEventWithoutRequest.mockResolvedValue(undefined);
-    mockRecordResponseCreatedMeterEvent.mockResolvedValue(undefined);
     mockSendResponseFinishedEmail.mockResolvedValue(undefined);
     mockSendFollowUpsForResponse.mockResolvedValue({ ok: true, data: [] });
     mockEnqueueResponseCompletedWorkflowRuns.mockResolvedValue(undefined);
@@ -329,11 +322,6 @@ describe("processResponsePipelineJob", () => {
         method: "POST",
       })
     );
-    expect(mockRecordResponseCreatedMeterEvent).toHaveBeenCalledWith({
-      createdAt: baseData.response.createdAt,
-      responseId: "response_123",
-      stripeCustomerId: "cus_123",
-    });
     expect(mockSendTelemetryEvents).toHaveBeenCalledTimes(1);
     expect(mockHandleIntegrations).not.toHaveBeenCalled();
   });
@@ -949,11 +937,6 @@ describe("processResponsePipelineJob", () => {
 
     await expect(processResponsePipelineJob(baseData, finalAttemptContext)).resolves.toBeUndefined();
 
-    expect(mockRecordResponseCreatedMeterEvent).toHaveBeenCalledWith({
-      createdAt: baseData.response.createdAt,
-      responseId: "response_123",
-      stripeCustomerId: "cus_123",
-    });
     expect(mockSendTelemetryEvents).toHaveBeenCalledTimes(1);
     expect(mockLoggerError).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -963,29 +946,6 @@ describe("processResponsePipelineJob", () => {
       }),
       "Response pipeline webhook delivery exhausted retries; continuing with remaining side effects"
     );
-  });
-
-  test("awaits the metering write before finishing responseCreated jobs", async () => {
-    let resolveMetering: (() => void) | undefined;
-    const meteringPromise = new Promise<void>((resolve) => {
-      resolveMetering = resolve;
-    });
-    mockRecordResponseCreatedMeterEvent.mockReturnValue(meteringPromise);
-
-    let settled = false;
-    const jobPromise = processResponsePipelineJob(baseData, baseContext).then(() => {
-      settled = true;
-    });
-
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
-    expect(settled).toBe(false);
-    expect(mockSendTelemetryEvents).not.toHaveBeenCalled();
-
-    resolveMetering?.();
-    await jobPromise;
-
-    expect(mockSendTelemetryEvents).toHaveBeenCalledTimes(1);
   });
 
   test("fails fast when the workspace organization cannot be found", async () => {

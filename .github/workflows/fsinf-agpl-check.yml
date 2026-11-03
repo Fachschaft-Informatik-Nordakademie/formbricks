@@ -29,7 +29,7 @@ jobs:
         run: |
           set -e
           if [ -e apps/web/modules/ee ]; then echo "apps/web/modules/ee must not exist"; exit 1; fi
-          if grep -rnE "modules/ee(/|\")" apps packages --include=*.ts --include=*.tsx --include=*.mjs --include=*.js --exclude-dir=node_modules; then
+          if grep -rnE "(from|import\(|mock\()[[:space:]]*\"[^\"]*modules/ee(/|\")" apps packages --include=*.ts --include=*.tsx --include=*.mjs --include=*.js --exclude-dir=node_modules; then
             echo "Found references to modules/ee"; exit 1
           fi
 

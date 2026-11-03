@@ -1,35 +1,31 @@
 import { describe, expect, test, vi } from "vitest";
-import {
-  blockedSignupDomainRedirectAfterHandler,
-  ssoRecoveryAfterHandler,
-} from "@/modules/ee/sso/lib/better-auth-hooks";
 import { runAfterAuthHooks } from "./after-auth-hooks";
 import { auditFailedAuthAfter } from "./better-auth-observability";
+import { twoFactorBackfillAfterHandler } from "./better-auth-two-factor-backfill";
 
-vi.mock("@/modules/ee/sso/lib/better-auth-hooks", () => ({
-  ssoRecoveryAfterHandler: vi.fn(),
-  blockedSignupDomainRedirectAfterHandler: vi.fn(),
-}));
+vi.mock("server-only", () => ({}));
 vi.mock("./better-auth-observability", () => ({ auditFailedAuthAfter: vi.fn() }));
+vi.mock("./better-auth-two-factor-backfill", () => ({ twoFactorBackfillAfterHandler: vi.fn() }));
 
 describe("runAfterAuthHooks", () => {
-  test("records the failed-auth audit before the personal-email redirect handler (which throws)", async () => {
+  test("records the failed-auth audit before the 2FA backfill", async () => {
     const calls: string[] = [];
-    vi.mocked(ssoRecoveryAfterHandler).mockImplementation(async () => {
-      calls.push("recovery");
-    });
     vi.mocked(auditFailedAuthAfter).mockImplementation(async () => {
       calls.push("audit");
     });
-    vi.mocked(blockedSignupDomainRedirectAfterHandler).mockImplementation(async () => {
-      calls.push("redirect");
-      throw new Error("ctx.redirect"); // mirrors the real handler's ctx.redirect throw
+    vi.mocked(twoFactorBackfillAfterHandler).mockImplementation(async () => {
+      calls.push("backfill");
     });
 
-    await expect(runAfterAuthHooks({} as never)).rejects.toThrow();
-    // Pins the intended order: the audit runs before the redirect throw. Future-proofing today
-    // (auditFailedAuthAfter only records /sign-in/email, so an SSO /callback rejection no-ops it either
-    // way), but locks the contract for when the failed-auth audit is extended to SSO callback paths.
-    expect(calls).toEqual(["recovery", "audit", "redirect"]);
+    await runAfterAuthHooks({} as never);
+    expect(calls).toEqual(["audit", "backfill"]);
+  });
+
+  test("a failing audit stops the chain instead of being swallowed", async () => {
+    vi.mocked(auditFailedAuthAfter).mockRejectedValueOnce(new Error("audit down"));
+    vi.mocked(twoFactorBackfillAfterHandler).mockClear();
+
+    await expect(runAfterAuthHooks({} as never)).rejects.toThrow("audit down");
+    expect(twoFactorBackfillAfterHandler).not.toHaveBeenCalled();
   });
 });

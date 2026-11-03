@@ -228,7 +228,9 @@ describe("resendVerificationEmailAction", () => {
       expect(result).toEqual({ success: true });
     });
 
-    test("should resend an SSO recovery email for a verified user", async () => {
+    // FSINF CE: the Enterprise SSO recovery flow is not part of this build — even a valid-looking
+    // recovery callback is just a normal verification request, so a verified user gets no email.
+    test("should not send an SSO recovery email (recovery flow not in this build)", async () => {
       vi.mocked(applyIPRateLimit).mockResolvedValue({ allowed: true });
       const verifiedUserWithLocale: NonNullable<Awaited<ReturnType<typeof getUserByEmail>>> = {
         ...mockVerifiedUser,
@@ -254,13 +256,7 @@ describe("resendVerificationEmailAction", () => {
         },
       } as any);
 
-      expect(sendVerificationEmail).toHaveBeenCalledWith({
-        id: mockVerifiedUser.id,
-        email: mockVerifiedUser.email,
-        locale: "en-US",
-        callbackUrl: "http://localhost:3000/api/auth/sso/recovery/complete?intent=test-intent",
-        purpose: "sso_recovery",
-      });
+      expect(sendVerificationEmail).not.toHaveBeenCalled();
       expect(result).toEqual({ success: true });
     });
 

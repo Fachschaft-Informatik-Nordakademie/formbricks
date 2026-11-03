@@ -4,7 +4,6 @@ import { resetDb } from "@/integration/reset-db";
 import { createInviteToken } from "@/lib/jwt";
 import { capturePostHogEvent, identifyPostHogPerson } from "@/lib/posthog";
 import { createUserAction } from "@/modules/auth/signup/actions";
-import { subscribeUserToMailingList } from "@/modules/ee/mailing/lib/mailing-subscription";
 import { sendInviteAcceptedEmail, sendVerificationLinkEmail } from "@/modules/email";
 
 /**
@@ -40,9 +39,6 @@ vi.mock("@/modules/fsinf-ce/features", async (importOriginal) => ({
   getIsMultiOrgEnabled: vi.fn(async () => true),
 }));
 
-vi.mock("@/modules/ee/mailing/lib/mailing-subscription", () => ({
-  subscribeUserToMailingList: vi.fn(async () => undefined),
-}));
 
 vi.mock("@/modules/fsinf-ce/audit-logs/lib/handler", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/modules/fsinf-ce/audit-logs/lib/handler")>();
@@ -145,7 +141,6 @@ describe("ENG-2091: accepting an invite via sign-up", () => {
     expect(await prisma.membership.count({ where: { organizationId, userId: existing.id } })).toBe(0);
     expect(await prisma.invite.count({ where: { email: INVITED_EMAIL } })).toBe(1);
     expect(sendInviteAcceptedEmail).not.toHaveBeenCalled();
-    expect(subscribeUserToMailingList).not.toHaveBeenCalled();
     expect(capturePostHogEvent).not.toHaveBeenCalled();
     expect(identifyPostHogPerson).not.toHaveBeenCalled();
 
@@ -274,6 +269,5 @@ describe("plain sign-up (no invite) with an address that already exists", () => 
       orgs: await prisma.organization.count(),
       memberships: await prisma.membership.count({ where: { userId: existing.id } }),
     }).toEqual({ orgs: orgsBefore, memberships: 0 });
-    expect(subscribeUserToMailingList).not.toHaveBeenCalled();
   });
 });

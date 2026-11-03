@@ -6,10 +6,6 @@ import { IS_FORMBRICKS_CLOUD } from "@/lib/constants";
 import { updateUser } from "@/lib/user/service";
 import { getWorkspaces } from "@/lib/workspace/service";
 import {
-  cleanupStripeCustomer,
-  ensureCloudStripeSetupForOrganization,
-} from "@/modules/ee/billing/lib/organization-billing";
-import {
   createOrganization,
   deleteOrganization,
   getMonthlyOrganizationWorkflowRunCount,
@@ -50,11 +46,6 @@ vi.mock("@/lib/workspace/service", () => ({
   getWorkspaces: vi.fn(),
 }));
 
-vi.mock("@/modules/ee/billing/lib/organization-billing", () => ({
-  ensureCloudStripeSetupForOrganization: vi.fn().mockResolvedValue(undefined),
-  cleanupStripeCustomer: vi.fn().mockResolvedValue(undefined),
-}));
-
 vi.mock("@/modules/hub/service", () => ({
   deleteHubTenantData: vi.fn().mockResolvedValue({
     data: { deletedFeedbackRecords: 0, deletedEmbeddings: 0, deletedWebhooks: 0 },
@@ -64,7 +55,6 @@ vi.mock("@/modules/hub/service", () => ({
 
 describe("Organization Service", () => {
   beforeEach(() => {
-    vi.mocked(ensureCloudStripeSetupForOrganization).mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -224,7 +214,6 @@ describe("Organization Service", () => {
         select: organizationSelect,
       });
       // Stripe setup is now handled by the caller after membership creation
-      expect(ensureCloudStripeSetupForOrganization).not.toHaveBeenCalled();
     });
 
     test("should throw DatabaseError on prisma error", async () => {
@@ -388,7 +377,7 @@ describe("Organization Service", () => {
   });
 
   describe("deleteOrganization", () => {
-    test("should call cleanupStripeCustomer when cloud and stripeCustomerId exists", async () => {
+    test("deletes the organization even when a Stripe customer id is stored (no Stripe in this build)", async () => {
       vi.mocked(prisma.organization.delete).mockResolvedValue({
         id: "org1",
         name: "Test Org",
@@ -400,9 +389,7 @@ describe("Organization Service", () => {
 
       await deleteOrganization("org1");
 
-      if (IS_FORMBRICKS_CLOUD) {
-        expect(cleanupStripeCustomer).toHaveBeenCalledWith("cus_123");
-      }
+      expect(prisma.organization.delete).toHaveBeenCalled();
     });
 
     test("should purge Hub-owned data for each feedback directory", async () => {

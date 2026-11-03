@@ -98,7 +98,7 @@ describe("withAuditLogging", () => {
   });
   test("logs audit event for successful handler", async () => {
     const handler = vi.fn().mockResolvedValue("ok");
-    const { withAuditLogging } = await import("../../modules/ee/audit-logs/lib/handler");
+    const { withAuditLogging } = await import("../../modules/fsinf-ce/audit-logs/lib/handler");
     const wrapped = withAuditLogging("created", "survey", handler);
     const ctx = {
       user: {
@@ -136,7 +136,7 @@ describe("withAuditLogging", () => {
   });
   test("logs audit event for failed handler and throws", async () => {
     const handler = vi.fn().mockRejectedValue(new Error("fail"));
-    const { withAuditLogging } = await import("../../modules/ee/audit-logs/lib/handler");
+    const { withAuditLogging } = await import("../../modules/fsinf-ce/audit-logs/lib/handler");
     const wrapped = withAuditLogging("created", "survey", handler);
     const ctx = {
       user: {

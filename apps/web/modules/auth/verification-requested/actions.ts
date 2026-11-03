@@ -5,7 +5,6 @@ import { z } from "zod";
 import { ResourceNotFoundError } from "@formbricks/types/errors";
 import { ZUserEmail } from "@formbricks/types/user";
 import { WEBAPP_URL } from "@/lib/constants";
-import { verifySsoRelinkIntent } from "@/lib/jwt";
 import { actionClient } from "@/lib/utils/action-client";
 import { getValidatedCallbackUrl } from "@/lib/utils/url";
 import { auth } from "@/modules/auth/lib/auth";
@@ -13,7 +12,6 @@ import { getUserByEmail } from "@/modules/auth/lib/user";
 import { TVerificationRequestPurpose } from "@/modules/auth/lib/verification-links";
 import { applyIPRateLimit } from "@/modules/core/rate-limit/helpers";
 import { rateLimitConfigs } from "@/modules/core/rate-limit/rate-limit-configs";
-import { SSO_RECOVERY_COMPLETION_PATH } from "@/modules/ee/sso/lib/constants";
 import { sendVerificationEmail } from "@/modules/email";
 import { withAuditLogging } from "@/modules/fsinf-ce/audit-logs/lib/handler";
 
@@ -22,35 +20,14 @@ const ZResendVerificationEmailAction = z.object({
   callbackUrl: z.string().max(2000).optional(),
 });
 
-const getVerificationRequestPurpose = ({
-  callbackUrl,
-  userEmail,
-}: {
+/**
+ * FSINF CE: always a plain email verification. The "sso_recovery" purpose belonged to the Enterprise
+ * SSO verify-before-link flow, which this build does not include — nothing mints its relink intents.
+ */
+const getVerificationRequestPurpose = (_input: {
   callbackUrl?: string;
   userEmail: string;
-}): TVerificationRequestPurpose => {
-  const validatedCallbackUrl = getValidatedCallbackUrl(callbackUrl, WEBAPP_URL);
-  if (!validatedCallbackUrl) {
-    return "email_verification";
-  }
-
-  const parsedCallbackUrl = new URL(validatedCallbackUrl);
-  if (parsedCallbackUrl.pathname !== SSO_RECOVERY_COMPLETION_PATH) {
-    return "email_verification";
-  }
-
-  const intentToken = parsedCallbackUrl.searchParams.get("intent");
-  if (!intentToken) {
-    return "email_verification";
-  }
-
-  try {
-    const intent = verifySsoRelinkIntent(intentToken);
-    return intent.email.toLowerCase() === userEmail.toLowerCase() ? "sso_recovery" : "email_verification";
-  } catch {
-    return "email_verification";
-  }
-};
+}): TVerificationRequestPurpose => "email_verification";
 
 export const resendVerificationEmailAction = actionClient.inputSchema(ZResendVerificationEmailAction).action(
   withAuditLogging("verificationEmailSent", "user", async ({ ctx, parsedInput }) => {

@@ -27,9 +27,6 @@ import {
   accountDeletionConfig,
   requireDeletionConfirmationBeforeHandler,
 } from "@/modules/account/lib/better-auth-account-deletion";
-import { ssoLicenseGateBeforeHandler } from "@/modules/ee/sso/lib/better-auth-hooks";
-import { ssoGenericOAuthConfig, ssoSocialProviders } from "@/modules/ee/sso/lib/better-auth-providers";
-import { ssoRecoverySignInPlugin } from "@/modules/ee/sso/lib/better-auth-recovery-signin";
 import { runAfterAuthHooks } from "./after-auth-hooks";
 import { rejectInactiveUserOnSessionCreate } from "./better-auth-active-user-gate";
 import { createBrevoCustomerAfterEmailVerification } from "./better-auth-email-verification";
@@ -102,10 +99,9 @@ export const auth = betterAuth({
   // across instances. Sessions also persist to the DB via session.storeSessionInDatabase below.
   secondaryStorage: redisSecondaryStorage,
 
-  // SSO providers (Google/GitHub social + Azure/OIDC/SAML genericOAuth) live in
-  // modules/ee/sso/lib/better-auth-providers.ts. The account-linking / verify-before-link flow is
-  // the security-sensitive Phase 5 work, re-expressed via hooks separately (pending review, D7).
-  socialProviders: ssoSocialProviders,
+  // FSINF CE: no social providers. The upstream Google/GitHub/Azure/OIDC/SAML providers were part of the
+  // Enterprise Edition; this build signs in through our own Authentik provider (genericOAuth below).
+  socialProviders: {},
 
   emailAndPassword: {
     // EMAIL_AUTH_DISABLED=1 has to switch the credential endpoints off here, not just hide the form on
@@ -234,8 +230,9 @@ export const auth = betterAuth({
   },
 
   account: {
-    // No automatic linking — Formbricks keeps its hardened verify-before-link (SSO recovery) flow,
-    // re-expressed via hooks in Phase 5 (design doc D7). BA's defaults are more permissive.
+    // No automatic linking. FSINF CE: the upstream verify-before-link recovery flow was Enterprise
+    // Edition code; here an Authentik login whose email already belongs to a different, unlinked
+    // account is refused (login page shows the "account not linked" notice) instead of linked.
     accountLinking: {
       enabled: false,
       allowDifferentEmails: false,
@@ -271,8 +268,7 @@ export const auth = betterAuth({
   // deactivated users before a session is created — parity with authOptions, covers every sign-in
   // path) with the Phase 7 `signedIn` success audit.
   databaseHooks: {
-    // FSINF: wraps the stock ssoDatabaseHooks so our own Authentik provider is treated as an SSO
-    // sign-up rather than a (blocked) credential one. See fsinf-sso-hooks.ts.
+    // FSINF: SSO sign-up handling for our own Authentik provider. See fsinf-sso-hooks.ts.
     ...fsinfSsoDatabaseHooks,
     session: {
       create: {
@@ -289,17 +285,12 @@ export const auth = betterAuth({
     },
   },
 
-  // Request hooks (parity with handleSsoCallback). Each slot is a single middleware, so related
-  // concerns are composed as plain handlers (calling a wrapped middleware would re-run the per-request
-  // context setup). `before`: re-check the SSO/SAML license on every SSO callback (covers existing-user
-  // sign-ins that skip user.create), then require an explicit confirmation factor on POST /delete-user
-  // (closes Better Auth's freshAge password bypass). `after`: turn an SSO "account not linked"
-  // collision into the verify-before-link recovery flow, then emit the failed-login audit (parity with
-  // NextAuth's `logAuthAttempt`). Recovery runs first; if it redirects (throws), the request is an SSO
-  // recovery rather than a credential failure, so skipping the audit is correct.
+  // Request hooks. Each slot is a single middleware, so related concerns are composed as plain handlers
+  // (calling a wrapped middleware would re-run the per-request context setup). `before`: require an
+  // explicit confirmation factor on POST /delete-user (closes Better Auth's freshAge password bypass),
+  // then the password-reset, sign-up and breach gates. `after`: see after-auth-hooks.ts.
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
-      await ssoLicenseGateBeforeHandler(ctx);
       await requireDeletionConfirmationBeforeHandler(ctx);
       // ENG-2105: reject password-reset requests at the native Better Auth layer when the operator
       // has disabled password resets (PASSWORD_RESET_DISABLED=1). See better-auth-password-reset-gate.ts.
@@ -337,7 +328,6 @@ export const auth = betterAuth({
       "/oauth2/introspect": { window: 60, max: 60 },
       "/oauth2/revoke": { window: 60, max: 30 },
       "/two-factor/*": { window: 60, max: 5 },
-      "/sso-recovery/*": { window: 60, max: 5 }, // brute-force defense on the recovery magic-link sign-in
       // Account deletion: re-auths the password (credential) / consumes the email token (SSO). Restore
       // the legacy 5/hour so a stolen session can't brute-force the password against delete-user (BA's
       // default global limit, ~100/10s, is only a flood guard). The callback gets a modest defensive cap.
@@ -385,15 +375,8 @@ export const auth = betterAuth({
       totpOptions: { digits: 6, period: 30 },
       backupCodeOptions: { amount: 10, length: 10, storeBackupCodes: "encrypted" },
     }),
-    // SSO via generic OAuth (Azure/OIDC + the BoxyHQ SAML bridge); empty config when no license or
-    // providers are configured. The account-linking/provisioning hooks are a separate reviewed pass.
-    // FSINF: our own always-on Authentik provider (fsinf-sso-config.ts) is appended here too — it's
-    // independent of the ee/sso license gate, so ssoGenericOAuthConfig stays [] without a license
-    // while fsinfSsoConfig still provides our entry.
-    genericOAuth({ config: [...ssoGenericOAuthConfig, ...fsinfSsoConfig] }),
-    // SSO-recovery magic-link sign-in — the BA replacement for the "token" provider's sso_recovery
-    // path (recovery-scoped, not a general magic-link). See better-auth-recovery-signin.ts.
-    ssoRecoverySignInPlugin,
+    // FSINF: our own Authentik provider (fsinf-sso-config.ts) is the only generic OAuth provider.
+    genericOAuth({ config: fsinfSsoConfig }),
     // nextCookies MUST remain the last plugin so server-action sign-in/out can set cookies.
     nextCookies(),
   ],

@@ -7,7 +7,7 @@ import { deleteOrganization, getOrganizationsWhereUserIsSingleOwner } from "@/li
 import { capturePostHogEvent } from "@/lib/posthog";
 import { ACCOUNT_DELETION_SOLE_OWNER_BLOCK_MESSAGE } from "@/modules/account/constants";
 import { deleteBrevoCustomerByEmail } from "@/modules/auth/lib/brevo";
-import type { AuthHookContext } from "@/modules/ee/sso/lib/better-auth-hooks";
+import type { AuthHookContext } from "@/modules/auth/lib/auth-hook-context";
 import { getIsMultiOrgEnabled } from "@/modules/fsinf-ce/features";
 import { queueAccountDeletionAuditEvent } from "./account-deletion-audit";
 

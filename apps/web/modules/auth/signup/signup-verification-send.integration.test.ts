@@ -23,9 +23,6 @@ vi.mock("next/headers", () => ({
   headers: vi.fn(async () => new Headers()),
 }));
 
-vi.mock("@/modules/ee/mailing/lib/mailing-subscription", () => ({
-  subscribeUserToMailingList: vi.fn(async () => undefined),
-}));
 
 vi.mock("@/modules/fsinf-ce/audit-logs/lib/handler", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/modules/fsinf-ce/audit-logs/lib/handler")>();

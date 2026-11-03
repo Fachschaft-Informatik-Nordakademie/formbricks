@@ -3,7 +3,6 @@ import { prisma } from "@formbricks/database";
 import { resetDb } from "@/integration/reset-db";
 import { createInviteToken } from "@/lib/jwt";
 import { createUserAction } from "@/modules/auth/signup/actions";
-import { subscribeUserToMailingList } from "@/modules/ee/mailing/lib/mailing-subscription";
 import { sendInviteAcceptedEmail, sendVerificationLinkEmail } from "@/modules/email";
 
 /**
@@ -39,9 +38,6 @@ vi.mock("@/modules/fsinf-ce/features", async (importOriginal) => ({
   getIsMultiOrgEnabled: vi.fn(async () => true),
 }));
 
-vi.mock("@/modules/ee/mailing/lib/mailing-subscription", () => ({
-  subscribeUserToMailingList: vi.fn(async () => undefined),
-}));
 
 vi.mock("@/modules/fsinf-ce/audit-logs/lib/handler", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/modules/fsinf-ce/audit-logs/lib/handler")>();
@@ -115,7 +111,6 @@ describe("invite sign-up when the existing account is SSO-only (real Postgres)",
     expect(await prisma.membership.count({ where: { organizationId, userId: ssoUser.id } })).toBe(0);
     expect(await prisma.invite.count({ where: { email: SSO_EMAIL } })).toBe(1);
     expect(sendInviteAcceptedEmail).not.toHaveBeenCalled();
-    expect(subscribeUserToMailingList).not.toHaveBeenCalled();
 
     // The IdP-attested verification state and provider are untouched.
     const after = await prisma.user.findUnique({ where: { id: ssoUser.id } });
