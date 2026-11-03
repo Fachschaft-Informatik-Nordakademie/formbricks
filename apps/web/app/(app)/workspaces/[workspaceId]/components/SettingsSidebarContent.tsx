@@ -6,14 +6,12 @@ import {
   BrushIcon,
   Building2Icon,
   ChevronDownIcon,
-  CreditCardIcon,
   FoldersIcon,
   GlobeIcon,
   KeyIcon,
   LanguagesIcon,
   ListChecksIcon,
   Loader2,
-  ShieldIcon,
   TagIcon,
   UnplugIcon,
   UserCircleIcon,
@@ -282,7 +280,7 @@ export const SettingsSidebarContent = ({
 }: SettingsSidebarContentProps) => {
   const pathname = usePathname();
   const { t } = useTranslation();
-  const { isMember, isBilling, isOwner, isManager } = getAccessFlags(membershipRole);
+  const { isBilling, isOwner, isManager } = getAccessFlags(membershipRole);
   const isOwnerOrManager = isOwner || isManager;
   const iconClassName = "h-4 w-4 shrink-0";
 
@@ -371,34 +369,11 @@ export const SettingsSidebarContent = ({
       hidden: !isOwnerOrManager,
     },
     {
-      id: "org-feedback-directories",
-      label: t("workspace.settings.feedback_directories.nav_label"),
-      href: organizationSettingsPath(organizationId, "feedback-directories"),
-      icon: <FoldersIcon className={iconClassName} />,
-      hidden: isMember,
-      disabled: !isOwnerOrManager,
-    },
-    {
       id: "org-domain",
       label: t("common.domain"),
       href: organizationSettingsPath(organizationId, "domain"),
       icon: <GlobeIcon className={iconClassName} />,
       hidden: isFormbricksCloud,
-    },
-    {
-      id: "org-billing",
-      label: t("common.billing"),
-      href: organizationSettingsPath(organizationId, "billing"),
-      icon: <CreditCardIcon className={iconClassName} />,
-      hidden: !isFormbricksCloud,
-    },
-    {
-      id: "org-enterprise",
-      label: t("common.enterprise_license"),
-      href: organizationSettingsPath(organizationId, "enterprise"),
-      icon: <ShieldIcon className={iconClassName} />,
-      hidden: isFormbricksCloud,
-      disabled: isMember || isBilling,
     },
   ];
 

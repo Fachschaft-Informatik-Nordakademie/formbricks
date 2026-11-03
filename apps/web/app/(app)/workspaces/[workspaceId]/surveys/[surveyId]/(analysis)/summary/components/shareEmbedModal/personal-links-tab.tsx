@@ -9,7 +9,7 @@ import { TSegment } from "@formbricks/types/segment";
 import { useWorkspace } from "@/app/(app)/workspaces/[workspaceId]/context/workspace-context";
 import { DocumentationLinks } from "@/app/(app)/workspaces/[workspaceId]/surveys/[surveyId]/(analysis)/summary/components/shareEmbedModal/documentation-links";
 import { getFormattedErrorMessage } from "@/lib/utils/helper";
-import { getTranslatedPersonalLinkError } from "@/modules/ee/contacts/lib/personal-link-errors";
+import { getTranslatedPersonalLinkError } from "@/modules/fsinf-ce/contacts/lib/personal-link-errors";
 import { Button } from "@/modules/ui/components/button";
 import { DatePicker } from "@/modules/ui/components/date-picker";
 import {

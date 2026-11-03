@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
 import { getTranslate } from "@/lingodotdev/server";
-import { WorkflowEditorProvider } from "@/modules/ee/workflows/components/workflow-editor-provider";
-import { WorkflowHeaderCta } from "@/modules/ee/workflows/components/workflow-header-cta";
-import { WorkflowPageTitle } from "@/modules/ee/workflows/components/workflow-page-title";
-import { WorkflowSecondaryNavigation } from "@/modules/ee/workflows/components/workflow-secondary-navigation";
-import { WorkflowsUpgradePrompt } from "@/modules/ee/workflows/components/workflows-upgrade-prompt";
-import { getWorkflowsRouteAuth } from "@/modules/ee/workflows/lib/auth";
+import { WorkflowEditorProvider } from "@/modules/fsinf-ce/workflows/components/workflow-editor-provider";
+import { WorkflowHeaderCta } from "@/modules/fsinf-ce/workflows/components/workflow-header-cta";
+import { WorkflowPageTitle } from "@/modules/fsinf-ce/workflows/components/workflow-page-title";
+import { WorkflowSecondaryNavigation } from "@/modules/fsinf-ce/workflows/components/workflow-secondary-navigation";
+import { WorkflowsUpgradePrompt } from "@/modules/fsinf-ce/workflows/components/workflows-upgrade-prompt";
+import { getWorkflowsRouteAuth } from "@/modules/fsinf-ce/workflows/lib/auth";
 import { PageContentWrapper } from "@/modules/ui/components/page-content-wrapper";
 import { PageHeader } from "@/modules/ui/components/page-header";
 

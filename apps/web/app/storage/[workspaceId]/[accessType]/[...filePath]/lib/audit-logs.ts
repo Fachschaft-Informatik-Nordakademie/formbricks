@@ -1,7 +1,7 @@
 import { logger } from "@formbricks/logger";
 import { getOrganizationIdFromWorkspaceId } from "@/lib/utils/helper";
-import { queueAuditEvent } from "@/modules/ee/audit-logs/lib/handler";
-import { TAuditStatus, UNKNOWN_DATA } from "@/modules/ee/audit-logs/types/audit-log";
+import { queueAuditEvent } from "@/modules/fsinf-ce/audit-logs/lib/handler";
+import { TAuditStatus, UNKNOWN_DATA } from "@/modules/fsinf-ce/audit-logs/types/audit-log";
 
 const getOrgId = async (workspaceId: string): Promise<string> => {
   try {

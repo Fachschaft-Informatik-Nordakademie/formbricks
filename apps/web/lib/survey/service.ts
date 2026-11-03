@@ -17,7 +17,7 @@ import {
   getOrganizationByWorkspaceId,
   subscribeOrganizationMembersToSurveyResponses,
 } from "@/lib/organization/service";
-import { getSurveyWorkspaceIdMap } from "@/modules/ee/contacts/segments/lib/segments";
+import { getSurveyWorkspaceIdMap } from "@/modules/fsinf-ce/contacts/segments/lib/segments";
 import {
   buildViewerSurveyWhere,
   isSurveyVisibleToViewer,

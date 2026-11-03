@@ -17,7 +17,7 @@ import {
   getOrganizationIdFromWorkspaceId,
   getWorkspaceIdFromIntegrationId,
 } from "@/lib/utils/helper";
-import { withAuditLogging } from "@/modules/ee/audit-logs/lib/handler";
+import { withAuditLogging } from "@/modules/fsinf-ce/audit-logs/lib/handler";
 
 const ZCreateOrUpdateIntegrationAction = z.object({
   workspaceId: ZId,

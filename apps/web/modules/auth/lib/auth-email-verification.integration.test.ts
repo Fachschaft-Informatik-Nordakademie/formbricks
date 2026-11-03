@@ -4,12 +4,12 @@ import { resetDb } from "@/integration/reset-db";
 import { capturePostHogEvent } from "@/lib/posthog";
 import { auth } from "@/modules/auth/lib/auth";
 import * as brevo from "@/modules/auth/lib/brevo";
-import { queueAuditEventBackground } from "@/modules/ee/audit-logs/lib/handler";
 import {
   sendPasswordResetLinkEmail,
   sendPasswordResetNotifyEmail,
   sendVerificationLinkEmail,
 } from "@/modules/email";
+import { queueAuditEventBackground } from "@/modules/fsinf-ce/audit-logs/lib/handler";
 
 // Spy createBrevoCustomer (the afterEmailVerification side effect) without hitting the Brevo API.
 vi.mock("@/modules/auth/lib/brevo", async (importOriginal) => {
@@ -19,8 +19,8 @@ vi.mock("@/modules/auth/lib/brevo", async (importOriginal) => {
 
 // Spy queueAuditEventBackground (the session.create.after `signedIn` audit) so the auto-login-after-
 // verification path can be asserted without depending on the real setImmediate/headers() emission.
-vi.mock("@/modules/ee/audit-logs/lib/handler", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/modules/ee/audit-logs/lib/handler")>();
+vi.mock("@/modules/fsinf-ce/audit-logs/lib/handler", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/modules/fsinf-ce/audit-logs/lib/handler")>();
   return { ...actual, queueAuditEventBackground: vi.fn().mockResolvedValue(undefined) };
 });
 

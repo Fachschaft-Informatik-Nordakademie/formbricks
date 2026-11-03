@@ -1,18 +1,10 @@
 import { ResourceNotFoundError } from "@formbricks/types/errors";
 import { SettingsCard } from "@/app/(app)/workspaces/[workspaceId]/settings/components/SettingsCard";
 import { cn } from "@/lib/cn";
-import {
-  IS_FORMBRICKS_CLOUD,
-  IS_STORAGE_CONFIGURED,
-  SURVEY_BG_COLORS,
-  UNSPLASH_ACCESS_KEY,
-} from "@/lib/constants";
+import { IS_STORAGE_CONFIGURED, SURVEY_BG_COLORS, UNSPLASH_ACCESS_KEY } from "@/lib/constants";
 import { getPublicDomain } from "@/lib/getPublicUrl";
 import { getWorkspace } from "@/lib/workspace/service";
 import { getTranslate } from "@/lingodotdev/server";
-import { getEnterpriseLicense } from "@/modules/ee/license-check/lib/license";
-import { getRemoveBrandingPermission } from "@/modules/ee/license-check/lib/utils";
-import { BrandingSettingsCard } from "@/modules/ee/whitelabel/remove-branding/components/branding-settings-card";
 import { Alert, AlertDescription } from "@/modules/ui/components/alert";
 import { PageContentWrapper } from "@/modules/ui/components/page-content-wrapper";
 import { PageHeader } from "@/modules/ui/components/page-header";
@@ -25,7 +17,7 @@ export const WorkspaceLookSettingsPage = async (props: { params: Promise<{ works
   const params = await props.params;
   const t = await getTranslate();
 
-  const { isReadOnly, organization, isOwner, isManager } = await getWorkspaceAuth(params.workspaceId);
+  const { isReadOnly } = await getWorkspaceAuth(params.workspaceId);
 
   const workspace = await getWorkspace(params.workspaceId);
 
@@ -33,17 +25,6 @@ export const WorkspaceLookSettingsPage = async (props: { params: Promise<{ works
     throw new ResourceNotFoundError(t("common.workspace"), null);
   }
 
-  const [canRemoveBranding, enterpriseLicense] = await Promise.all([
-    getRemoveBrandingPermission(organization.id),
-    IS_FORMBRICKS_CLOUD ? Promise.resolve(null) : getEnterpriseLicense(),
-  ]);
-
-  const isOwnerOrManager = isManager || isOwner;
-  const showLiteLicenseTip =
-    !IS_FORMBRICKS_CLOUD &&
-    isOwnerOrManager &&
-    enterpriseLicense?.status === "no-license" &&
-    !canRemoveBranding;
   const publicDomain = getPublicDomain();
 
   return (
@@ -81,13 +62,6 @@ export const WorkspaceLookSettingsPage = async (props: { params: Promise<{ works
         description={t("workspace.look.app_survey_placement_settings_description")}>
         <EditPlacementForm workspace={workspace} isReadOnly={isReadOnly} />
       </SettingsCard>
-
-      <BrandingSettingsCard
-        canRemoveBranding={canRemoveBranding}
-        workspace={workspace}
-        isReadOnly={isReadOnly}
-        showLiteLicenseTip={showLiteLicenseTip}
-      />
     </PageContentWrapper>
   );
 };

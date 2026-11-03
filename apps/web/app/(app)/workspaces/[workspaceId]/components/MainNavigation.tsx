@@ -1,13 +1,11 @@
 "use client";
 
 import {
-  BarChart3Icon,
   Building2Icon,
   ChevronRightIcon,
   FoldersIcon,
   Loader2,
   MessageCircle,
-  MessageSquareTextIcon,
   PanelLeftCloseIcon,
   PanelLeftOpenIcon,
   PlusIcon,
@@ -19,7 +17,6 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import posthog from "posthog-js";
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import { TOrganizationRole } from "@formbricks/types/memberships";
@@ -36,12 +33,9 @@ import FBLogo from "@/images/formbricks-wordmark.svg";
 import { cn } from "@/lib/cn";
 import { getBillingFallbackPath } from "@/lib/membership/navigation";
 import { getAccessFlags } from "@/lib/membership/utils";
-import { TrialAlert } from "@/modules/ee/billing/components/trial-alert";
-import { TRIAL_BASE_RESPONSE_LIMIT, TrialBannerNew } from "@/modules/ee/billing/components/trial-banner-new";
 import { SwitcherDropdownBody } from "@/modules/settings/components/switcher-dropdown-body";
 import { UserDropdown } from "@/modules/settings/components/user-dropdown";
 import { useSwitcherData } from "@/modules/settings/hooks/use-switcher-data";
-import { Badge } from "@/modules/ui/components/badge";
 import { Button } from "@/modules/ui/components/button";
 import {
   DropdownMenu,
@@ -83,8 +77,6 @@ export const MainNavigation = ({
   organizationWorkspacesLimit,
   isLicenseActive,
   isAccessControlAllowed,
-  responseCount,
-  newTrialBannerVariant,
   isFormbricksSurveysConfigured,
 }: NavigationProps) => {
   const router = useRouter();
@@ -145,39 +137,6 @@ export const MainNavigation = ({
               pathname?.includes("/contacts") ||
               pathname?.includes("/segments") ||
               pathname?.includes("/attributes"),
-            disabled: isMembershipPending || isBilling,
-          },
-        ],
-      },
-      {
-        id: "unify-feedback",
-        name: (
-          <span className="inline-flex items-center gap-2">
-            {/* Product section (IA) label — intentionally not localized (kept in English across all locales) */}
-            <span>Unify</span>
-            <Badge
-              text="Beta"
-              type="gray"
-              size="tiny"
-              className="text-[10px] font-semibold tracking-normal normal-case"
-            />
-          </span>
-        ),
-        items: [
-          {
-            name: t("workspace.unify.feedback_data"),
-            href: `/workspaces/${workspace.id}/unify/sources`,
-            icon: MessageSquareTextIcon,
-            isActive: pathname?.includes("/unify/"),
-            isHidden: false,
-            disabled: isMembershipPending || isBilling,
-          },
-          {
-            name: t("common.analysis"),
-            href: `/workspaces/${workspace.id}/dashboards`,
-            icon: BarChart3Icon,
-            isActive: pathname?.includes("/dashboards") || pathname?.includes("/charts"),
-            isHidden: false,
             disabled: isMembershipPending || isBilling,
           },
         ],
@@ -253,21 +212,6 @@ export const MainNavigation = ({
     }
     if (isOwnerOrManager) loadReleases();
   }, [isOwnerOrManager]);
-
-  const trialDaysRemaining = useMemo(() => {
-    if (!isFormbricksCloud || organization.billing?.stripe?.subscriptionStatus !== "trialing") return null;
-    const trialEnd = organization.billing.stripe.trialEnd;
-    if (!trialEnd) return null;
-    const ts = new Date(trialEnd).getTime();
-    if (!Number.isFinite(ts)) return null;
-    const msPerDay = 86_400_000;
-    // eslint-disable-next-line react-hooks/purity -- migration ENG-1677
-    return Math.ceil((ts - Date.now()) / msPerDay);
-  }, [
-    isFormbricksCloud,
-    organization.billing?.stripe?.subscriptionStatus,
-    organization.billing?.stripe?.trialEnd,
-  ]);
 
   const mainNavigationLink = isBilling
     ? getBillingFallbackPath(organization.id, isFormbricksCloud)
@@ -513,28 +457,6 @@ export const MainNavigation = ({
                       </p>
                     </Link>
                   )}
-
-                {/* Trial Days Remaining */}
-                {!isCollapsed &&
-                  isFormbricksCloud &&
-                  trialDaysRemaining !== null &&
-                  (newTrialBannerVariant === "test" ? (
-                    <TrialBannerNew
-                      trialDaysRemaining={trialDaysRemaining}
-                      planName={organization.billing.stripe?.plan ?? "pro"}
-                      responseCount={responseCount}
-                      responseLimit={organization.billing.limits.monthly.responses}
-                      baseResponseLimit={TRIAL_BASE_RESPONSE_LIMIT}
-                      billingHref={`/organizations/${organization.id}/settings/billing`}
-                    />
-                  ) : (
-                    <Link
-                      href={`/organizations/${organization.id}/settings/billing`}
-                      className="m-2 block"
-                      onClick={() => posthog.capture("main_nav_go_to_billing_clicked")}>
-                      <TrialAlert trialDaysRemaining={trialDaysRemaining} size="small" />
-                    </Link>
-                  ))}
               </>
             )}
 

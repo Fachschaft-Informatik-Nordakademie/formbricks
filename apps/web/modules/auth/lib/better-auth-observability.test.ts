@@ -3,8 +3,8 @@ import { APIError } from "better-auth/api";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { prisma } from "@formbricks/database";
 import { logger } from "@formbricks/logger";
-import { queueAuditEventBackground } from "@/modules/ee/audit-logs/lib/handler";
-import { UNKNOWN_DATA } from "@/modules/ee/audit-logs/types/audit-log";
+import { queueAuditEventBackground } from "@/modules/fsinf-ce/audit-logs/lib/handler";
+import { UNKNOWN_DATA } from "@/modules/fsinf-ce/audit-logs/types/audit-log";
 import {
   auditFailedAuthAfter,
   auditPasswordReset,
@@ -16,7 +16,7 @@ import {
 import { finalizeSuccessfulSignIn } from "./sign-in-tracking";
 import { logAuthAttempt, shouldLogAuthFailure } from "./utils";
 
-vi.mock("@/modules/ee/audit-logs/lib/handler", () => ({
+vi.mock("@/modules/fsinf-ce/audit-logs/lib/handler", () => ({
   queueAuditEventBackground: vi.fn(),
 }));
 

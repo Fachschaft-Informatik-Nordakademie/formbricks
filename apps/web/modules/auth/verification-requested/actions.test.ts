@@ -6,8 +6,8 @@ import { getUserByEmail } from "@/modules/auth/lib/user";
 // Import mocked functions
 import { applyIPRateLimit } from "@/modules/core/rate-limit/helpers";
 import { rateLimitConfigs } from "@/modules/core/rate-limit/rate-limit-configs";
-import { withAuditLogging } from "@/modules/ee/audit-logs/lib/handler";
 import { sendVerificationEmail } from "@/modules/email";
+import { withAuditLogging } from "@/modules/fsinf-ce/audit-logs/lib/handler";
 import { resendVerificationEmailAction } from "./actions";
 
 // Mock dependencies
@@ -52,7 +52,7 @@ vi.mock("@/lib/constants", async (importOriginal) => {
   };
 });
 
-vi.mock("@/modules/ee/audit-logs/lib/handler", () => ({
+vi.mock("@/modules/fsinf-ce/audit-logs/lib/handler", () => ({
   withAuditLogging: vi.fn((_type: string, _object: string, fn: Function) => fn),
 }));
 

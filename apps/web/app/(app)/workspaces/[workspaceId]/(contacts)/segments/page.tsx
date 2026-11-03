@@ -1,3 +1,3 @@
-import { SegmentsPage } from "@/modules/ee/contacts/segments/page";
+import { SegmentsPage } from "@/modules/fsinf-ce/contacts/segments/page";
 
 export default SegmentsPage;

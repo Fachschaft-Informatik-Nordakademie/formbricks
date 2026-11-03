@@ -9,7 +9,7 @@ import { getSession } from "@/modules/auth/lib/session";
 import { applyRateLimit } from "@/modules/core/rate-limit/helpers";
 import { rateLimitConfigs } from "@/modules/core/rate-limit/rate-limit-configs";
 import type { TRateLimitConfig } from "@/modules/core/rate-limit/types/rate-limit";
-import { TAuditAction, TAuditTarget } from "@/modules/ee/audit-logs/types/audit-log";
+import { TAuditAction, TAuditTarget } from "@/modules/fsinf-ce/audit-logs/types/audit-log";
 import { buildV3AuditLog, queueV3AuditLog } from "./audit";
 import {
   type InvalidParam,

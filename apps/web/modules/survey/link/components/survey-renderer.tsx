@@ -14,7 +14,7 @@ import {
   TERMS_URL,
 } from "@/lib/constants";
 import { getPublicDomain } from "@/lib/getPublicUrl";
-import { getIsContactsEnabled } from "@/modules/ee/license-check/lib/utils";
+import { getIsContactsEnabled } from "@/modules/fsinf-ce/features";
 import { FsinfFingerprintConsentScreen } from "@/modules/survey/link/components/fsinf-fingerprint-consent-screen";
 import { FsinfRespondentSsoScreen } from "@/modules/survey/link/components/fsinf-respondent-sso-screen";
 import { PinScreen } from "@/modules/survey/link/components/pin-screen";

@@ -3,8 +3,8 @@ import { createCacheKey } from "@formbricks/cache";
 import { logger } from "@formbricks/logger";
 import { cache } from "@/lib/cache";
 import { hashSecret, verifySecret } from "@/lib/crypto";
-import { queueAuditEventBackground } from "@/modules/ee/audit-logs/lib/handler";
-import { TAuditAction, TAuditStatus, UNKNOWN_DATA } from "@/modules/ee/audit-logs/types/audit-log";
+import { queueAuditEventBackground } from "@/modules/fsinf-ce/audit-logs/lib/handler";
+import { TAuditAction, TAuditStatus, UNKNOWN_DATA } from "@/modules/fsinf-ce/audit-logs/types/audit-log";
 
 export const hashPassword = async (password: string) => {
   return await hashSecret(password, 12);

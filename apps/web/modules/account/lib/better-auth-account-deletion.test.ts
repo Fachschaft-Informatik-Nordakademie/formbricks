@@ -5,7 +5,7 @@ import { logger } from "@formbricks/logger";
 import { deleteOrganization, getOrganizationsWhereUserIsSingleOwner } from "@/lib/organization/service";
 import { capturePostHogEvent } from "@/lib/posthog";
 import { deleteBrevoCustomerByEmail } from "@/modules/auth/lib/brevo";
-import { getIsMultiOrgEnabled } from "@/modules/ee/license-check/lib/utils";
+import { getIsMultiOrgEnabled } from "@/modules/fsinf-ce/features";
 import { queueAccountDeletionAuditEvent } from "./account-deletion-audit";
 import {
   accountDeletionAfterDelete,
@@ -22,7 +22,7 @@ vi.mock("@/lib/organization/service", () => ({
 }));
 vi.mock("@/lib/posthog", () => ({ capturePostHogEvent: vi.fn() }));
 vi.mock("@/modules/auth/lib/brevo", () => ({ deleteBrevoCustomerByEmail: vi.fn() }));
-vi.mock("@/modules/ee/license-check/lib/utils", () => ({ getIsMultiOrgEnabled: vi.fn() }));
+vi.mock("@/modules/fsinf-ce/features", () => ({ getIsMultiOrgEnabled: vi.fn() }));
 vi.mock("./account-deletion-audit", () => ({ queueAccountDeletionAuditEvent: vi.fn() }));
 
 const user = { id: "user-1", email: "ada@example.com", name: "Ada" } as Parameters<

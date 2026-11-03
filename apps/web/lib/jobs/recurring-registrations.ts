@@ -10,9 +10,9 @@ import {
   type TWorkflowRunJobData,
   recurringJobs,
 } from "@formbricks/jobs";
-import { processWorkflowRunJob } from "@/modules/ee/workflows/lib/runner/process-workflow-run-job";
-import { processWorkflowRunReconcileJob } from "@/modules/ee/workflows/lib/runner/process-workflow-run-reconcile-job";
-import { WORKFLOW_RUN_RECONCILE_INTERVAL_MS } from "@/modules/ee/workflows/lib/runner/reconcile-constants";
+import { processWorkflowRunJob } from "@/modules/fsinf-ce/workflows/lib/runner/process-workflow-run-job";
+import { processWorkflowRunReconcileJob } from "@/modules/fsinf-ce/workflows/lib/runner/process-workflow-run-reconcile-job";
+import { WORKFLOW_RUN_RECONCILE_INTERVAL_MS } from "@/modules/fsinf-ce/workflows/lib/runner/reconcile-constants";
 import { processResponsePipelineJob } from "@/modules/response-pipeline/lib/process-response-pipeline-job";
 import {
   SURVEY_ARCHIVE_PURGE_DAILY_CRON_PATTERN,

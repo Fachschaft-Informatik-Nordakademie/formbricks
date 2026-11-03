@@ -3,9 +3,12 @@ import { ZodIssue, z } from "zod";
 import { AuthorizationError } from "@formbricks/types/errors";
 import { type TOrganizationRole } from "@formbricks/types/memberships";
 import { getMembershipRole } from "@/lib/membership/hooks/actions";
-import { getTeamRoleByTeamIdUserId, getWorkspacePermissionByUserId } from "@/modules/ee/teams/lib/roles";
-import { type TTeamRole } from "@/modules/ee/teams/team-list/types/team";
-import { type TTeamPermission } from "@/modules/ee/teams/workspace-teams/types/team";
+import {
+  getTeamRoleByTeamIdUserId,
+  getWorkspacePermissionByUserId,
+} from "@/modules/fsinf-ce/teams/lib/roles";
+import { type TTeamRole } from "@/modules/fsinf-ce/teams/team-list/types/team";
+import { type TTeamPermission } from "@/modules/fsinf-ce/teams/workspace-teams/types/team";
 
 export const formatErrors = (issues: ZodIssue[]): Record<string, { _errors: string[] }> => {
   return {

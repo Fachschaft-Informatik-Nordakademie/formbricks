@@ -16,7 +16,7 @@ import {
   getWebhook,
   getWebhookWithSecret,
 } from "@/modules/api/v2/management/webhooks/[webhookId]/lib/webhook";
-import { withAuditLogging } from "@/modules/ee/audit-logs/lib/handler";
+import { withAuditLogging } from "@/modules/fsinf-ce/audit-logs/lib/handler";
 import {
   createWebhook,
   deleteWebhook,

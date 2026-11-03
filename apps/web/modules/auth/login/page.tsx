@@ -23,11 +23,7 @@ import {
   FSINF_SSO_DISPLAY_NAME,
   FSINF_SSO_ENABLED,
 } from "@/modules/auth/lib/fsinf-sso-config";
-import {
-  getIsMultiOrgEnabled,
-  getIsSamlSsoEnabled,
-  getIsSsoEnabled,
-} from "@/modules/ee/license-check/lib/utils";
+import { getIsMultiOrgEnabled, getIsSamlSsoEnabled, getIsSsoEnabled } from "@/modules/fsinf-ce/features";
 import { LoginForm } from "./components/login-form";
 
 export const metadata: Metadata = {

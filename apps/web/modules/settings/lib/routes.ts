@@ -12,7 +12,7 @@ export const accountSettingsPath = (slug: string): string => `/account/settings/
 export const workspaceSettingsPath = (workspaceId: string, slug: string): string =>
   `/workspaces/${workspaceId}/settings/workspace/${slug}`;
 
-// Where billing-role users (and other "you can't see this settings page" cases) get sent. Billing is an
-// organization-level concern, so it resolves to the org-scoped billing/enterprise page.
-export const getOrganizationBillingPath = (organizationId: string, isFormbricksCloud: boolean): string =>
-  organizationSettingsPath(organizationId, isFormbricksCloud ? "billing" : "enterprise");
+// Where billing-role users (and other "you can't see this settings page" cases) get sent.
+// FSINF CE: there is no billing or enterprise page in this build, so it is the general org settings.
+export const getOrganizationBillingPath = (organizationId: string, _isFormbricksCloud: boolean): string =>
+  organizationSettingsPath(organizationId, "general");

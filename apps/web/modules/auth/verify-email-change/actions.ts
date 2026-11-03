@@ -5,7 +5,7 @@ import { verifyEmailChangeToken } from "@/lib/jwt";
 import { actionClient } from "@/lib/utils/action-client";
 import { updateBrevoCustomer } from "@/modules/auth/lib/brevo";
 import { getUser, updateUser } from "@/modules/auth/lib/user";
-import { withAuditLogging } from "@/modules/ee/audit-logs/lib/handler";
+import { withAuditLogging } from "@/modules/fsinf-ce/audit-logs/lib/handler";
 
 export const verifyEmailChangeAction = actionClient.inputSchema(z.object({ token: z.string() })).action(
   withAuditLogging("updated", "user", async ({ ctx, parsedInput }) => {

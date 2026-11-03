@@ -21,7 +21,7 @@ import {
   successListResponse,
   successResponse,
 } from "@/app/api/v3/lib/response";
-import { UNKNOWN_DATA } from "@/modules/ee/audit-logs/types/audit-log";
+import { UNKNOWN_DATA } from "@/modules/fsinf-ce/audit-logs/types/audit-log";
 import { registerFeedbackRecordTools } from "./feedback-records";
 
 // Asserted as a shape, not by calling getMcpResourceUrl() here: comparing production's value with

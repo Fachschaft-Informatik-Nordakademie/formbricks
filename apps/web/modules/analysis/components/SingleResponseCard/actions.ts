@@ -16,7 +16,7 @@ import {
   getWorkspaceIdFromSurveyId,
 } from "@/lib/utils/helper";
 import { getTag } from "@/lib/utils/services";
-import { withAuditLogging } from "@/modules/ee/audit-logs/lib/handler";
+import { withAuditLogging } from "@/modules/fsinf-ce/audit-logs/lib/handler";
 
 const ZCreateTagAction = z.object({
   workspaceId: ZId,

@@ -6,7 +6,7 @@ import { PrismaErrorType } from "@formbricks/database/types/error";
 import { ok, okVoid } from "@formbricks/types/error-handlers";
 import { TSurveyQuota } from "@formbricks/types/quota";
 import { getDisplayForResponseValidation } from "@/lib/display/service";
-import { evaluateResponseQuotas } from "@/modules/ee/quotas/lib/evaluation-service";
+import { evaluateResponseQuotas } from "@/modules/fsinf-ce/quotas/lib/evaluation-service";
 import { deleteDisplay } from "../display";
 import {
   deleteResponse,
@@ -61,7 +61,7 @@ vi.mock("../utils", () => ({
   findAndDeleteUploadedFilesInResponse: vi.fn(),
 }));
 
-vi.mock("@/modules/ee/quotas/lib/evaluation-service", () => ({
+vi.mock("@/modules/fsinf-ce/quotas/lib/evaluation-service", () => ({
   evaluateResponseQuotas: vi.fn(),
 }));
 

@@ -3,7 +3,7 @@ import { prisma } from "@formbricks/database";
 import { SurveyStatus, SurveyType } from "@formbricks/database/prisma";
 import type { TBaseFilters } from "@formbricks/types/segment";
 import { ApiErrorResponseV2 } from "@/modules/api/v2/types/api-error";
-import { segmentFilterToPrismaQuery } from "@/modules/ee/contacts/segments/lib/filter/prisma-query";
+import { segmentFilterToPrismaQuery } from "@/modules/fsinf-ce/contacts/segments/lib/filter/prisma-query";
 import { getContactsInSegment } from "../contact";
 import { getContactAttributeKeys } from "../contact-attribute-key";
 import { getSegment } from "../segment";
@@ -45,7 +45,7 @@ vi.mock("../contact-attribute-key", () => ({
   }),
 }));
 
-vi.mock("@/modules/ee/contacts/segments/lib/filter/prisma-query", () => ({
+vi.mock("@/modules/fsinf-ce/contacts/segments/lib/filter/prisma-query", () => ({
   segmentFilterToPrismaQuery: vi.fn().mockResolvedValue({
     ok: true,
     data: {

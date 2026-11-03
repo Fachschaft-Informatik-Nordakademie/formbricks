@@ -9,8 +9,8 @@ import { DatabaseError, ResourceNotFoundError } from "@formbricks/types/errors";
 import { getOrganizationByWorkspaceId } from "@/lib/organization/service";
 import { checkForInvalidMediaInBlocks } from "@/lib/survey/utils";
 import { validateInputs } from "@/lib/utils/validate";
-import { getIsQuotasEnabled } from "@/modules/ee/license-check/lib/utils";
-import { getQuotas } from "@/modules/ee/quotas/lib/quotas";
+import { getIsQuotasEnabled } from "@/modules/fsinf-ce/features";
+import { getQuotas } from "@/modules/fsinf-ce/quotas/lib/quotas";
 import { buildOrderByClause, buildWhereClause } from "@/modules/survey/lib/utils";
 import { doesWorkspaceExist, getWorkspaceWithLanguages } from "@/modules/survey/list/lib/workspace";
 import { TSurvey, TWorkspaceWithLanguages } from "../types/surveys";
@@ -66,11 +66,11 @@ vi.mock("@paralleldrive/cuid2", () => ({
   createId: vi.fn(() => "new_cuid2_id"),
 }));
 
-vi.mock("@/modules/ee/license-check/lib/utils", () => ({
+vi.mock("@/modules/fsinf-ce/features", () => ({
   getIsQuotasEnabled: vi.fn(),
 }));
 
-vi.mock("@/modules/ee/quotas/lib/quotas", () => ({
+vi.mock("@/modules/fsinf-ce/quotas/lib/quotas", () => ({
   getQuotas: vi.fn(),
 }));
 

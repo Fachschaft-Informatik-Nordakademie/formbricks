@@ -4,9 +4,12 @@ import { Prisma } from "@formbricks/database/prisma";
 import type { TContactAttributeKey } from "@formbricks/types/contact-attribute-key";
 import { DatabaseError } from "@formbricks/types/errors";
 import { getOrganizationByWorkspaceId } from "@/lib/organization/service";
-import { getContactAttributeKeys } from "@/modules/ee/contacts/lib/contact-attribute-keys";
-import { getExistingWorkspaceSurveyIds, getSegments } from "@/modules/ee/contacts/segments/lib/segments";
-import { getIsContactsEnabled } from "@/modules/ee/license-check/lib/utils";
+import { getContactAttributeKeys } from "@/modules/fsinf-ce/contacts/lib/contact-attribute-keys";
+import {
+  getExistingWorkspaceSurveyIds,
+  getSegments,
+} from "@/modules/fsinf-ce/contacts/segments/lib/segments";
+import { getIsContactsEnabled } from "@/modules/fsinf-ce/features";
 import { V3SurveyReferenceValidationError } from "./reference-validation";
 import type { TV3SurveyTargeting } from "./schemas";
 import {
@@ -30,16 +33,16 @@ vi.mock("@/lib/organization/service", () => ({
   getOrganizationByWorkspaceId: vi.fn(),
 }));
 
-vi.mock("@/modules/ee/contacts/lib/contact-attribute-keys", () => ({
+vi.mock("@/modules/fsinf-ce/contacts/lib/contact-attribute-keys", () => ({
   getContactAttributeKeys: vi.fn(),
 }));
 
-vi.mock("@/modules/ee/contacts/segments/lib/segments", () => ({
+vi.mock("@/modules/fsinf-ce/contacts/segments/lib/segments", () => ({
   getSegments: vi.fn(),
   getExistingWorkspaceSurveyIds: vi.fn(),
 }));
 
-vi.mock("@/modules/ee/license-check/lib/utils", () => ({
+vi.mock("@/modules/fsinf-ce/features", () => ({
   getIsContactsEnabled: vi.fn(),
 }));
 

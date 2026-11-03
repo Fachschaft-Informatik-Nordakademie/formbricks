@@ -19,7 +19,7 @@ import {
 } from "@formbricks/types/surveys/types";
 import { getFormattedErrorMessage } from "@/lib/utils/helper";
 import { isDeepEqual } from "@/lib/utils/object";
-import { createSegmentAction } from "@/modules/ee/contacts/segments/actions";
+import { createSegmentAction } from "@/modules/fsinf-ce/contacts/segments/actions";
 import { scrollElementCardIntoView } from "@/modules/survey/editor/lib/utils";
 import { TSurveyDraft } from "@/modules/survey/editor/types/survey";
 import { Alert, AlertButton, AlertTitle } from "@/modules/ui/components/alert";

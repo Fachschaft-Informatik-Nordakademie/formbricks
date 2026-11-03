@@ -82,11 +82,11 @@ vi.mock("@/modules/survey/archive/lib/process-survey-archive-purge-job", () => (
   processSurveyArchivePurgeJob: mockProcessSurveyArchivePurgeJob,
 }));
 
-vi.mock("@/modules/ee/workflows/lib/runner/process-workflow-run-job", () => ({
+vi.mock("@/modules/fsinf-ce/workflows/lib/runner/process-workflow-run-job", () => ({
   processWorkflowRunJob: mockProcessWorkflowRunJob,
 }));
 
-vi.mock("@/modules/ee/workflows/lib/runner/process-workflow-run-reconcile-job", () => ({
+vi.mock("@/modules/fsinf-ce/workflows/lib/runner/process-workflow-run-reconcile-job", () => ({
   processWorkflowRunReconcileJob: mockProcessWorkflowRunReconcileJob,
 }));
 
@@ -408,7 +408,7 @@ describe("instrumentation-jobs", () => {
       const { SURVEY_ARCHIVE_PURGE_DAILY_CRON_PATTERN, SURVEY_ARCHIVE_PURGE_TIME_ZONE } =
         await import("@/modules/survey/archive/lib/constants");
       const { WORKFLOW_RUN_RECONCILE_INTERVAL_MS } =
-        await import("@/modules/ee/workflows/lib/runner/reconcile-constants");
+        await import("@/modules/fsinf-ce/workflows/lib/runner/reconcile-constants");
 
       await registerRecurringJobs();
       await registerRecurringJobs();

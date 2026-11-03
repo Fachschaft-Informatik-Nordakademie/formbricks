@@ -2,11 +2,11 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { prisma } from "@formbricks/database";
 import { TResponse, TResponseInput } from "@formbricks/types/responses";
 import { updateResponse } from "@/lib/response/service";
-import { evaluateResponseQuotas } from "@/modules/ee/quotas/lib/evaluation-service";
+import { evaluateResponseQuotas } from "@/modules/fsinf-ce/quotas/lib/evaluation-service";
 import { updateResponseWithQuotaEvaluation } from "./response";
 
 vi.mock("@/lib/response/service");
-vi.mock("@/modules/ee/quotas/lib/evaluation-service");
+vi.mock("@/modules/fsinf-ce/quotas/lib/evaluation-service");
 
 const mockUpdateResponse = vi.mocked(updateResponse);
 const mockEvaluateResponseQuotas = vi.mocked(evaluateResponseQuotas);

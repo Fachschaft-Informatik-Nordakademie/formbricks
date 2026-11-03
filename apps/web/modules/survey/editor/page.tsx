@@ -11,14 +11,14 @@ import {
 import { getPublicDomain } from "@/lib/getPublicUrl";
 import { getTranslate } from "@/lingodotdev/server";
 import { listAuthentikGroupNames } from "@/modules/auth/lib/fsinf-authentik-directory";
-import { getContactAttributeKeys } from "@/modules/ee/contacts/lib/contact-attribute-keys";
-import { getSegments } from "@/modules/ee/contacts/segments/lib/segments";
+import { getContactAttributeKeys } from "@/modules/fsinf-ce/contacts/lib/contact-attribute-keys";
+import { getSegments } from "@/modules/fsinf-ce/contacts/segments/lib/segments";
 import {
   getIsContactsEnabled,
   getIsQuotasEnabled,
   getIsSpamProtectionEnabled,
-} from "@/modules/ee/license-check/lib/utils";
-import { getQuotas } from "@/modules/ee/quotas/lib/quotas";
+} from "@/modules/fsinf-ce/features";
+import { getQuotas } from "@/modules/fsinf-ce/quotas/lib/quotas";
 import { getTeamMemberDetails } from "@/modules/survey/editor/lib/team";
 import { getUserEmail } from "@/modules/survey/editor/lib/user";
 import { getWorkspaceLanguages } from "@/modules/survey/editor/lib/workspace";

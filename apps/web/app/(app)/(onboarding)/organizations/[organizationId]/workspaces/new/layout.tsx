@@ -1,12 +1,10 @@
 import { notFound, redirect } from "next/navigation";
 import { ResourceNotFoundError } from "@formbricks/types/errors";
-import { IS_FORMBRICKS_CLOUD } from "@/lib/constants";
 import { getMembershipByUserIdOrganizationId } from "@/lib/membership/service";
 import { getAccessFlags } from "@/lib/membership/utils";
 import { getOrganization } from "@/lib/organization/service";
 import { getTranslate } from "@/lingodotdev/server";
 import { getSession } from "@/modules/auth/lib/session";
-import { invalidateOrganizationBillingCache } from "@/modules/ee/billing/lib/organization-billing";
 
 const OnboardingLayout = async (props: {
   params: Promise<{ organizationId: string }>;
@@ -29,11 +27,6 @@ const OnboardingLayout = async (props: {
   const organization = await getOrganization(params.organizationId);
   if (!organization) {
     throw new ResourceNotFoundError(t("common.organization"), params.organizationId);
-  }
-
-  if (IS_FORMBRICKS_CLOUD) {
-    // Refresh trial/plan state after users return from onboarding billing actions.
-    await invalidateOrganizationBillingCache(organization.id);
   }
 
   return <>{children}</>;

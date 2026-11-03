@@ -13,9 +13,9 @@ import { getUserByEmail } from "@/modules/auth/lib/user";
 import { TVerificationRequestPurpose } from "@/modules/auth/lib/verification-links";
 import { applyIPRateLimit } from "@/modules/core/rate-limit/helpers";
 import { rateLimitConfigs } from "@/modules/core/rate-limit/rate-limit-configs";
-import { withAuditLogging } from "@/modules/ee/audit-logs/lib/handler";
 import { SSO_RECOVERY_COMPLETION_PATH } from "@/modules/ee/sso/lib/constants";
 import { sendVerificationEmail } from "@/modules/email";
+import { withAuditLogging } from "@/modules/fsinf-ce/audit-logs/lib/handler";
 
 const ZResendVerificationEmailAction = z.object({
   email: ZUserEmail,

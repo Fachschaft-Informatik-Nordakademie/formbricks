@@ -4,7 +4,7 @@ import { getMembershipByUserIdOrganizationId } from "@/lib/membership/service";
 import { getAccessFlags } from "@/lib/membership/utils";
 import { getOrganization, updateOrganization } from "@/lib/organization/service";
 import { getUserWorkspaces, getWorkspaces } from "@/lib/workspace/service";
-import { getIsAISmartToolsEnabled } from "@/modules/ee/license-check/lib/utils";
+import { getIsAISmartToolsEnabled } from "@/modules/fsinf-ce/features";
 import { getOnboardingWorkspaceContext, selectOldestWorkspace } from "./onboarding-workspace";
 
 vi.mock("@/lib/membership/service", () => ({
@@ -20,7 +20,7 @@ vi.mock("@/lib/organization/service", () => ({
   updateOrganization: vi.fn(),
 }));
 
-vi.mock("@/modules/ee/license-check/lib/utils", () => ({
+vi.mock("@/modules/fsinf-ce/features", () => ({
   getIsAISmartToolsEnabled: vi.fn(),
 }));
 

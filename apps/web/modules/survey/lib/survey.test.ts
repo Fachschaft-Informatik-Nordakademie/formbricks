@@ -5,7 +5,7 @@ import { PrismaErrorType } from "@formbricks/database/types/error";
 import { DatabaseError, ResourceNotFoundError } from "@formbricks/types/errors";
 import { TOrganizationBilling } from "@formbricks/types/organizations";
 import { TSurvey } from "@formbricks/types/surveys/types";
-import { getOrganizationBillingWithReadThroughSync } from "@/modules/ee/billing/lib/organization-billing";
+import { getSelfHostedOrganizationBilling } from "@/modules/fsinf-ce/billing/organization-billing";
 import { getOrganizationBilling, getSurvey } from "./survey";
 
 // Mock prisma
@@ -17,8 +17,8 @@ vi.mock("@formbricks/database", () => ({
   },
 }));
 
-vi.mock("@/modules/ee/billing/lib/organization-billing", () => ({
-  getOrganizationBillingWithReadThroughSync: vi.fn(),
+vi.mock("@/modules/fsinf-ce/billing/organization-billing", () => ({
+  getSelfHostedOrganizationBilling: vi.fn(),
 }));
 
 // Mock transformPrismaSurvey
@@ -39,21 +39,21 @@ describe("Survey Library Tests", () => {
         subscriptionStatus: "active",
         nextRenewalDate: new Date(),
       } as unknown as TOrganizationBilling;
-      vi.mocked(getOrganizationBillingWithReadThroughSync).mockResolvedValueOnce(mockBilling);
+      vi.mocked(getSelfHostedOrganizationBilling).mockResolvedValueOnce(mockBilling);
 
       const billing = await getOrganizationBilling("org_123");
       expect(billing).toEqual(mockBilling);
-      expect(getOrganizationBillingWithReadThroughSync).toHaveBeenCalledWith("org_123");
+      expect(getSelfHostedOrganizationBilling).toHaveBeenCalledWith("org_123");
     });
 
     test("should throw ResourceNotFoundError when organization not found", async () => {
-      vi.mocked(getOrganizationBillingWithReadThroughSync).mockResolvedValueOnce(null);
+      vi.mocked(getSelfHostedOrganizationBilling).mockResolvedValueOnce(null);
       await expect(getOrganizationBilling("org_nonexistent")).rejects.toThrow(ResourceNotFoundError);
     });
 
     test("should throw other errors", async () => {
       const genericError = new Error("Generic error");
-      vi.mocked(getOrganizationBillingWithReadThroughSync).mockRejectedValueOnce(genericError);
+      vi.mocked(getSelfHostedOrganizationBilling).mockRejectedValueOnce(genericError);
       await expect(getOrganizationBilling("org_error")).rejects.toThrow(genericError);
     });
   });

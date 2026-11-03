@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import { TOrganizationRole } from "@formbricks/types/memberships";
 import { cn } from "@/lib/cn";
 import type { TAuthentikDirectoryMember } from "@/modules/auth/lib/fsinf-authentik-directory";
-import type { TOrganizationTeam } from "@/modules/ee/teams/team-list/types/team";
+import type { TOrganizationTeam } from "@/modules/fsinf-ce/teams/team-list/types/team";
 import { FsinfAuthentikMemberPicker } from "@/modules/organization/settings/teams/components/invite-member/fsinf-authentik-member-picker";
 import { buildInviteesFromDirectory } from "@/modules/organization/settings/teams/components/invite-member/fsinf-directory-invitees";
 import { ZInvitees } from "@/modules/organization/settings/teams/types/invites";
@@ -139,7 +139,9 @@ export const BulkInviteTab = ({
   const onInviteSelection = async () => {
     if (!directorySelection.length || !isBulkInviteAllowed || isImporting) return;
 
-    const parsed = ZInvitees.safeParse(buildInviteesFromDirectory(directorySelection, isAccessControlAllowed));
+    const parsed = ZInvitees.safeParse(
+      buildInviteesFromDirectory(directorySelection, isAccessControlAllowed)
+    );
     if (!parsed.success) {
       setError(t("workspace.settings.general.please_check_csv_file"));
       return;

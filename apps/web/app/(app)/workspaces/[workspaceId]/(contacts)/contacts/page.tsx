@@ -1,3 +1,3 @@
-import { ContactsPage } from "@/modules/ee/contacts/page";
+import { ContactsPage } from "@/modules/fsinf-ce/contacts/page";
 
 export default ContactsPage;

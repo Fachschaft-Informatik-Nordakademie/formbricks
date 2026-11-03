@@ -7,20 +7,12 @@ import { SecurityListTip } from "@/app/(app)/workspaces/[workspaceId]/settings/o
 import { isInstanceAIConfigured } from "@/lib/ai/service";
 import {
   ENTERPRISE_LICENSE_REQUEST_FORM_URL,
-  FB_LOGO_URL,
   IS_FORMBRICKS_CLOUD,
   IS_STORAGE_CONFIGURED,
 } from "@/lib/constants";
-import { getUser } from "@/lib/user/service";
 import { getTranslate } from "@/lingodotdev/server";
-import {
-  getIsAISmartToolsEnabled,
-  getIsMultiOrgEnabled,
-  getWhiteLabelPermission,
-} from "@/modules/ee/license-check/lib/utils";
-import { EmailCustomizationSettings } from "@/modules/ee/whitelabel/email-customization/components/email-customization-settings";
+import { getIsAISmartToolsEnabled, getIsMultiOrgEnabled } from "@/modules/fsinf-ce/features";
 import { getOrganizationAuth } from "@/modules/organization/lib/utils";
-import { getSettingsLayoutData } from "@/modules/settings/lib/navigation-data";
 import { redirectBillingRoleFromRestrictedOrgSettings } from "@/modules/settings/lib/redirect-billing-role";
 import { Alert, AlertDescription } from "@/modules/ui/components/alert";
 import { IdBadge } from "@/modules/ui/components/id-badge";
@@ -34,22 +26,17 @@ const Page = async (props: Readonly<{ params: Promise<{ organizationId: string }
 
   await redirectBillingRoleFromRestrictedOrgSettings(params.organizationId);
 
-  const { session, currentUserMembership, organization, isOwner, isManager } = await getOrganizationAuth(
+  const { session, currentUserMembership, organization, isOwner } = await getOrganizationAuth(
     params.organizationId
   );
 
-  const user = session?.user?.id ? await getUser(session.user.id) : null;
-
-  const [isMultiOrgEnabled, hasWhiteLabelPermission, hasAIPermission, layoutData] = await Promise.all([
+  const [isMultiOrgEnabled, hasAIPermission] = await Promise.all([
     getIsMultiOrgEnabled(),
-    getWhiteLabelPermission(organization.id),
     getIsAISmartToolsEnabled(organization.id),
-    getSettingsLayoutData(session.user.id, organization.id),
   ]);
 
   const isDeleteDisabled = !isOwner || !isMultiOrgEnabled;
   const currentUserRole = currentUserMembership?.role;
-  const isOwnerOrManager = isManager || isOwner;
 
   return (
     <PageContentWrapper>
@@ -79,17 +66,6 @@ const Page = async (props: Readonly<{ params: Promise<{ organizationId: string }
           enterpriseLicenseRequestFormUrl={ENTERPRISE_LICENSE_REQUEST_FORM_URL}
         />
       </SettingsCard>
-      <EmailCustomizationSettings
-        organization={organization}
-        hasWhiteLabelPermission={hasWhiteLabelPermission}
-        workspaceId={layoutData?.currentWorkspace?.id ?? ""}
-        isReadOnly={!isOwnerOrManager}
-        isFormbricksCloud={IS_FORMBRICKS_CLOUD}
-        fbLogoUrl={FB_LOGO_URL}
-        user={user}
-        isStorageConfigured={IS_STORAGE_CONFIGURED}
-        enterpriseLicenseRequestFormUrl={ENTERPRISE_LICENSE_REQUEST_FORM_URL}
-      />
       {isMultiOrgEnabled && (
         <>
           <SettingsCard

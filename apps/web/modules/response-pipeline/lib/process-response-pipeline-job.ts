@@ -7,17 +7,16 @@ import { logger } from "@formbricks/logger";
 import { type TUserLocale, ZUserLocale } from "@formbricks/types/user";
 import { DANGEROUSLY_ALLOW_WEBHOOK_INTERNAL_URLS, POSTHOG_KEY } from "@/lib/constants";
 import { generateStandardWebhookSignature } from "@/lib/crypto";
-import { handleFeedbackSourcePipeline } from "@/lib/feedback-source/pipeline-handler";
 import { getIntegrations } from "@/lib/integration/service";
 import { isDatabasePoolExhaustionError } from "@/lib/jobs/pool-exhaustion";
 import { getResponseCountBySurveyId } from "@/lib/response/service";
 import { createPinnedDispatcher, validateAndResolveWebhookUrl } from "@/lib/utils/validate-webhook-url";
-import { queueAuditEventWithoutRequest } from "@/modules/ee/audit-logs/lib/handler";
-import { type TAuditStatus, UNKNOWN_DATA } from "@/modules/ee/audit-logs/types/audit-log";
 import { recordResponseCreatedMeterEvent } from "@/modules/ee/billing/lib/metering";
-import { dispatchWorkflowRunViaJobs } from "@/modules/ee/workflows/lib/runner/dispatch";
-import { enqueueResponseCompletedWorkflowRuns } from "@/modules/ee/workflows/lib/runner/enqueue-response-completed-runs";
 import { sendResponseFinishedEmail } from "@/modules/email";
+import { queueAuditEventWithoutRequest } from "@/modules/fsinf-ce/audit-logs/lib/handler";
+import { type TAuditStatus, UNKNOWN_DATA } from "@/modules/fsinf-ce/audit-logs/types/audit-log";
+import { dispatchWorkflowRunViaJobs } from "@/modules/fsinf-ce/workflows/lib/runner/dispatch";
+import { enqueueResponseCompletedWorkflowRuns } from "@/modules/fsinf-ce/workflows/lib/runner/enqueue-response-completed-runs";
 import { captureSurveyResponsePostHogEvent } from "@/modules/response-pipeline/lib/posthog";
 import { resolveStorageUrlsInObject } from "@/modules/storage/utils";
 import { sendFollowUpsForResponse } from "@/modules/survey/follow-ups/lib/follow-ups";
@@ -682,18 +681,6 @@ const runResponseFinishedSideEffects = async ({
         "Response pipeline integration handling failed"
       );
     }
-  }
-
-  try {
-    await handleFeedbackSourcePipeline(data.response, survey, workspaceId);
-  } catch (error) {
-    logger.error(
-      {
-        ...logContext,
-        err: error,
-      },
-      "Response pipeline feedbackSource handling failed"
-    );
   }
 
   await handleFollowUpsSafely({

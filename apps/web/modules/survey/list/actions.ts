@@ -13,7 +13,7 @@ import {
   generateSurveySingleUseLinkParams,
   generateSurveySingleUseLinkParamsList,
 } from "@/lib/utils/single-use-surveys";
-import { withAuditLogging } from "@/modules/ee/audit-logs/lib/handler";
+import { withAuditLogging } from "@/modules/fsinf-ce/audit-logs/lib/handler";
 import { copySurveyToOtherWorkspace } from "@/modules/survey/list/lib/survey";
 
 const ZCopySurveyToOtherWorkspaceAction = z.object({

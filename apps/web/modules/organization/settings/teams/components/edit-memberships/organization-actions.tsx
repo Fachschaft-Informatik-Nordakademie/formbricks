@@ -10,7 +10,7 @@ import { TOrganization } from "@formbricks/types/organizations";
 import { FORMBRICKS_ENVIRONMENT_ID_LS } from "@/lib/localStorage";
 import { getAccessFlags } from "@/lib/membership/utils";
 import { getFormattedErrorMessage } from "@/lib/utils/helper";
-import { TOrganizationTeam } from "@/modules/ee/teams/team-list/types/team";
+import { TOrganizationTeam } from "@/modules/fsinf-ce/teams/team-list/types/team";
 import {
   bulkInviteUsersAction,
   inviteUserAction,

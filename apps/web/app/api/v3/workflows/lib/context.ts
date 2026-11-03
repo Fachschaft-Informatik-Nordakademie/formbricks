@@ -14,7 +14,7 @@ import { ENCRYPTION_KEY } from "@/lib/constants";
 import { normalizeEmailForComparison } from "@/lib/utils/email";
 import { getOrganizationIdFromWorkspaceId } from "@/lib/utils/helper";
 import { getWorkspaceMemberEmails } from "@/lib/workspace/service";
-import { getIsWorkflowsEnabled } from "@/modules/ee/license-check/lib/utils";
+import { getIsWorkflowsEnabled } from "@/modules/fsinf-ce/features";
 
 /**
  * Adapter glue between the Next.js v3 routes and the framework-agnostic `@formbricks/workflows`

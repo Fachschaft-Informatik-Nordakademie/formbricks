@@ -8,9 +8,9 @@ import { RequestBodyTooLargeError, readRequestBodyWithLimit } from "@/app/lib/ap
 import { verifyFeedbackRecordsGatewayToken } from "@/lib/jwt";
 import { checkAuthorizationUpdated } from "@/lib/utils/action-client/action-client-middleware";
 import { getBearerTokenFromHeaders } from "@/modules/api/lib/api-key-auth";
-import { getFeedbackDirectoryAuthContext } from "@/modules/ee/feedback-directory/lib/feedback-directory";
-import { getIsFeedbackDirectoriesEnabled } from "@/modules/ee/license-check/lib/utils";
-import type { TTeamPermission } from "@/modules/ee/teams/workspace-teams/types/team";
+import { getIsFeedbackDirectoriesEnabled } from "@/modules/fsinf-ce/features";
+import { getFeedbackDirectoryAuthContext } from "@/modules/fsinf-ce/feedback-directory/lib/feedback-directory";
+import type { TTeamPermission } from "@/modules/fsinf-ce/teams/workspace-teams/types/team";
 import {
   TGatewayAuthenticatedPrincipal,
   TGatewayRequestAuthorizer,

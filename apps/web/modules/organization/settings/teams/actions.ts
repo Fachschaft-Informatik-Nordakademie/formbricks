@@ -17,11 +17,11 @@ import { checkAuthorizationUpdated } from "@/lib/utils/action-client/action-clie
 import { getOrganizationIdFromInviteId } from "@/lib/utils/helper";
 import { assertRateLimitAvailable, recordRateLimitUsage } from "@/modules/core/rate-limit/helpers";
 import { rateLimitConfigs } from "@/modules/core/rate-limit/rate-limit-configs";
-import { withAuditLogging } from "@/modules/ee/audit-logs/lib/handler";
-import { getBulkInvitePermission, getIsMultiOrgEnabled } from "@/modules/ee/license-check/lib/utils";
-import { checkRoleManagementPermission } from "@/modules/ee/role-management/actions";
-import { getTeamsWhereUserIsAdmin } from "@/modules/ee/teams/lib/roles";
 import { sendInviteMemberEmail } from "@/modules/email";
+import { withAuditLogging } from "@/modules/fsinf-ce/audit-logs/lib/handler";
+import { getBulkInvitePermission, getIsMultiOrgEnabled } from "@/modules/fsinf-ce/features";
+import { checkRoleManagementPermission } from "@/modules/fsinf-ce/role-management/actions";
+import { getTeamsWhereUserIsAdmin } from "@/modules/fsinf-ce/teams/lib/roles";
 import {
   deleteMembership,
   getMembershipsByUserId,

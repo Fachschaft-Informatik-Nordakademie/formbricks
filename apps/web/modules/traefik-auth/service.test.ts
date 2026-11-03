@@ -52,11 +52,11 @@ vi.mock("@formbricks/database", () => ({
   },
 }));
 
-vi.mock("@/modules/ee/feedback-directory/lib/feedback-directory", () => ({
+vi.mock("@/modules/fsinf-ce/feedback-directory/lib/feedback-directory", () => ({
   getFeedbackDirectoryAuthContext: mockGetFeedbackDirectoryAuthContext,
 }));
 
-vi.mock("@/modules/ee/license-check/lib/utils", () => ({
+vi.mock("@/modules/fsinf-ce/features", () => ({
   getIsFeedbackDirectoriesEnabled: mockGetIsFeedbackDirectoriesEnabled,
 }));
 

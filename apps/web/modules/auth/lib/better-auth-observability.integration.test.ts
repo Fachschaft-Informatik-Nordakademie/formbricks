@@ -3,11 +3,11 @@ import { prisma } from "@formbricks/database";
 import { resetDb } from "@/integration/reset-db";
 import { hashSecret } from "@/lib/crypto";
 import { auth } from "@/modules/auth/lib/auth";
-import * as auditHandler from "@/modules/ee/audit-logs/lib/handler";
+import * as auditHandler from "@/modules/fsinf-ce/audit-logs/lib/handler";
 
 // Capture audit emission without running the real background audit logging (DB writes via setImmediate).
-vi.mock("@/modules/ee/audit-logs/lib/handler", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/modules/ee/audit-logs/lib/handler")>();
+vi.mock("@/modules/fsinf-ce/audit-logs/lib/handler", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/modules/fsinf-ce/audit-logs/lib/handler")>();
   return { ...actual, queueAuditEventBackground: vi.fn() };
 });
 

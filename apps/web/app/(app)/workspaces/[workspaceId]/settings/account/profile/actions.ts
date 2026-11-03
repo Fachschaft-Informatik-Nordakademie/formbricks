@@ -17,8 +17,8 @@ import { auth } from "@/modules/auth/lib/auth";
 import { updateBrevoCustomer } from "@/modules/auth/lib/brevo";
 import { applyRateLimit } from "@/modules/core/rate-limit/helpers";
 import { rateLimitConfigs } from "@/modules/core/rate-limit/rate-limit-configs";
-import { withAuditLogging } from "@/modules/ee/audit-logs/lib/handler";
 import { sendVerificationNewEmail } from "@/modules/email";
+import { withAuditLogging } from "@/modules/fsinf-ce/audit-logs/lib/handler";
 
 function buildUserUpdatePayload(parsedInput: TUserPersonalInfoUpdateInput): TUserUpdateInput {
   return {

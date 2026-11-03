@@ -21,12 +21,11 @@ import { convertToCsv } from "@/lib/utils/file-conversion";
 import { getOrganizationIdFromSurveyId, getWorkspaceIdFromSurveyId } from "@/lib/utils/helper";
 import { applyRateLimit } from "@/modules/core/rate-limit/helpers";
 import { rateLimitConfigs } from "@/modules/core/rate-limit/rate-limit-configs";
-import { withAuditLogging } from "@/modules/ee/audit-logs/lib/handler";
-import { generatePersonalLinks } from "@/modules/ee/contacts/lib/contacts";
-import { NO_CONTACTS_IN_SEGMENT_ERROR_CODE } from "@/modules/ee/contacts/lib/personal-link-errors";
-import { getIsContactsEnabled } from "@/modules/ee/license-check/lib/utils";
-import { getOrganizationLogoUrl } from "@/modules/ee/whitelabel/email-customization/lib/organization";
 import { sendEmbedSurveyPreviewEmail } from "@/modules/email";
+import { withAuditLogging } from "@/modules/fsinf-ce/audit-logs/lib/handler";
+import { generatePersonalLinks } from "@/modules/fsinf-ce/contacts/lib/contacts";
+import { NO_CONTACTS_IN_SEGMENT_ERROR_CODE } from "@/modules/fsinf-ce/contacts/lib/personal-link-errors";
+import { getIsContactsEnabled } from "@/modules/fsinf-ce/features";
 import { deleteResponsesAndDisplaysForSurvey } from "./lib/survey";
 
 const ZSendEmbedSurveyPreviewEmailAction = z.object({
@@ -37,7 +36,6 @@ export const sendEmbedSurveyPreviewEmailAction = authenticatedActionClient
   .inputSchema(ZSendEmbedSurveyPreviewEmailAction)
   .action(async ({ ctx, parsedInput }) => {
     const organizationId = await getOrganizationIdFromSurveyId(parsedInput.surveyId);
-    const organizationLogoUrl = await getOrganizationLogoUrl(organizationId);
 
     await checkAuthorizationUpdated({
       userId: ctx.user.id,
@@ -71,7 +69,8 @@ export const sendEmbedSurveyPreviewEmailAction = authenticatedActionClient
       emailHtml,
       survey.workspaceId,
       ctx.user.locale,
-      organizationLogoUrl || ""
+      // FSINF CE: no organization email logo (whitelabel is not part of this build).
+      ""
     );
   });
 

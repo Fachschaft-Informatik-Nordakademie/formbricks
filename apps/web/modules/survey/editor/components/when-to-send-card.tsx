@@ -8,8 +8,8 @@ import { ActionClass, OrganizationRole } from "@formbricks/database/prisma-brows
 import { TActionClass } from "@formbricks/types/action-classes";
 import { TSurvey } from "@formbricks/types/surveys/types";
 import { getAccessFlags } from "@/lib/membership/utils";
-import { getTeamPermissionFlags } from "@/modules/ee/teams/utils/teams";
-import { TTeamPermission } from "@/modules/ee/teams/workspace-teams/types/team";
+import { getTeamPermissionFlags } from "@/modules/fsinf-ce/teams/utils/teams";
+import { TTeamPermission } from "@/modules/fsinf-ce/teams/workspace-teams/types/team";
 import { AddActionModal } from "@/modules/survey/editor/components/add-action-modal";
 import { ActionClassInfo } from "@/modules/ui/components/action-class-info";
 import { AdvancedOptionToggle } from "@/modules/ui/components/advanced-option-toggle";

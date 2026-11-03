@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import { getTranslate } from "@/lingodotdev/server";
-import { WorkflowsUpgradePrompt } from "@/modules/ee/workflows/components/workflows-upgrade-prompt";
-import { WorkspaceWorkflowsHeaderCta } from "@/modules/ee/workflows/components/workspace-workflows-header-cta";
-import { WorkspaceWorkflowsSecondaryNavigation } from "@/modules/ee/workflows/components/workspace-workflows-secondary-navigation";
-import { getWorkflowsRouteAuth } from "@/modules/ee/workflows/lib/auth";
+import { WorkflowsUpgradePrompt } from "@/modules/fsinf-ce/workflows/components/workflows-upgrade-prompt";
+import { WorkspaceWorkflowsHeaderCta } from "@/modules/fsinf-ce/workflows/components/workspace-workflows-header-cta";
+import { WorkspaceWorkflowsSecondaryNavigation } from "@/modules/fsinf-ce/workflows/components/workspace-workflows-secondary-navigation";
+import { getWorkflowsRouteAuth } from "@/modules/fsinf-ce/workflows/lib/auth";
 import { PageContentWrapper } from "@/modules/ui/components/page-content-wrapper";
 import { PageHeader } from "@/modules/ui/components/page-header";
 import { WorkflowsQueryClientProvider } from "./query-client-provider";

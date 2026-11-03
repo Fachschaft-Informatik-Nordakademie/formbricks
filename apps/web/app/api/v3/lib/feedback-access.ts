@@ -1,6 +1,6 @@
 import "server-only";
-import { getIsFeedbackDirectoriesEnabled } from "@/modules/ee/license-check/lib/utils";
-import type { TTeamPermission } from "@/modules/ee/teams/workspace-teams/types/team";
+import { getIsFeedbackDirectoriesEnabled } from "@/modules/fsinf-ce/features";
+import type { TTeamPermission } from "@/modules/fsinf-ce/teams/workspace-teams/types/team";
 import { requireV3WorkspaceAccess } from "./auth";
 import { problemForbidden } from "./response";
 import type { TV3Authentication } from "./types";

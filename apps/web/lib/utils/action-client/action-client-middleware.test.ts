@@ -4,14 +4,17 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { ZodIssue, z } from "zod";
 import { AuthorizationError } from "@formbricks/types/errors";
 import { getMembershipRole } from "@/lib/membership/hooks/actions";
-import { getTeamRoleByTeamIdUserId, getWorkspacePermissionByUserId } from "@/modules/ee/teams/lib/roles";
+import {
+  getTeamRoleByTeamIdUserId,
+  getWorkspacePermissionByUserId,
+} from "@/modules/fsinf-ce/teams/lib/roles";
 import { checkAuthorizationUpdated, formatErrors } from "./action-client-middleware";
 
 vi.mock("@/lib/membership/hooks/actions", () => ({
   getMembershipRole: vi.fn(),
 }));
 
-vi.mock("@/modules/ee/teams/lib/roles", () => ({
+vi.mock("@/modules/fsinf-ce/teams/lib/roles", () => ({
   getWorkspacePermissionByUserId: vi.fn(),
   getTeamRoleByTeamIdUserId: vi.fn(),
 }));

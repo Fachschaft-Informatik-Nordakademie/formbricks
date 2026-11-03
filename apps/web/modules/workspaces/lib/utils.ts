@@ -21,10 +21,9 @@ import { hasUserWorkspaceAccess } from "@/lib/workspace/auth";
 import { getWorkspace } from "@/lib/workspace/service";
 import { getTranslate } from "@/lingodotdev/server";
 import { getSession } from "@/modules/auth/lib/session";
-import { getEnterpriseLicense } from "@/modules/ee/license-check/lib/license";
-import { getAccessControlPermission } from "@/modules/ee/license-check/lib/utils";
-import { getWorkspacePermissionByUserId } from "@/modules/ee/teams/lib/roles";
-import { getTeamPermissionFlags } from "@/modules/ee/teams/utils/teams";
+import { getAccessControlPermission, getIsMultiOrgEnabled } from "@/modules/fsinf-ce/features";
+import { getWorkspacePermissionByUserId } from "@/modules/fsinf-ce/teams/lib/roles";
+import { getTeamPermissionFlags } from "@/modules/fsinf-ce/teams/utils/teams";
 import { TWorkspaceAuth, TWorkspaceLayoutData } from "@/modules/workspaces/types/workspace-auth";
 
 /**
@@ -304,10 +303,10 @@ export const getWorkspaceLayoutData = reactCache(
       throw new AuthorizationError(t("common.membership_not_found"));
     }
 
-    const [isAccessControlAllowed, workspacePermission, license] = await Promise.all([
+    const [isAccessControlAllowed, workspacePermission, isMultiOrgEnabled] = await Promise.all([
       getAccessControlPermission(organization.id),
       getWorkspacePermissionByUserId(userId, workspace.id),
-      getEnterpriseLicense(),
+      getIsMultiOrgEnabled(),
     ]);
 
     let responseCount = 0;
@@ -329,7 +328,7 @@ export const getWorkspaceLayoutData = reactCache(
       membership,
       isAccessControlAllowed,
       workspacePermission,
-      license,
+      isMultiOrgEnabled,
       responseCount,
     };
   }

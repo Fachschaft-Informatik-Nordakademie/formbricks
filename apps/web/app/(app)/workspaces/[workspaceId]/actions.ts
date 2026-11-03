@@ -15,11 +15,8 @@ import { updateUser } from "@/lib/user/service";
 import { authenticatedActionClient } from "@/lib/utils/action-client";
 import { checkAuthorizationUpdated } from "@/lib/utils/action-client/action-client-middleware";
 import { getOrganizationWorkspacesCount } from "@/lib/workspace/service";
-import { withAuditLogging } from "@/modules/ee/audit-logs/lib/handler";
-import {
-  getAccessControlPermission,
-  getOrganizationWorkspacesLimit,
-} from "@/modules/ee/license-check/lib/utils";
+import { withAuditLogging } from "@/modules/fsinf-ce/audit-logs/lib/handler";
+import { getAccessControlPermission, getOrganizationWorkspacesLimit } from "@/modules/fsinf-ce/features";
 import { createWorkspace } from "@/modules/workspaces/settings/lib/workspace";
 import { getOrganizationsByUserId } from "./lib/organization";
 import { getWorkspacesByUserId, getWritableWorkspacesByUserId } from "./lib/workspace";

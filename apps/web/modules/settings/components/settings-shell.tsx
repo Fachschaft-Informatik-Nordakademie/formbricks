@@ -4,7 +4,6 @@ import { IS_FORMBRICKS_SURVEYS_CONFIGURED } from "@/lib/constants";
 import { SettingsNavigation } from "@/modules/settings/components/settings-navigation";
 import type { TSettingsLayoutData } from "@/modules/settings/lib/navigation-data";
 import { LimitsReachedBanner } from "@/modules/ui/components/limits-reached-banner";
-import { PendingDowngradeBanner } from "@/modules/ui/components/pending-downgrade-banner";
 
 interface SettingsShellProps {
   data: TSettingsLayoutData;
@@ -17,7 +16,6 @@ interface SettingsShellProps {
 // supplied from the current workspace so reused settings components (which call useWorkspace) behave
 // exactly as they do inside the workspace layout.
 export const SettingsShell = ({ data, children }: Readonly<SettingsShellProps>) => {
-  const { lastChecked, isPendingDowngrade, active, status } = data.license;
   const organization = {
     ...data.organization,
     billing: {
@@ -31,15 +29,6 @@ export const SettingsShell = ({ data, children }: Readonly<SettingsShellProps>) 
       {data.isFormbricksCloud && (
         <LimitsReachedBanner organization={organization} responseCount={data.responseCount} />
       )}
-
-      <PendingDowngradeBanner
-        organizationId={data.organization.id}
-        lastChecked={lastChecked}
-        isPendingDowngrade={isPendingDowngrade ?? false}
-        active={active}
-        locale={data.user.locale}
-        status={status}
-      />
 
       <div className="flex h-full">
         <SettingsNavigation
@@ -63,7 +52,7 @@ export const SettingsShell = ({ data, children }: Readonly<SettingsShellProps>) 
               isMultiOrgEnabled={data.isMultiOrgEnabled}
               organizationWorkspacesLimit={data.organizationWorkspacesLimit}
               isFormbricksCloud={data.isFormbricksCloud}
-              isLicenseActive={active}
+              isLicenseActive={true}
               isOwnerOrManager={data.isOwnerOrManager}
               isAccessControlAllowed={data.isAccessControlAllowed}
               membershipRole={data.membershipRole}

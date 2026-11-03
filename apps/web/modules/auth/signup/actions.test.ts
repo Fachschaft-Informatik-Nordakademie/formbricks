@@ -15,9 +15,9 @@ import { auth } from "@/modules/auth/lib/auth";
 import { updateUser } from "@/modules/auth/lib/user";
 import { getInvite, resolveInviteMatch } from "@/modules/auth/signup/lib/invite";
 import { applyIPRateLimit } from "@/modules/core/rate-limit/helpers";
-import { UNKNOWN_DATA } from "@/modules/ee/audit-logs/types/audit-log";
-import { getIsMultiOrgEnabled } from "@/modules/ee/license-check/lib/utils";
 import { subscribeUserToMailingList } from "@/modules/ee/mailing/lib/mailing-subscription";
+import { UNKNOWN_DATA } from "@/modules/fsinf-ce/audit-logs/types/audit-log";
+import { getIsMultiOrgEnabled } from "@/modules/fsinf-ce/features";
 import { createUserAction } from "./actions";
 
 vi.mock("next/headers", () => ({
@@ -69,7 +69,7 @@ vi.mock("@/lib/posthog", () => ({
 vi.mock("@/modules/ee/billing/lib/organization-billing", () => ({
   ensureCloudStripeSetupForOrganization: vi.fn(),
 }));
-vi.mock("@/modules/ee/license-check/lib/utils", () => ({ getIsMultiOrgEnabled: vi.fn() }));
+vi.mock("@/modules/fsinf-ce/features", () => ({ getIsMultiOrgEnabled: vi.fn() }));
 vi.mock("@/modules/ee/mailing/lib/mailing-subscription", () => ({ subscribeUserToMailingList: vi.fn() }));
 vi.mock("@/modules/email", () => ({ sendInviteAcceptedEmail: vi.fn() }));
 vi.mock("@/modules/workspaces/settings/lib/workspace", () => ({ createWorkspace: vi.fn() }));
@@ -99,7 +99,7 @@ vi.mock("@/lib/constants", () => ({
 
 vi.mock("@/lib/instance/service", () => ({ getIsFreshInstance: vi.fn() }));
 
-vi.mock("@/modules/ee/audit-logs/lib/handler", () => ({
+vi.mock("@/modules/fsinf-ce/audit-logs/lib/handler", () => ({
   withAuditLogging: vi.fn((_type: string, _object: string, fn: Function) => fn),
 }));
 

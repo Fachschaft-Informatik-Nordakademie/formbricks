@@ -4,7 +4,7 @@ import { prisma } from "@formbricks/database";
 import { Prisma } from "@formbricks/database/prisma";
 import { DatabaseError, ResourceNotFoundError } from "@formbricks/types/errors";
 import { TSurvey } from "@formbricks/types/surveys/types";
-import { getOrganizationBillingWithReadThroughSync } from "@/modules/ee/billing/lib/organization-billing";
+import { getSelfHostedOrganizationBilling } from "@/modules/fsinf-ce/billing/organization-billing";
 import { transformPrismaSurvey } from "@/modules/survey/lib/utils";
 import {
   getExistingContactResponse,
@@ -18,8 +18,8 @@ import {
 vi.mock("server-only", () => ({}));
 
 // Mock dependencies
-vi.mock("@/modules/ee/billing/lib/organization-billing", () => ({
-  getOrganizationBillingWithReadThroughSync: vi.fn(),
+vi.mock("@/modules/fsinf-ce/billing/organization-billing", () => ({
+  getSelfHostedOrganizationBilling: vi.fn(),
 }));
 
 vi.mock("@/modules/survey/lib/utils", () => ({
@@ -436,17 +436,17 @@ describe("data", () => {
 
     test("should fetch organization billing successfully", async () => {
       const organizationId = "org-1";
-      vi.mocked(getOrganizationBillingWithReadThroughSync).mockResolvedValue(mockBilling as any);
+      vi.mocked(getSelfHostedOrganizationBilling).mockResolvedValue(mockBilling as any);
 
       const result = await getOrganizationBilling(organizationId);
 
       expect(result).toEqual(mockBilling);
-      expect(getOrganizationBillingWithReadThroughSync).toHaveBeenCalledWith(organizationId);
+      expect(getSelfHostedOrganizationBilling).toHaveBeenCalledWith(organizationId);
     });
 
     test("should throw ResourceNotFoundError when organization not found", async () => {
       const organizationId = "nonexistent-org";
-      vi.mocked(getOrganizationBillingWithReadThroughSync).mockResolvedValue(null);
+      vi.mocked(getSelfHostedOrganizationBilling).mockResolvedValue(null);
 
       await expect(getOrganizationBilling(organizationId)).rejects.toThrow(ResourceNotFoundError);
       await expect(getOrganizationBilling(organizationId)).rejects.toThrow("Organization");
@@ -456,7 +456,7 @@ describe("data", () => {
       const organizationId = "org-1";
       const genericError = new Error("Generic error");
 
-      vi.mocked(getOrganizationBillingWithReadThroughSync).mockRejectedValue(genericError);
+      vi.mocked(getSelfHostedOrganizationBilling).mockRejectedValue(genericError);
 
       await expect(getOrganizationBilling(organizationId)).rejects.toThrow(genericError);
     });
@@ -468,7 +468,7 @@ describe("data", () => {
         clientVersion: "5.0.0",
       });
 
-      vi.mocked(getOrganizationBillingWithReadThroughSync).mockRejectedValue(prismaError);
+      vi.mocked(getSelfHostedOrganizationBilling).mockRejectedValue(prismaError);
 
       await expect(getOrganizationBilling(organizationId)).rejects.toThrow(prismaError);
     });

@@ -2,7 +2,7 @@ import { OperationNotAllowedError } from "@formbricks/types/errors";
 import { IS_FORMBRICKS_CLOUD } from "@/lib/constants";
 import { hasCloudEntitlementWithLicenseGuard } from "@/modules/billing/lib/feature-access";
 import { CLOUD_STRIPE_FEATURE_LOOKUP_KEYS } from "@/modules/billing/lib/stripe-catalog";
-import { getIsSpamProtectionEnabled } from "@/modules/ee/license-check/lib/utils";
+import { getIsSpamProtectionEnabled } from "@/modules/fsinf-ce/features";
 
 /**
  * Checks if the organization has spam protection enabled.

@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { OperationNotAllowedError } from "@formbricks/types/errors";
 import { hasCloudEntitlementWithLicenseGuard } from "@/modules/billing/lib/feature-access";
-import { getIsSpamProtectionEnabled } from "@/modules/ee/license-check/lib/utils";
+import { getIsSpamProtectionEnabled } from "@/modules/fsinf-ce/features";
 import { checkSpamProtectionPermission, getExternalUrlsPermission } from "./permission";
 
-vi.mock("@/modules/ee/license-check/lib/utils", () => ({
+vi.mock("@/modules/fsinf-ce/features", () => ({
   getIsSpamProtectionEnabled: vi.fn(),
 }));
 

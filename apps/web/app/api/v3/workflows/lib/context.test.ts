@@ -4,7 +4,7 @@ import { requireV3WorkspaceAccess } from "@/app/api/v3/lib/auth";
 import type { TV3AuditLog, TV3Authentication } from "@/app/api/v3/lib/types";
 import { getOrganizationIdFromWorkspaceId } from "@/lib/utils/helper";
 import { getWorkspaceMemberEmails } from "@/lib/workspace/service";
-import { getIsWorkflowsEnabled } from "@/modules/ee/license-check/lib/utils";
+import { getIsWorkflowsEnabled } from "@/modules/fsinf-ce/features";
 import { buildWorkflowApiContext } from "./context";
 
 const { surveyFindUnique } = vi.hoisted(() => ({ surveyFindUnique: vi.fn() }));
@@ -17,7 +17,7 @@ vi.mock("@formbricks/logger", () => ({
 vi.mock("@/app/api/v3/lib/auth", () => ({ requireV3WorkspaceAccess: vi.fn() }));
 vi.mock("@/lib/utils/helper", () => ({ getOrganizationIdFromWorkspaceId: vi.fn() }));
 vi.mock("@/lib/workspace/service", () => ({ getWorkspaceMemberEmails: vi.fn() }));
-vi.mock("@/modules/ee/license-check/lib/utils", () => ({ getIsWorkflowsEnabled: vi.fn() }));
+vi.mock("@/modules/fsinf-ce/features", () => ({ getIsWorkflowsEnabled: vi.fn() }));
 
 const baseAuditLog = (): TV3AuditLog => ({
   action: "updated",

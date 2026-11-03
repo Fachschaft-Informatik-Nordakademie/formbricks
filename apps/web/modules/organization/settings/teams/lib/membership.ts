@@ -8,7 +8,7 @@ import { DatabaseError, UnknownError } from "@formbricks/types/errors";
 import { TMember, TMembership } from "@formbricks/types/memberships";
 import { ITEMS_PER_PAGE } from "@/lib/constants";
 import { validateInputs } from "@/lib/utils/validate";
-import { TOrganizationMember } from "@/modules/ee/teams/team-list/types/team";
+import { TOrganizationMember } from "@/modules/fsinf-ce/teams/team-list/types/team";
 
 export const getMembershipByOrganizationId = reactCache(
   async (organizationId: string, page?: number): Promise<TMember[]> => {

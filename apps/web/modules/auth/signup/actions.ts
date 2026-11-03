@@ -12,7 +12,7 @@ import {
   UnknownError,
 } from "@formbricks/types/errors";
 import { ZUser, ZUserEmail, ZUserLocale, ZUserName, ZUserPassword } from "@formbricks/types/user";
-import { IS_FORMBRICKS_CLOUD, IS_TURNSTILE_CONFIGURED, TURNSTILE_SECRET_KEY } from "@/lib/constants";
+import { IS_TURNSTILE_CONFIGURED, TURNSTILE_SECRET_KEY } from "@/lib/constants";
 import { verifyInviteToken } from "@/lib/jwt";
 import { createMembership } from "@/lib/membership/service";
 import { createOrganization, getOrganization } from "@/lib/organization/service";
@@ -46,11 +46,9 @@ import { createTeamMembership } from "@/modules/auth/signup/lib/team";
 import { verifyTurnstileToken } from "@/modules/auth/signup/lib/utils";
 import { applyIPRateLimit } from "@/modules/core/rate-limit/helpers";
 import { rateLimitConfigs } from "@/modules/core/rate-limit/rate-limit-configs";
-import { withAuditLogging } from "@/modules/ee/audit-logs/lib/handler";
-import { ensureCloudStripeSetupForOrganization } from "@/modules/ee/billing/lib/organization-billing";
-import { getIsMultiOrgEnabled } from "@/modules/ee/license-check/lib/utils";
-import { subscribeUserToMailingList } from "@/modules/ee/mailing/lib/mailing-subscription";
 import { sendInviteAcceptedEmail } from "@/modules/email";
+import { withAuditLogging } from "@/modules/fsinf-ce/audit-logs/lib/handler";
+import { getIsMultiOrgEnabled } from "@/modules/fsinf-ce/features";
 import { createWorkspace } from "@/modules/workspaces/settings/lib/workspace";
 
 const ZCreatedUser = ZUser.pick({
@@ -266,16 +264,6 @@ async function handleOrganizationCreation(ctx: ActionClientCtx, user: TCreatedUs
     accepted: true,
   });
 
-  // Stripe setup must run AFTER membership is created so the owner email is available
-  if (IS_FORMBRICKS_CLOUD) {
-    ensureCloudStripeSetupForOrganization(organization.id).catch((error) => {
-      logger.error(
-        { error, organizationId: organization.id },
-        "Stripe setup failed after organization creation"
-      );
-    });
-  }
-
   const workspace = await createWorkspace(organization.id, {
     name: DEFAULT_WORKSPACE_NAME,
   });
@@ -407,13 +395,6 @@ export const createUserAction = actionClient.inputSchema(ZCreateUserAction).acti
     if (outcome.status === "created") {
       const { user } = outcome;
       await handlePostUserCreation(ctx, outcome, inviteToken);
-
-      await subscribeUserToMailingList({
-        email: user.email,
-        isFormbricksCloud: IS_FORMBRICKS_CLOUD,
-        subscribeToSecurityUpdates: parsedInput.subscribeToSecurityUpdates,
-        subscribeToProductUpdates: parsedInput.subscribeToProductUpdates,
-      });
 
       const cookieStore = await cookies();
       const hasAttributionCookie = cookieStore.get(ATTRIBUTION_COOKIE_NAME) !== undefined;

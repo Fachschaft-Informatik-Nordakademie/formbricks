@@ -1,3 +1,3 @@
-import { DELETE, GET } from "@/modules/ee/contacts/api/v1/management/contacts/[contactId]/route";
+import { DELETE, GET } from "@/modules/fsinf-ce/contacts/api/v1/management/contacts/[contactId]/route";
 
 export { DELETE, GET };

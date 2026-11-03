@@ -11,7 +11,7 @@ import { getSurvey } from "@/lib/survey/service";
 import { resolveClientApiIds } from "@/lib/utils/resolve-client-id";
 import { formatValidationErrorsForV1Api, validateResponseData } from "@/modules/api/lib/validation";
 import { validateOtherOptionLengthForMultipleChoice } from "@/modules/api/v2/lib/element";
-import { createQuotaFullObject } from "@/modules/ee/quotas/lib/helpers";
+import { createQuotaFullObject } from "@/modules/fsinf-ce/quotas/lib/helpers";
 import { validateClientFileUploads } from "@/modules/storage/utils";
 import { dropFingerprintKeys } from "@/modules/survey/link/lib/fsinf-device-fingerprint/gate";
 import { enforceRespondentSsoUpdateGate } from "@/modules/survey/link/lib/fsinf-respondent-sso/gate";

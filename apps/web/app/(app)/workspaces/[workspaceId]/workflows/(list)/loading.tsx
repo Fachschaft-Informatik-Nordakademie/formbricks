@@ -1,1 +1,1 @@
-export { WorkflowsListBodyLoading as default } from "@/modules/ee/workflows/loading";
+export { WorkflowsListBodyLoading as default } from "@/modules/fsinf-ce/workflows/loading";

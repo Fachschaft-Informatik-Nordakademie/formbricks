@@ -10,9 +10,9 @@ import { authenticatedActionClient } from "@/lib/utils/action-client";
 import { checkAuthorizationUpdated } from "@/lib/utils/action-client/action-client-middleware";
 import { getOrganizationIdFromWorkspaceId } from "@/lib/utils/helper";
 import { getWorkspace } from "@/lib/workspace/service";
-import { withAuditLogging } from "@/modules/ee/audit-logs/lib/handler";
-import { getRemoveBrandingPermission } from "@/modules/ee/license-check/lib/utils";
-import { getTeamsByOrganizationId } from "@/modules/ee/teams/team-list/lib/team";
+import { withAuditLogging } from "@/modules/fsinf-ce/audit-logs/lib/handler";
+import { getRemoveBrandingPermission } from "@/modules/fsinf-ce/features";
+import { getTeamsByOrganizationId } from "@/modules/fsinf-ce/teams/team-list/lib/team";
 import { updateWorkspace } from "@/modules/workspaces/settings/lib/workspace";
 
 const ZUpdateWorkspaceAction = z.object({

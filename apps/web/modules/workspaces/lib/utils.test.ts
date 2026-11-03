@@ -8,7 +8,7 @@ import { getOrganization } from "@/lib/organization/service";
 import { hasUserWorkspaceAccess } from "@/lib/workspace/auth";
 import { getWorkspace } from "@/lib/workspace/service";
 import { getSession } from "@/modules/auth/lib/session";
-import { getWorkspacePermissionByUserId } from "@/modules/ee/teams/lib/roles";
+import { getWorkspacePermissionByUserId } from "@/modules/fsinf-ce/teams/lib/roles";
 import { getWorkspaceAuth } from "./utils";
 
 const mocks = vi.hoisted(() => ({ isFormbricksCloud: false }));
@@ -32,7 +32,7 @@ vi.mock("@/lib/membership/service", () => ({ getMembershipByUserIdOrganizationId
 vi.mock("@/lib/membership/navigation", () => ({ getBillingFallbackPath: vi.fn() }));
 vi.mock("@/lingodotdev/server", () => ({ getTranslate: vi.fn(() => Promise.resolve((k: string) => k)) }));
 vi.mock("@/modules/auth/lib/session", () => ({ getSession: vi.fn() }));
-vi.mock("@/modules/ee/teams/lib/roles", () => ({ getWorkspacePermissionByUserId: vi.fn() }));
+vi.mock("@/modules/fsinf-ce/teams/lib/roles", () => ({ getWorkspacePermissionByUserId: vi.fn() }));
 
 const workspaceId = "workspace-1";
 const organizationId = "organization-1";

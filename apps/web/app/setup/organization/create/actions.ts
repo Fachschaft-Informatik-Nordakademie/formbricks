@@ -1,18 +1,15 @@
 "use server";
 
 import { z } from "zod";
-import { logger } from "@formbricks/logger";
 import { OperationNotAllowedError } from "@formbricks/types/errors";
-import { IS_FORMBRICKS_CLOUD } from "@/lib/constants";
 import { getHasNoOrganizations } from "@/lib/instance/service";
 import { createMembership } from "@/lib/membership/service";
 import { createOrganization } from "@/lib/organization/service";
 import { capturePostHogEvent, getEmailDomain, groupIdentifyPostHog } from "@/lib/posthog";
 import { authenticatedActionClient } from "@/lib/utils/action-client";
 import { DEFAULT_WORKSPACE_NAME } from "@/lib/workspace/constants";
-import { withAuditLogging } from "@/modules/ee/audit-logs/lib/handler";
-import { ensureCloudStripeSetupForOrganization } from "@/modules/ee/billing/lib/organization-billing";
-import { getIsMultiOrgEnabled } from "@/modules/ee/license-check/lib/utils";
+import { withAuditLogging } from "@/modules/fsinf-ce/audit-logs/lib/handler";
+import { getIsMultiOrgEnabled } from "@/modules/fsinf-ce/features";
 import { createWorkspace } from "@/modules/workspaces/settings/lib/workspace";
 
 const ZCreateOrganizationAction = z.object({
@@ -38,16 +35,6 @@ export const createOrganizationAction = authenticatedActionClient
         role: "owner",
         accepted: true,
       });
-
-      // Stripe setup must run AFTER membership is created so the owner email is available
-      if (IS_FORMBRICKS_CLOUD) {
-        ensureCloudStripeSetupForOrganization(newOrganization.id).catch((error) => {
-          logger.error(
-            { error, organizationId: newOrganization.id },
-            "Stripe setup failed after organization creation"
-          );
-        });
-      }
 
       const newWorkspace = await createWorkspace(newOrganization.id, {
         name: DEFAULT_WORKSPACE_NAME,

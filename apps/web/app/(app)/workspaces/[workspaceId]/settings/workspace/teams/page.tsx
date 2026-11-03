@@ -1,3 +1,3 @@
-import { WorkspaceTeams } from "@/modules/ee/teams/workspace-teams/page";
+import { WorkspaceTeams } from "@/modules/fsinf-ce/teams/workspace-teams/page";
 
 export default WorkspaceTeams;

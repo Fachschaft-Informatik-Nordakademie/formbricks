@@ -45,7 +45,7 @@ vi.mock("@/lib/workspace/service", () => ({ getWorkspace: (...a: unknown[]) => m
 vi.mock("@/modules/ee/license-check/lib/license", () => ({
   getEnterpriseLicense: (...a: unknown[]) => mocks.getEnterpriseLicense(...a),
 }));
-vi.mock("@/modules/ee/license-check/lib/utils", () => ({
+vi.mock("@/modules/fsinf-ce/features", () => ({
   getAccessControlPermission: (...a: unknown[]) => mocks.getAccessControlPermission(...a),
   getOrganizationWorkspacesLimit: (...a: unknown[]) => mocks.getOrganizationWorkspacesLimit(...a),
 }));

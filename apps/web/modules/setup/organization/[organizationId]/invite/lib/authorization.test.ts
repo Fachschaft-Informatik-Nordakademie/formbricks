@@ -11,7 +11,7 @@ vi.mock("@/lib/membership/service", () => ({
   getMembershipByUserIdOrganizationId: vi.fn(),
 }));
 
-vi.mock("@/modules/ee/teams/lib/roles", () => ({
+vi.mock("@/modules/fsinf-ce/teams/lib/roles", () => ({
   getTeamRoleByTeamIdUserId: vi.fn(),
   getWorkspacePermissionByUserId: vi.fn(),
 }));

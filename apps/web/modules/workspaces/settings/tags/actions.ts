@@ -10,7 +10,7 @@ import {
   getOrganizationIdFromWorkspaceId,
   getWorkspaceIdFromTagId,
 } from "@/lib/utils/helper";
-import { withAuditLogging } from "@/modules/ee/audit-logs/lib/handler";
+import { withAuditLogging } from "@/modules/fsinf-ce/audit-logs/lib/handler";
 import { deleteTag, mergeTags, updateTagName } from "@/modules/workspaces/settings/lib/tag";
 
 const ZDeleteTagAction = z.object({

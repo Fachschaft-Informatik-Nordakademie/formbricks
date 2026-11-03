@@ -9,8 +9,8 @@ import { checkAuthorizationUpdated } from "@/lib/utils/action-client/action-clie
 import {
   getFeedbackDirectoriesByWorkspaceId,
   getFeedbackDirectoryAuthContext,
-} from "@/modules/ee/feedback-directory/lib/feedback-directory";
-import type { TTeamPermission } from "@/modules/ee/teams/workspace-teams/types/team";
+} from "@/modules/fsinf-ce/feedback-directory/lib/feedback-directory";
+import type { TTeamPermission } from "@/modules/fsinf-ce/teams/workspace-teams/types/team";
 import { canApiKeyMutateFeedbackDirectoryRecords } from "@/modules/hub/feedback-records-gateway-authz";
 import { retrieveFeedbackRecord } from "@/modules/hub/service";
 import type { FeedbackRecordData } from "@/modules/hub/types";

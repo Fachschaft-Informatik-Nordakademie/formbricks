@@ -2,7 +2,7 @@ import { TOrganization } from "@formbricks/types/organizations";
 import { TSurvey, TSurveyCreateInputWithWorkspaceId } from "@formbricks/types/surveys/types";
 import { responses } from "@/app/lib/api/response";
 import { getElementsFromBlocks } from "@/lib/survey/utils";
-import { getIsSpamProtectionEnabled } from "@/modules/ee/license-check/lib/utils";
+import { getIsSpamProtectionEnabled } from "@/modules/fsinf-ce/features";
 import { getSurveyFollowUpsPermission } from "@/modules/survey/follow-ups/lib/utils";
 import { getExternalUrlsPermission } from "@/modules/survey/lib/permission";
 

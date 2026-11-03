@@ -13,14 +13,13 @@ import { getMonthlyOrganizationResponseCount, getOrganization } from "@/lib/orga
 import { getUser } from "@/lib/user/service";
 import { getWorkspace } from "@/lib/workspace/service";
 import { getSession } from "@/modules/auth/lib/session";
-import { getEnterpriseLicense } from "@/modules/ee/license-check/lib/license";
 import {
   getAccessControlPermission,
+  getIsMultiOrgEnabled,
   getOrganizationWorkspacesLimit,
-} from "@/modules/ee/license-check/lib/utils";
+} from "@/modules/fsinf-ce/features";
 
 type TOrganizationWithBilling = NonNullable<Awaited<ReturnType<typeof getOrganization>>>;
-type TLicense = Awaited<ReturnType<typeof getEnterpriseLicense>>;
 type TUser = NonNullable<Awaited<ReturnType<typeof getUser>>>;
 
 export interface TSettingsLayoutData {
@@ -32,7 +31,6 @@ export interface TSettingsLayoutData {
   isOwnerOrManager: boolean;
   isMultiOrgEnabled: boolean;
   organizationWorkspacesLimit: number;
-  license: TLicense;
   responseCount: number;
   isFormbricksCloud: boolean;
   isDevelopment: boolean;
@@ -79,12 +77,13 @@ export const getSettingsLayoutData = async (
   ]);
   if (!user || !organization || !membership) return null;
 
-  const [isAccessControlAllowed, license, organizationWorkspacesLimit, workspaces] = await Promise.all([
-    getAccessControlPermission(organization.id),
-    getEnterpriseLicense(),
-    getOrganizationWorkspacesLimit(organization.id),
-    getWorkspacesByUserId(userId, membership),
-  ]);
+  const [isAccessControlAllowed, isMultiOrgEnabled, organizationWorkspacesLimit, workspaces] =
+    await Promise.all([
+      getAccessControlPermission(organization.id),
+      getIsMultiOrgEnabled(),
+      getOrganizationWorkspacesLimit(organization.id),
+      getWorkspacesByUserId(userId, membership),
+    ]);
 
   const responseCount = IS_FORMBRICKS_CLOUD ? await getMonthlyOrganizationResponseCount(organization.id) : 0;
 
@@ -109,9 +108,8 @@ export const getSettingsLayoutData = async (
     membershipRole: membership.role,
     isAccessControlAllowed,
     isOwnerOrManager,
-    isMultiOrgEnabled: license.features?.isMultiOrgEnabled ?? false,
+    isMultiOrgEnabled,
     organizationWorkspacesLimit,
-    license,
     responseCount,
     isFormbricksCloud: IS_FORMBRICKS_CLOUD,
     isDevelopment: IS_DEVELOPMENT,

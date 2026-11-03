@@ -5,7 +5,7 @@ import type { TContactAttributes } from "@formbricks/types/contact-attribute";
 import type { TResponse } from "@formbricks/types/responses";
 import type { TTag } from "@formbricks/types/tags";
 import { normalizeResponseLanguage } from "@/lib/response/utils";
-import { evaluateResponseQuotas } from "@/modules/ee/quotas/lib/evaluation-service";
+import { evaluateResponseQuotas } from "@/modules/fsinf-ce/quotas/lib/evaluation-service";
 
 type TQuotaEvaluationResponseInput = {
   surveyId: string;

@@ -10,7 +10,7 @@ import { z } from "zod";
 import { ZWorkspace } from "@formbricks/types/workspace";
 import { createWorkspaceAction } from "@/app/(app)/workspaces/[workspaceId]/actions";
 import { getFormattedErrorMessage } from "@/lib/utils/helper";
-import { TOrganizationTeam } from "@/modules/ee/teams/team-list/types/team";
+import { TOrganizationTeam } from "@/modules/fsinf-ce/teams/team-list/types/team";
 import { Button } from "@/modules/ui/components/button";
 import {
   Dialog,

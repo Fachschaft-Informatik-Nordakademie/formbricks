@@ -4,7 +4,7 @@ import { prisma } from "@formbricks/database";
 import { Prisma } from "@formbricks/database/prisma";
 import { DatabaseError, ResourceNotFoundError } from "@formbricks/types/errors";
 import { TSurvey } from "@formbricks/types/surveys/types";
-import { getOrganizationBillingWithReadThroughSync } from "@/modules/ee/billing/lib/organization-billing";
+import { getSelfHostedOrganizationBilling } from "@/modules/fsinf-ce/billing/organization-billing";
 import { transformPrismaSurvey } from "@/modules/survey/lib/utils";
 
 /**
@@ -253,7 +253,7 @@ export const getExistingContactResponse = reactCache((surveyId: string, contactI
  * Cached separately with longer TTL
  */
 export const getOrganizationBilling = reactCache(async (organizationId: string) => {
-  const billing = await getOrganizationBillingWithReadThroughSync(organizationId);
+  const billing = await getSelfHostedOrganizationBilling(organizationId);
   if (!billing) {
     throw new ResourceNotFoundError("Organization", organizationId);
   }

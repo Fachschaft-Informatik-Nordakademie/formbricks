@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import type { TAuthenticationApiKey } from "@formbricks/types/auth";
 import { AuthorizationError } from "@formbricks/types/errors";
 import { checkAuthorizationUpdated } from "@/lib/utils/action-client/action-client-middleware";
-import { getFeedbackDirectoryAuthContext } from "@/modules/ee/feedback-directory/lib/feedback-directory";
-import { getIsFeedbackDirectoriesEnabled } from "@/modules/ee/license-check/lib/utils";
+import { getIsFeedbackDirectoriesEnabled } from "@/modules/fsinf-ce/features";
+import { getFeedbackDirectoryAuthContext } from "@/modules/fsinf-ce/feedback-directory/lib/feedback-directory";
 import type { TGatewayAuthenticatedPrincipal } from "@/modules/gateway-auth/lib/request";
 import { feedbackRecordsGatewayAuthorizer } from "./feedback-records-gateway";
 import { getFeedbackRecordTenant } from "./service";
@@ -33,11 +33,11 @@ vi.mock("@/lib/utils/action-client/action-client-middleware", () => ({
   checkAuthorizationUpdated: vi.fn(),
 }));
 
-vi.mock("@/modules/ee/feedback-directory/lib/feedback-directory", () => ({
+vi.mock("@/modules/fsinf-ce/feedback-directory/lib/feedback-directory", () => ({
   getFeedbackDirectoryAuthContext: vi.fn(),
 }));
 
-vi.mock("@/modules/ee/license-check/lib/utils", () => ({
+vi.mock("@/modules/fsinf-ce/features", () => ({
   getIsFeedbackDirectoriesEnabled: vi.fn(),
 }));
 

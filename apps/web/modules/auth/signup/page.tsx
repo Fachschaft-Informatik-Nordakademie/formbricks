@@ -20,11 +20,7 @@ import { verifyInviteToken } from "@/lib/jwt";
 import { findMatchingLocale } from "@/lib/utils/locale";
 import { FormWrapper } from "@/modules/auth/components/form-wrapper";
 import { getIsValidInviteToken } from "@/modules/auth/signup/lib/invite";
-import {
-  getIsMultiOrgEnabled,
-  getIsSamlSsoEnabled,
-  getIsSsoEnabled,
-} from "@/modules/ee/license-check/lib/utils";
+import { getIsMultiOrgEnabled, getIsSamlSsoEnabled, getIsSsoEnabled } from "@/modules/fsinf-ce/features";
 import { SignupForm } from "./components/signup-form";
 
 export const SignupPage = async ({

@@ -1,6 +1,6 @@
-import { getWorkflowsRouteAuth } from "@/modules/ee/workflows/lib/auth";
-import { getWorkflowEmailAuthoringContext } from "@/modules/ee/workflows/lib/email-authoring-context";
-import { WorkflowBuilderPage } from "@/modules/ee/workflows/pages/workflow-builder-page";
+import { getWorkflowsRouteAuth } from "@/modules/fsinf-ce/workflows/lib/auth";
+import { getWorkflowEmailAuthoringContext } from "@/modules/fsinf-ce/workflows/lib/email-authoring-context";
+import { WorkflowBuilderPage } from "@/modules/fsinf-ce/workflows/pages/workflow-builder-page";
 
 const WorkflowPage = async (
   props: Readonly<{ params: Promise<{ workspaceId: string; workflowId: string }> }>
