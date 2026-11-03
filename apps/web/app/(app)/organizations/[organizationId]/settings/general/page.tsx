@@ -1,3 +1,4 @@
+import { AuthenticationError } from "@formbricks/types/errors";
 import { SettingsCard } from "@/app/(app)/workspaces/[workspaceId]/settings/components/SettingsCard";
 import { AISettingsToggle } from "@/app/(app)/workspaces/[workspaceId]/settings/organization/general/components/AISettingsToggle";
 import { CreateOrganizationCard } from "@/app/(app)/workspaces/[workspaceId]/settings/organization/general/components/CreateOrganizationCard";
@@ -29,6 +30,9 @@ const Page = async (props: Readonly<{ params: Promise<{ organizationId: string }
   const { session, currentUserMembership, organization, isOwner } = await getOrganizationAuth(
     params.organizationId
   );
+  if (!session) {
+    throw new AuthenticationError(t("common.not_authenticated"));
+  }
 
   const [isMultiOrgEnabled, hasAIPermission] = await Promise.all([
     getIsMultiOrgEnabled(),

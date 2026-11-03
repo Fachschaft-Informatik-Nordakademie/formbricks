@@ -23,8 +23,6 @@ import {
  * Auditing never breaks the audited operation: every failure here is caught and logged.
  */
 
-const auditLogger = logger.withContext({ audit: true });
-
 export type TAuditRecord = {
   timestamp: string;
   action: TAuditAction;
@@ -67,7 +65,7 @@ export const buildAuditRecord = (
 
 const writeAuditRecord = (event: TAuditEventInput): void => {
   const record = buildAuditRecord(event, { includeIp: AUDIT_LOG_GET_USER_IP });
-  auditLogger.info({ auditEvent: record }, `audit ${record.action} ${record.targetType}`);
+  logger.withContext({ audit: true }).info({ auditEvent: record }, `audit ${record.action} ${record.targetType}`);
 };
 
 /** Records an event that belongs to an incoming request; resolves the client IP if configured. */
