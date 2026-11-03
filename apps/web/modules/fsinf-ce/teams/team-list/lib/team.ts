@@ -61,9 +61,16 @@ const teamDetailsSelect = {
   workspaceTeams: {
     select: { workspaceId: true, permission: true, workspace: { select: { name: true } } },
   },
-} satisfies Prisma.TeamSelect;
+} as const;
 
-type TTeamDetailsRow = Prisma.TeamGetPayload<{ select: typeof teamDetailsSelect }>;
+// The shape `teamDetailsSelect` yields. Spelled out because the database package's Prisma facade does
+// not re-export TeamSelect/TeamGetPayload; Prisma's inferred result is checked against it at the call.
+type TTeamDetailsRow = {
+  id: string;
+  name: string;
+  teamUsers: { userId: string; role: TTeamRole; user: { name: string; email: string } }[];
+  workspaceTeams: { workspaceId: string; permission: TTeamPermission; workspace: { name: string } }[];
+};
 
 const toTeamDetails = (team: TTeamDetailsRow): TTeamDetails => ({
   id: team.id,
