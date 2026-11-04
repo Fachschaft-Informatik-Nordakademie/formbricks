@@ -32,7 +32,7 @@ export const quotaSelect = {
   action: true,
   endingCardId: true,
   countPartialSubmissions: true,
-} satisfies Prisma.SurveyQuotaSelect;
+} as const;
 
 export type TSurveyQuotaWithCount = TSurveyQuota & { screenedInCount: number };
 

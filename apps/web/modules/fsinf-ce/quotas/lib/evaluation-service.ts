@@ -122,15 +122,14 @@ export const evaluateResponseQuotas = async ({
     await tx.responseQuotaLink.deleteMany({ where: { responseId, quotaId: { in: removeIds } } });
   }
 
-  const newLinks = plan.decisions.flatMap((decision) => {
+  const newLinks: { responseId: string; quotaId: string; status: TResponseQuotaLinkStatus }[] = [];
+  for (const decision of plan.decisions) {
     if (decision.operation === "screenIn") {
-      return [{ responseId, quotaId: decision.quotaId, status: "screenedIn" as const }];
+      newLinks.push({ responseId, quotaId: decision.quotaId, status: "screenedIn" });
+    } else if (decision.operation === "screenOut") {
+      newLinks.push({ responseId, quotaId: decision.quotaId, status: "screenedOut" });
     }
-    if (decision.operation === "screenOut") {
-      return [{ responseId, quotaId: decision.quotaId, status: "screenedOut" as const }];
-    }
-    return [];
-  });
+  }
   if (newLinks.length > 0) {
     await tx.responseQuotaLink.createMany({ data: newLinks, skipDuplicates: true });
   }
