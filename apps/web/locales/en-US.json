@@ -3406,6 +3406,7 @@
           "limit_must_be_greater_than_or_equal_to_the_number_of_responses": "{value, plural, one {You already have {value} response for this quota, so the limit must be greater than {value}.} other {You already have {value} responses for this quota, so the limit must be greater than {value}.}}",
           "limited_to_x_responses": "Limited to {limit}",
           "new_quota": "New Quota",
+          "no_conditions_possible": "Add a question to the survey first: quotas need at least one condition.",
           "quota_created_successfull_toast": "Quota created successfully",
           "quota_deleted_successfull_toast": "Quota deleted successfully",
           "quota_duplicated_successfull_toast": "Quota duplicated successfully",
