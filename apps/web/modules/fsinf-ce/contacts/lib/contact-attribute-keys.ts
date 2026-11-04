@@ -37,7 +37,7 @@ export const selectContactAttributeKey = {
   type: true,
   dataType: true,
   workspaceId: true,
-} satisfies Prisma.ContactAttributeKeySelect;
+} as const;
 
 export const getContactAttributeKeys = reactCache(
   async (workspaceId: string): Promise<TContactAttributeKey[]> => {

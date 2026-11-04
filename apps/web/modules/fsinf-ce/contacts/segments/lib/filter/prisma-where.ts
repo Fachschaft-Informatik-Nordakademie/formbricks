@@ -53,11 +53,7 @@ const or = (items: TWhere[]): TWhere => {
   return relevant.length === 1 ? relevant[0] : { OR: relevant };
 };
 
-const hasAttribute = (
-  workspaceId: string,
-  key: string,
-  condition: Omit<Prisma.ContactAttributeWhereInput, "attributeKey">
-): TWhere => ({
+const hasAttribute = (workspaceId: string, key: string, condition: Record<string, unknown>): TWhere => ({
   attributes: { some: { attributeKey: { key, workspaceId }, ...condition } },
 });
 
