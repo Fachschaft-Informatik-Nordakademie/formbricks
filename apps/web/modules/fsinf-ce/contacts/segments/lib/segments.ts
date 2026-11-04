@@ -211,6 +211,13 @@ export const assertValidSegmentFilters = async (
 };
 
 export const createSegment = async (input: TSegmentCreateInput): Promise<TSegment> => {
+  // The editor's "temporary" segment of a survey is its private segment (title = survey id), which
+  // may already exist for that survey: reuse it instead of failing on the unique title.
+  if (input.isPrivate && input.surveyId && input.title === input.surveyId) {
+    const privateFilters = await assertValidSegmentFilters(input.workspaceId, input.filters);
+    return setPrivateSegmentFilters(input.surveyId, input.workspaceId, privateFilters);
+  }
+
   const filters = await assertValidSegmentFilters(input.workspaceId, input.filters);
 
   if (input.surveyId) {
