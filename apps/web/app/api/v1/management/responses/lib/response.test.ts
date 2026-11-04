@@ -119,6 +119,11 @@ vi.mock("@formbricks/database", () => ({
 }));
 vi.mock("@formbricks/logger");
 vi.mock("./contact");
+// response.ts reaches the survey service, which reaches the viewer-scoped survey filter and with it the
+// auth/session graph; none of that is under test here.
+vi.mock("@/modules/survey/lib/fsinf-survey-visibility", () => ({
+  buildViewerSurveyWhere: vi.fn(async () => ({})),
+}));
 
 type MockTx = {
   response: {
