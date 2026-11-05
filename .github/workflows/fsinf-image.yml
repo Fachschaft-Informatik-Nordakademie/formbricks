@@ -2,7 +2,7 @@ name: FSINF image
 
 on:
   push:
-    branches: [main]
+    branches: [main, agpl-only]
   workflow_dispatch:
 
 permissions:
@@ -32,4 +32,4 @@ jobs:
           cache-to: type=gha,mode=max
           tags: |
             ghcr.io/fachschaft-informatik-nordakademie/formbricks:${{ github.sha }}
-            ghcr.io/fachschaft-informatik-nordakademie/formbricks:main
+            ghcr.io/fachschaft-informatik-nordakademie/formbricks:${{ github.ref_name }}
