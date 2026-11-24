@@ -16,6 +16,9 @@ interface PinScreenProps {
   surveyId: string;
   workspace: Pick<Workspace, "styling" | "logo" | "linkSurveyBranding" | "customHeadScripts">;
   singleUseId?: string;
+  // The raw single-use link params (?suId, ?suToken): the PIN action re-validates them server-side.
+  singleUseLinkId?: string;
+  singleUseLinkToken?: string;
   singleUseResponse?: Pick<Response, "id" | "finished">;
   publicDomain: string;
   IMPRINT_URL?: string;
@@ -40,6 +43,8 @@ export const PinScreen = (props: PinScreenProps) => {
     workspace,
     publicDomain,
     singleUseId,
+    singleUseLinkId,
+    singleUseLinkToken,
     singleUseResponse,
     IMPRINT_URL,
     PRIVACY_URL,
@@ -89,7 +94,12 @@ export const PinScreen = (props: PinScreenProps) => {
       const isValidPin = validPinRegex.test(localPinEntry);
       if (isValidPin) {
         setLoading(true);
-        const response = await validateSurveyPinAction({ surveyId, pin: localPinEntry });
+        const response = await validateSurveyPinAction({
+          surveyId,
+          pin: localPinEntry,
+          suId: singleUseLinkId,
+          suToken: singleUseLinkToken,
+        });
         if (response?.data?.survey) {
           setSurvey(response.data.survey);
           setPinAuthToken(response.data.pinAuthToken ?? undefined);
@@ -102,7 +112,7 @@ export const PinScreen = (props: PinScreenProps) => {
     };
 
     void validateSurveyPin();
-  }, [localPinEntry, surveyId]);
+  }, [localPinEntry, surveyId, singleUseLinkId, singleUseLinkToken]);
 
   if (!survey) {
     return (
